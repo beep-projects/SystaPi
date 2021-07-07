@@ -2,10 +2,6 @@
 
 [![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues)[![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi)[![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers)![GitHub all releases](https://img.shields.io/github/downloads/beep-project/SystaPi/total)![GitHub top language](https://img.shields.io/github/languages/top/beep-projects/SystaREST)
 
-
-
-[TOC]
-
 # SystaPi and SystaREST
 
 SystaPi adds a REST API to [Paradigma SystaComfort II](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SytsaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST.
@@ -15,8 +11,6 @@ This project is inspired by this post on the VDR portal [Heizungssteuerung: Date
 Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort II.
 
 <img src="ressources/SystaPi.jpg" alt="SystaPi" style="zoom:25%;" /> <img src="ressources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" style="zoom: 25%;" /><img src="ressources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" style="zoom: 25%;" /> 
-
-
 
 ## Directory Structure of this Project
 
@@ -39,8 +33,6 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
     └── README.md               # This file
 ```
 
-
-
 ## Parts List
 
 This is what I am using for this project, but any Raspberry Pi with one WiFi and one Ethernet interface should do the job. The required size of the Micro SD card depends on the amount of data you want to log. Logging data of one day requires ~100 MB.
@@ -49,8 +41,6 @@ This is what I am using for this project, but any Raspberry Pi with one WiFi and
 * ENC28J60 Ethernet HAT
 * Micro SD card >256MB
 * Micro USB Powersupply 5V / 1A
-
-
 
 ## Installation
 
@@ -64,8 +54,8 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 1. Run the following commands in a shell for downloading and unzipping the project files
 
    ```bash
-   wget https://github.com/beep-projects/SystaREST/archive/refs/heads/main.zip
-   unzip SystaREST-main.zip
+   wget https://github.com/beep-projects/SystaPi/archive/refs/heads/main.zip
+   unzip SystaPi-main.zip
    ```
 
 2. Open `firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
@@ -104,7 +94,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 4. Continue in the shell
 
    ```bash
-   cd SystaREST-main
+   cd SystaPi-main
    ./install_systapi.sh
    ```
 
@@ -121,7 +111,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 1. Install Raspberry Pi OS following this [guide](https://www.raspberrypi.org/documentation/installation/installing-images/).
    [Raspberry Pi OS Lite](https://www.raspberrypi.org/software/operating-systems/#raspberry-pi-os-32-bit) is sufficient.
 
-2. Download [SystaREST](https://github.com/beep-projects/SystaREST/archive/refs/heads/main.zip)
+2. Download [SystaPi](https://github.com/beep-projects/SystaPi/archive/refs/heads/main.zip)
 
 3. Extract the downloaded zip file
 
@@ -173,15 +163,11 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 12. Wait a while and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 
-
-
 ### Troubleshooting the installation
 
 1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you see if something gets wrong
 2. If you do not know where the install script died on the Raspberry Pi, have a look at the `/boot` folder. The files `firstrun.sh`, `secondrun.sh` and `thirdrun.sh`  are stored there and run one after each other. After a successful run, each of the files removes itself. So the first file not deleted, is the one that failed
 3. SystaRESTServer is installed as a service on the raspberry pi. `systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
-
-
 
 ## The SystaREST API
 
