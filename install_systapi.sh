@@ -132,7 +132,7 @@ echo " unzip image file"
 echo "=============================================================="
 echo 
 
-echo "unzip raspberry pi zip image file"
+echo "unzip the Raspberry Pi OS image"
 if [ -f $RPI_IMAGE ]; then
   echo "file found, skip the zip"
 else

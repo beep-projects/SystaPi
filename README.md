@@ -1,6 +1,6 @@
 ![banner](ressources/banner.png)
 
-[![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues)[![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi)[![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers)![GitHub all releases](https://img.shields.io/github/downloads/beep-project/SystaPi/total)![GitHub top language](https://img.shields.io/github/languages/top/beep-projects/SystaREST)
+[![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) ![GitHub all releases](https://img.shields.io/github/downloads/beep-project/SystaPi/total) ![GitHub top language](https://img.shields.io/github/languages/top/beep-projects/SystaREST)
 
 # SystaPi and SystaREST
 
@@ -58,7 +58,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    unzip SystaPi-main.zip
    ```
 
-2. Open `firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
+2. Open `SystaPi-main/SystaPi_files/firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
    Most probably you want to generate your `WPA_PASSPHRASE` via `wpa_passphrase MY_WIFI passphrase` , or  use the [WPA PSK (Raw Key) Generator](https://www.wireshark.org/tools/wpa-psk.html), and add the credentials to the file.
 
    ```bash
