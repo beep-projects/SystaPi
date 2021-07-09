@@ -4,8 +4,9 @@
 
 # SystaPi and SystaREST
 
-SystaPi adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SytsaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST ([Javadoc](http://beep-projects.github.io/SystaPi)). 
-Because the communication protocol is not publicly available, the server has a rudimentary logging functionality integrated, so you can set triggers on value changes with your home automation system and start recordings for reverse engineering of the protocol.
+SystaPi adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST ([Javadoc](http://beep-projects.github.io/SystaPi)). 
+Because the communication protocol is not publicly available, the server has a rudimentary logging functionality integrated. You can set triggers on value changes with your home automation system and start logging of values for analysis.
+
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).
 
 Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort.
