@@ -1,6 +1,6 @@
 ![banner](ressources/banner.png)
 
-[![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) ![GitHub all releases](https://img.shields.io/github/downloads/beep-project/SystaPi/total) ![GitHub top language](https://img.shields.io/github/languages/top/beep-projects/SystaREST)
+[![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub forks](https://img.shields.io/github/forks/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/network) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) [![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/blob/main/LICENSE) ![GitHub repo size](https://img.shields.io/github/repo-size/beep-projects/SystaPi) ![GitHub all releases](https://img.shields.io/github/downloads/beep-projects/SystaPi/total) 
 
 # SystaPi and SystaREST
 
