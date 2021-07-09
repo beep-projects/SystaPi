@@ -27,6 +27,8 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
     │   ├── doc                 # JavaDoc for the server files
     │   ├── lib                 # .jar files required for running the server
     │   └── src                 # src files of the server, for everyone who wants to improve this
+    ├── docs                    # Javadoc for SystaREST Java classes [SystaREST Javadoc](http://beep-projects.github.io/SystaPi)
+    ├── resources               # folder for images or other files linked with README.md
     ├── install_systapi.sh      # Script for automatically downloading, flashing and configuring 
     │                           # a Micro SD card for running the SystaREST server
     ├── LICENSE                 # License for using and editing this software
@@ -418,6 +420,7 @@ There are some ENC28J60 modules around with wrong jumper settings. Make sure you
 
 ## Links
 
+* [SystaREST JavaDoc](http://beep-projects.github.io/SystaPi)
 * [Paradigma Downloads](http://www.paradigma.de/software/)
 * [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/)
 * [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter)
