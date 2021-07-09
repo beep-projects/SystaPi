@@ -37,7 +37,7 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
 
 ## Parts List
 
-This is what I am using for this project, but any Raspberry Pi with one WiFi and one Ethernet interface should do the job. The required size of the Micro SD card depends on the amount of data you want to log. Logging data of one day requires ~100 MB.
+This is what I am using for this project, but any Raspberry Pi with at least one Ethernet interface and a second WiFi or Ethernet interface should do the job. The required size of the Micro SD card depends on the amount of data you want to log. Logging data of one day requires ~100 MB.
 
 * Raspberry Pi Zero WH
 * ENC28J60 Ethernet HAT
@@ -57,7 +57,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
    ```bash
    wget https://github.com/beep-projects/SystaPi/archive/refs/heads/main.zip
-   unzip SystaPi-main.zip
+   unzip main.zip
    ```
 
 2. Open `SystaPi-main/SystaPi_files/firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
@@ -106,7 +106,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 7. Power up the Raspberry Pi
 
-8. Wait a while and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+8. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 
 ### Windows / manual installation
 
@@ -163,7 +163,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 11. Power up the Raspberry Pi
 
-12. Wait a while and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+12. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 
 ### Troubleshooting the installation
 
