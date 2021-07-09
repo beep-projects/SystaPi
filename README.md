@@ -167,9 +167,11 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 ### Troubleshooting the installation
 
-1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you see if something gets wrong
-2. If you do not know where the install script died on the Raspberry Pi, have a look at the `/boot` folder. The files `firstrun.sh`, `secondrun.sh` and `thirdrun.sh`  are stored there and run one after each other. After a successful run, each of the files removes itself. So the first file not deleted, is the one that failed
-3. SystaRESTServer is installed as a service on the raspberry pi. `systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
+1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong
+2. If you do not know where the install script died on the Raspberry Pi, have a look into the `/boot` folder via `ls /boot/*.sh`. 
+The files `firstrun.sh`, `secondrun.sh` and `thirdrun.sh`  are stored there and run one after each other. After a successful run, each of the files removes itself. So the first file not deleted, is the one that failed
+4. SystaRESTServer is installed as a service on the raspberry pi. 
+`systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
 
 ## The SystaREST API
 
