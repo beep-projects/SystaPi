@@ -4,11 +4,11 @@
 
 # SystaPi and SystaREST
 
-SystaPi adds a REST API to [Paradigma SystaComfort II](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SytsaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST.
+SystaPi adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SytsaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST.
 Because the communication protocol is not publicly available, the server has a rudimentary logging functionality integrated, so you can set triggers on value changes with your home automation system and start recordings for reverse engineering of the protocol.
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).
 
-Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort II.
+Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort.
 
 <img src="ressources/SystaPi.jpg" alt="SystaPi" style="zoom:25%;" /> <img src="ressources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" style="zoom: 25%;" /><img src="ressources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" style="zoom: 25%;" /> 
 
@@ -22,7 +22,7 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
     │   ├── secondrun.sh        # called after a reboot. Should have network running. Does a full-upgrade of the system, 
     │   │                       # installs required packages (dnsmasq, OpenJDK) and the SystaRESTAPI.service
     │   └── thirdrun.sh         # called after a reboot. Cleans up after the installation and reboots into the final system
-    ├── SystaRESTServer         # Java based server for providing a REST API for a Paradigma SystaComfort II unit
+    ├── SystaRESTServer         # Java based server for providing a REST API for a Paradigma SystaComfort unit
     │   ├── bin                 # precompiled .class files for running the SystaRESTAPI server
     │   ├── doc                 # JavaDoc for the server files
     │   ├── lib                 # .jar files required for running the server
@@ -45,7 +45,7 @@ This is what I am using for this project, but any Raspberry Pi with one WiFi and
 ## Installation
 
 For easy installation I have created some scripts that configure the Raspberry Pi OS automatically on a Micro SD card. These scripts are not actively maintained, so they might stop working at some time. If auto configuration fails, step through the files `firstrun.sh` and `secondrun.sh` and run the commands manually on your `systapi`.
-The installation script sets up IP spoofing for the Ethernet interface `eth0`, so that the Paradigma SystaComfort II starts communicating with the `systapi` instead of [SystaWeb](https://paradigma.remoteportal.de/). It also installs Open JDK for running the SystaREST server.
+The installation script sets up IP spoofing for the Ethernet interface `eth0`, so that the Paradigma SystaComfort starts communicating with the `systapi` instead of [SystaWeb](https://paradigma.remoteportal.de/). It also installs Open JDK for running the SystaREST server.
 
 ### Linux
 
@@ -100,7 +100,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 5. Eject the Micro SD card and insert it into your Raspberry Pi
 
-6. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort II
+6. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
 
 7. Power up the Raspberry Pi
 
@@ -157,7 +157,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 9. Eject the Micro SD card and insert it into your Raspberry Pi
 
-10. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort II
+10. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
 
 11. Power up the Raspberry Pi
 
@@ -176,11 +176,11 @@ The hostname of the Raspberry Pi is set to `systapi`.
 The path and method names on the REST server are implemented case insensitive.
 The root path is: `systarest`, or `SystaREST`, or any variation you like.
 So you should be able to access the server via `http://systapi:1337/SystaREST/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the URL assigned by your router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
-If a command is called which should retrieve data from the SystaREST, but the communication is not running, `start` is automatically called, but the reply will be empty until the first data packet is received from the Paradigma Systa Comfort II. Data packets are sent every minute.
+If a command is called which should retrieve data from the SystaREST, but the communication is not running, `start` is automatically called, but the reply will be empty until the first data packet is received from the Paradigma Systa Comfort. Data packets are sent every minute.
 
 #### start
 
-`POST` `/SystaREST/start` start communication with the connected Paradigma SystaComfort II
+`POST` `/SystaREST/start` start communication with the connected Paradigma SystaComfort
 
 ````bash
 curl -X POST http://systapi:1337/SystaREST/start
@@ -188,7 +188,7 @@ curl -X POST http://systapi:1337/SystaREST/start
 
 #### stop
 
-`POST` `/SystaREST/stop`  stop communication with the connected Paradigma SystaComfort II
+`POST` `/SystaREST/stop`  stop communication with the connected Paradigma SystaComfort
 
 ````bash
 curl -X POST http://systapi:1337/SystaREST/stop
@@ -224,7 +224,7 @@ Returns the status of the SystaREST server
 
 `GET` `/SystaREST/rawdata`
 [http://systapi:1337/SystaREST/rawdata](http://systapi:1337/SystaREST/rawdata)
-Returns the raw data received from the Paradigma Systa Comfort II with added timestamp information.
+Returns the raw data received from the Paradigma Systa Comfort with added timestamp information.
 
 ```json
 {
