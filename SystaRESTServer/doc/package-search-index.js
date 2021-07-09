@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"de.freaklamarsch.systarest"},{"l":"de.freaklamarsch.systarest.tests"}];updateSearchResults();
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"de.freaklamarsch.systarest"}];updateSearchResults();

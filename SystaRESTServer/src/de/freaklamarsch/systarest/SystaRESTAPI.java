@@ -44,18 +44,16 @@ public class SystaRESTAPI {
 	 */
 	public SystaRESTAPI(@Context ResourceConfig config) {
 		// constructor is called for each request, so make sure only one FakeSystaWeb is
-		// created,
-		// or the socket will be blocked
+		// created, or the socket will be blocked
 		if (fsw == null) {
 			fsw = new FakeSystaWeb();
-			// t = new Thread(fsw);
 			start(config);
 		}
 		// printAPI();
 	}
 
 	/**
-	 * print information about the provided functions ba this REST API. This
+	 * print information about the provided functions by this REST API. This
 	 * function is only used for debugging server problems. In general, the API can
 	 * also be accesses by calling
 	 * {@code http://<ip>:<port>/application.wadl?detail=true}

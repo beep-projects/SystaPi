@@ -1,12 +1,19 @@
 package de.freaklamarsch.systarest;
 
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -64,6 +71,20 @@ public class SystaRESTServer {
 		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config, false);
 		server.start();
 		System.out.println("[RESTServer] RESTServer started at " + baseUri);
+		try {
+			//start the SystaRESTAPI
+			System.out.println("Calling: "+baseUri+"SystaREST/start");
+	        HttpClient client = HttpClient.newHttpClient();
+	        HttpRequest request = HttpRequest.newBuilder()
+	                .uri(URI.create(baseUri+"SystaREST/start"))
+	                .POST(HttpRequest.BodyPublishers.ofString(""))
+	                .build();
+	        //send the POST SystaREST/start request
+	        client.send(request, HttpResponse.BodyHandlers.ofString());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		try {
 			Thread.currentThread().join();
 			System.out.println("[RESTServer] Server exited");
