@@ -4,7 +4,7 @@
 
 # SystaPi and SystaREST
 
-SystaPi adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SytsaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST.
+SystaPi adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SytsaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST ([Javadoc](http://beep-projects.github.io/SystaPi)). 
 Because the communication protocol is not publicly available, the server has a rudimentary logging functionality integrated, so you can set triggers on value changes with your home automation system and start recordings for reverse engineering of the protocol.
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).
 
@@ -27,7 +27,7 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
     │   ├── doc                 # JavaDoc for the server files
     │   ├── lib                 # .jar files required for running the server
     │   └── src                 # src files of the server, for everyone who wants to improve this
-    ├── docs                    # Javadoc for SystaREST Java classes [SystaREST Javadoc](http://beep-projects.github.io/SystaPi)
+    ├── docs                    # Javadoc for SystaREST Java classes available at http://beep-projects.github.io/SystaPi
     ├── resources               # folder for images or other files linked with README.md
     ├── install_systapi.sh      # Script for automatically downloading, flashing and configuring 
     │                           # a Micro SD card for running the SystaREST server
@@ -420,7 +420,7 @@ There are some ENC28J60 modules around with wrong jumper settings. Make sure you
 
 ## Links
 
-* [SystaREST JavaDoc](http://beep-projects.github.io/SystaPi)
+* [SystaREST Javadoc](http://beep-projects.github.io/SystaPi)
 * [Paradigma Downloads](http://www.paradigma.de/software/)
 * [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/)
 * [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter)
