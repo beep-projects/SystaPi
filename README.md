@@ -47,7 +47,8 @@ This is what I am using for this project, but any Raspberry Pi with at least one
 
 ## Installation
 
-For easy installation I have created some scripts that configure the Raspberry Pi OS automatically on a Micro SD card. These scripts are not actively maintained, so they might stop working at some time. If auto configuration fails, step through the files `firstrun.sh` and `secondrun.sh` and run the commands manually on your `systapi`.
+For easy installation I have created some scripts that configure the Raspberry Pi OS automatically on a Micro SD card. These scripts are not actively maintained, so they might stop working at some time. If auto configuration fails, step through the files `firstrun.sh` and `secondrun.sh` and run the commands manually on your `systapi`. Your are also welcome to fix the scripts and push them to this repository.
+
 Once the Micro SD card is prepared as described in the next sections, these scripts should do the following on first boot ups: 
 * resize the Raspberry Pi OS partition to use the full size of the Micro SD card
 * configure WiFi on interface `wlan0`
