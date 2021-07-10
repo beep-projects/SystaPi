@@ -48,7 +48,15 @@ This is what I am using for this project, but any Raspberry Pi with at least one
 ## Installation
 
 For easy installation I have created some scripts that configure the Raspberry Pi OS automatically on a Micro SD card. These scripts are not actively maintained, so they might stop working at some time. If auto configuration fails, step through the files `firstrun.sh` and `secondrun.sh` and run the commands manually on your `systapi`.
-The installation script sets up IP spoofing for the Ethernet interface `eth0`, so that the Paradigma SystaComfort starts communicating with the `systapi` instead of [SystaWeb](https://paradigma.remoteportal.de/). It also installs Open JDK for running the SystaREST server.
+Once the Micro SD card is prepared as described in the next sections, these scripts should do the following on first boot ups: 
+* configure WiFi on interface `wlan0`
+* `apt full-upgrade` the system
+* install `dnsmasq`
+* configure `dnsmasq` and `dhcpd` for IP spoofing on interface `eth0`\
+  (this will make the Paradigma SystaComfort to communicate with `systapi` instead of [SystaWeb](https://paradigma.remoteportal.de/)
+* install OpenJDK 11 from [https://www.azul.com/downloads/?package=jdk#download-openjdk](https://www.azul.com/downloads/?package=jdk#download-openjdk)\
+  (this is the most current one you can get for the ARMv6 of the Raspberry Pi Zero)
+* installs the `systemd` service unit `SytsaRESTServer.service` for automatically starting the SystaRESTServer
 
 ### Linux
 
@@ -181,7 +189,7 @@ The hostname of the Raspberry Pi is set to `systapi`.
 The path and method names on the REST server are implemented case insensitive.
 The root path is: `systarest`, or `SystaREST`, or any variation you like.
 So you should be able to access the server via `http://systapi:1337/SystaREST/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the URL assigned by your router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
-If a command is called which should retrieve data from the SystaREST, but the communication is not running, `start` is automatically called, but the reply will be empty until the first data packet is received from the Paradigma Systa Comfort. Data packets are sent every minute.
+If a command is called which should retrieve data from the SystaREST, but the communication is not running, `start` is automatically called, but the reply will be empty until the first data packet is received from the Paradigma SystaComfort. Data packets are sent every minute.
 
 #### start
 
