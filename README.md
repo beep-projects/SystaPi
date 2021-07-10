@@ -49,6 +49,7 @@ This is what I am using for this project, but any Raspberry Pi with at least one
 
 For easy installation I have created some scripts that configure the Raspberry Pi OS automatically on a Micro SD card. These scripts are not actively maintained, so they might stop working at some time. If auto configuration fails, step through the files `firstrun.sh` and `secondrun.sh` and run the commands manually on your `systapi`.
 Once the Micro SD card is prepared as described in the next sections, these scripts should do the following on first boot ups: 
+* resize the Raspberry Pi OS partition to use the full size of the Micro SD card
 * configure WiFi on interface `wlan0`
 * `apt full-upgrade` the system
 * install `dnsmasq`
@@ -56,7 +57,7 @@ Once the Micro SD card is prepared as described in the next sections, these scri
   (this will make the Paradigma SystaComfort to communicate with `systapi` instead of [SystaWeb](https://paradigma.remoteportal.de/)
 * install OpenJDK 11 from [https://www.azul.com/downloads/?package=jdk#download-openjdk](https://www.azul.com/downloads/?package=jdk#download-openjdk)\
   (this is the most current one you can get for the ARMv6 of the Raspberry Pi Zero)
-* installs the `systemd` service unit `SytsaRESTServer.service` for automatically starting the SystaRESTServer
+* install the `systemd` service unit `SytsaRESTServer.service` for automatically starting the SystaRESTServer
 
 ### Linux
 
