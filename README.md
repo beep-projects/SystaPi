@@ -130,7 +130,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 4. Change into the `SystaPi_files` subfolder of the extracted archive
 
-5. Open `firstrun.sh` with a text editor
+5. Open `firstrun.sh` with a text editor and configure everything in the marked section to your liking.
 
    Most probably you want to use something like [WPA PSK (Raw Key) Generator](https://www.wireshark.org/tools/wpa-psk.html) and add the generated credentials to the file.
 
@@ -166,7 +166,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 7. Copy all files from the `SystaPi_files` subfolder to `boot`-partition of the Micro SD card
 
-8. Copy the `SystaRESTServer` folder and all its contents to the `boot`-partition.
+8. Copy the `SystaRESTServer` folder and all of its content to the `boot`-partition.
 
 9. Eject the Micro SD card and insert it into your Raspberry Pi
 
