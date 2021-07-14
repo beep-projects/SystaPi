@@ -1,5 +1,8 @@
 package de.freaklamarsch.systarest;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +37,7 @@ public class SystaRESTAPI {
 	private static Thread t = null;
 	private final Map<String, Object> config = new HashMap<String, Object>();
 	private final JsonBuilderFactory jsonFactory = Json.createBuilderFactory(config);
+	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
 
 	/**
 	 * Create SystaRESTAPI object which provides the Jersey REST API resource for
@@ -124,7 +128,7 @@ public class SystaRESTAPI {
 		try {
 			FakeSystaWebStatus fsws = fsw.getStatus();
 
-			JsonObject jo = jsonFactory.createObjectBuilder().add("timeStampString", fsw.getTimestampString())
+			JsonObject jo = jsonFactory.createObjectBuilder().add("timeStampString", formatter.format(LocalDateTime.now()))
 					.add("connected", fsws.connected)
 					.add("running", fsws.running).add("lastDataReceivedAt", fsws.lastTimestamp)
 					.add("packetsReceived", fsws.dataPacketsReceived).add("paradigmaListenerIP", fsws.localAddress)
