@@ -4,8 +4,9 @@
 
 # SystaPi and SystaREST
 
-SystaPi adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SytsaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST.
-Because the communication protocol is not publicly available, the server has a rudimentary logging functionality integrated, so you can set triggers on value changes with your home automation system and start recordings for reverse engineering of the protocol.
+SystaPi adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST ([Javadoc](http://beep-projects.github.io/SystaPi)). 
+Because the communication protocol is not publicly available, the server has a rudimentary logging functionality integrated. You can set triggers on value changes with your home automation system and start logging of values for analysis.
+
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).
 
 Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort.
@@ -27,7 +28,7 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
     │   ├── doc                 # JavaDoc for the server files
     │   ├── lib                 # .jar files required for running the server
     │   └── src                 # src files of the server, for everyone who wants to improve this
-    ├── docs                    # Javadoc for SystaREST Java classes [SystaREST Javadoc](http://beep-projects.github.io/SystaPi)
+    ├── docs                    # Javadoc for SystaREST Java classes available at http://beep-projects.github.io/SystaPi
     ├── resources               # folder for images or other files linked with README.md
     ├── install_systapi.sh      # Script for automatically downloading, flashing and configuring 
     │                           # a Micro SD card for running the SystaREST server
@@ -37,7 +38,7 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
 
 ## Parts List
 
-This is what I am using for this project, but any Raspberry Pi with one WiFi and one Ethernet interface should do the job. The required size of the Micro SD card depends on the amount of data you want to log. Logging data of one day requires ~100 MB.
+This is what I am using for this project, but any Raspberry Pi with at least one Ethernet interface and a second WiFi or Ethernet interface should do the job. The required size of the Micro SD card depends on the amount of data you want to log. Logging data of one day requires ~100 MB.
 
 * Raspberry Pi Zero WH
 * ENC28J60 Ethernet HAT
@@ -46,8 +47,18 @@ This is what I am using for this project, but any Raspberry Pi with one WiFi and
 
 ## Installation
 
-For easy installation I have created some scripts that configure the Raspberry Pi OS automatically on a Micro SD card. These scripts are not actively maintained, so they might stop working at some time. If auto configuration fails, step through the files `firstrun.sh` and `secondrun.sh` and run the commands manually on your `systapi`.
-The installation script sets up IP spoofing for the Ethernet interface `eth0`, so that the Paradigma SystaComfort starts communicating with the `systapi` instead of [SystaWeb](https://paradigma.remoteportal.de/). It also installs Open JDK for running the SystaREST server.
+For easy installation I have created some scripts that configure the Raspberry Pi OS automatically on a Micro SD card. These scripts are not actively maintained, so they might stop working at some time. If auto configuration fails, step through the files `firstrun.sh` and `secondrun.sh` and run the commands manually on your `systapi`. Your are also welcome to fix the scripts and create a pull request to this repository.
+
+Once the Micro SD card is prepared as described in the next sections, the scripts should do the following on first boot ups of the Raspberry Pi: 
+* resize the Raspberry Pi OS partition to use the full size of the Micro SD card
+* configure WiFi on interface `wlan0`
+* `apt full-upgrade` the system
+* install `dnsmasq`
+* configure `dnsmasq` and `dhcpd` for IP spoofing on interface `eth0`\
+  (this will make the Paradigma SystaComfort to communicate with `systapi` instead of [SystaWeb](https://paradigma.remoteportal.de/)
+* install OpenJDK 11 from [https://www.azul.com/downloads/?package=jdk#download-openjdk](https://www.azul.com/downloads/?package=jdk#download-openjdk)\
+  (this is the most current one you can get for the ARMv6 of the Raspberry Pi Zero)
+* install the `systemd` service unit `SytsaRESTServer.service` for automatically starting the SystaRESTServer
 
 ### Linux
 
@@ -57,7 +68,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
    ```bash
    wget https://github.com/beep-projects/SystaPi/archive/refs/heads/main.zip
-   unzip SystaPi-main.zip
+   unzip main.zip
    ```
 
 2. Open `SystaPi-main/SystaPi_files/firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
@@ -106,7 +117,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 7. Power up the Raspberry Pi
 
-8. Wait a while and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+8. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 
 ### Windows / manual installation
 
@@ -119,7 +130,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 4. Change into the `SystaPi_files` subfolder of the extracted archive
 
-5. Open `firstrun.sh` with a text editor
+5. Open `firstrun.sh` with a text editor and configure everything in the marked section to your liking.
 
    Most probably you want to use something like [WPA PSK (Raw Key) Generator](https://www.wireshark.org/tools/wpa-psk.html) and add the generated credentials to the file.
 
@@ -155,7 +166,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 7. Copy all files from the `SystaPi_files` subfolder to `boot`-partition of the Micro SD card
 
-8. Copy the `SystaRESTServer` folder and all its contents to the `boot`-partition.
+8. Copy the `SystaRESTServer` folder and all of its content to the `boot`-partition.
 
 9. Eject the Micro SD card and insert it into your Raspberry Pi
 
@@ -163,13 +174,15 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 11. Power up the Raspberry Pi
 
-12. Wait a while and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+12. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 
 ### Troubleshooting the installation
 
-1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you see if something gets wrong
-2. If you do not know where the install script died on the Raspberry Pi, have a look at the `/boot` folder. The files `firstrun.sh`, `secondrun.sh` and `thirdrun.sh`  are stored there and run one after each other. After a successful run, each of the files removes itself. So the first file not deleted, is the one that failed
-3. SystaRESTServer is installed as a service on the raspberry pi. `systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
+1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong
+2. If you do not know where the install script died on the Raspberry Pi, have a look into the `/boot` folder via `ls /boot/*.sh`. 
+The files `firstrun.sh`, `secondrun.sh` and `thirdrun.sh`  are stored there and run one after each other. After a successful run, each of the files removes itself. So the first file not deleted, is the one that failed
+4. SystaRESTServer is installed as a service on the raspberry pi. 
+`systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
 
 ## The SystaREST API
 
@@ -178,7 +191,7 @@ The hostname of the Raspberry Pi is set to `systapi`.
 The path and method names on the REST server are implemented case insensitive.
 The root path is: `systarest`, or `SystaREST`, or any variation you like.
 So you should be able to access the server via `http://systapi:1337/SystaREST/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the URL assigned by your router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
-If a command is called which should retrieve data from the SystaREST, but the communication is not running, `start` is automatically called, but the reply will be empty until the first data packet is received from the Paradigma Systa Comfort. Data packets are sent every minute.
+If a command is called which should retrieve data from the SystaREST, but the communication is not running, `start` is automatically called, but the reply will be empty until the first data packet is received from the Paradigma SystaComfort. Data packets are sent every minute.
 
 #### start
 
@@ -420,7 +433,7 @@ There are some ENC28J60 modules around with wrong jumper settings. Make sure you
 
 ## Links
 
-* [SystaREST JavaDoc](http://beep-projects.github.io/SystaPi)
+* [SystaREST Javadoc](http://beep-projects.github.io/SystaPi)
 * [Paradigma Downloads](http://www.paradigma.de/software/)
 * [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/)
 * [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter)
