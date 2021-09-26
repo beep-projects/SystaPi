@@ -268,7 +268,7 @@ Returns the raw data received from the Paradigma Systa Comfort with added timest
 
 `GET` `/SystaREST/waterheater`
 [http://systapi:1337/SystaREST/waterheater](http://systapi:1337/SystaREST/waterheater)
-Returns the information for a Home Assistant [https://developers.home-assistant.io/docs/core/entity/water-heater/](Water Heater)
+Returns the information for a Home Assistant [Water Heater](https://developers.home-assistant.io/docs/core/entity/water-heater/) 
 
 ```json
 {
