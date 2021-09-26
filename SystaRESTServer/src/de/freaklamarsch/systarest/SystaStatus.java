@@ -1,9 +1,9 @@
 package de.freaklamarsch.systarest;
 
 /**
- * Class for holding the status of a Paradigma SystaComfort II heating controller.
- * The status is build from all the known fields from a SystaWeb UDP data packet.
- * If new fields are decoded, this class should be updated.
+ * Class for holding the status of a Paradigma SystaComfort II heating
+ * controller. The status is build from all the known fields from a SystaWeb UDP
+ * data packet. If new fields are decoded, this class should be updated.
  */
 public class SystaStatus {
 	/**
@@ -557,15 +557,17 @@ public class SystaStatus {
 	public double solarGainTotal;
 	public int countdown;
 	/**
-	 * Relais Heizkreispumpe = Relais &amp; 0x0001 Relais &amp; 0x0002 Relais &amp; 0x0004
-	 * Relais &amp; 0x0008 Relais &amp; 0x0010 Ladepumpe = Relais &amp; 0x0080 Zirkulationspumpe
-	 * = Relais &amp; 0x0100 Kessel = Relais &amp; 0x0200 Relais &amp; 0x0800 Brenner = Kessel
-	 * &amp;&amp; (FLOW_TEMP_BOILER - RETURN_TEMP_BOILER > 2)
+	 * Relais Heizkreispumpe = Relais &amp; 0x0001 Relais &amp; 0x0002 Relais &amp;
+	 * 0x0004 Relais &amp; 0x0008 Relais &amp; 0x0010 Ladepumpe = Relais &amp;
+	 * 0x0080 Zirkulationspumpe = Relais &amp; 0x0100 Kessel = Relais &amp; 0x0200
+	 * Relais &amp; 0x0800 Brenner = Kessel &amp;&amp; (FLOW_TEMP_BOILER -
+	 * RETURN_TEMP_BOILER > 2)
 	 * 
-	 * Relay Heating circuit pump = relay &amp; 0x0001 Relay &amp; 0x0002 Relay &amp; 0x0004
-	 * Relay &amp; 0x0008 Relay &amp; 0x0010 Charge pump = Relay &amp; 0x0080 Circulation Pump =
-	 * Relay &amp; 0x0100 Boiler = Relay &amp; 0x0200 Relay &amp; 0x0800 Burner = Boiler &amp;&amp;
-	 * (FLOW_TEMP_BOILER - RETURN_TEMP_BOILER > 2)
+	 * Relay Heating circuit pump = relay &amp; 0x0001 Relay &amp; 0x0002 Relay
+	 * &amp; 0x0004 Relay &amp; 0x0008 Relay &amp; 0x0010 Charge pump = Relay &amp;
+	 * 0x0080 Circulation Pump = Relay &amp; 0x0100 Boiler = Relay &amp; 0x0200
+	 * Relay &amp; 0x0800 Burner = Boiler &amp;&amp; (FLOW_TEMP_BOILER -
+	 * RETURN_TEMP_BOILER > 2)
 	 */
 	public int relay;
 	public static final int HEATING_PUMP_MASK = 0x0001;

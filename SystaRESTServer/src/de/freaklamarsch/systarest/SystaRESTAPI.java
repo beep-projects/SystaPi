@@ -26,8 +26,8 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 
 /**
- * class for creating a Jersey resource that offers a REST API for a Paradigma SystaComfort II
- * For running this class a {@link SystaRESTServer} is required
+ * class for creating a Jersey resource that offers a REST API for a Paradigma
+ * SystaComfort II For running this class a {@link SystaRESTServer} is required
  *
  */
 @Path("{systarest : (?i)systarest}")
@@ -128,8 +128,8 @@ public class SystaRESTAPI {
 		try {
 			FakeSystaWebStatus fsws = fsw.getStatus();
 
-			JsonObject jo = jsonFactory.createObjectBuilder().add("timeStampString", formatter.format(LocalDateTime.now()))
-					.add("connected", fsws.connected)
+			JsonObject jo = jsonFactory.createObjectBuilder()
+					.add("timeStampString", formatter.format(LocalDateTime.now())).add("connected", fsws.connected)
 					.add("running", fsws.running).add("lastDataReceivedAt", fsws.lastTimestamp)
 					.add("packetsReceived", fsws.dataPacketsReceived).add("paradigmaListenerIP", fsws.localAddress)
 					.add("paradigmaListenerPort", fsws.localPort)
@@ -158,7 +158,7 @@ public class SystaRESTAPI {
 	public JsonObject getRawData() {
 		// System.out.println("[ParadigmaRESTAPI] getRawData: called");
 		// System.out.println("[ParadigmaRESTAPI] getRawData: fsw.getData()");
-		int[] rawData = fsw.getData();
+		Integer[] rawData = fsw.getData();
 		if (rawData == null) {
 			return jsonFactory.createObjectBuilder().build();
 		}
@@ -187,7 +187,10 @@ public class SystaRESTAPI {
 	}
 
 	/**
-	 * returns a JsonObject holding the fields of an <a href="https://developers.home-assistant.io/docs/core/entity/water-heater/">Home Assistant Water Heater Entity</a>
+	 * returns a JsonObject holding the fields of an <a href=
+	 * "https://developers.home-assistant.io/docs/core/entity/water-heater/">Home
+	 * Assistant Water Heater Entity</a>
+	 * 
 	 * @return the Water Heater Entity
 	 */
 	@GET
@@ -218,7 +221,9 @@ public class SystaRESTAPI {
 	}
 
 	/**
-	 * returns a JsonObject holding the status of the connected Paradigma SystaComfort II. The status is all known fields.
+	 * returns a JsonObject holding the status of the connected Paradigma
+	 * SystaComfort II. The status is all known fields.
+	 * 
 	 * @return the status
 	 */
 	@GET
@@ -289,9 +294,14 @@ public class SystaRESTAPI {
 
 	/**
 	 * enables the logging of each received data element to a log file
-	 * @param filePrefix the prefix for the created log files. Following the prefix a running number is added to the file names defaults to {@code paradigma}
-	 * @param delimiter the delimiter used in the log files for seperating the entries. Defaults to {@code ;}
-	 * @param entriesPerFile the logger collects up to this number of elemnt before writing the file to disk. Defaults to {@code 60}
+	 * 
+	 * @param filePrefix     the prefix for the created log files. Following the
+	 *                       prefix a running number is added to the file names
+	 *                       defaults to {@code paradigma}
+	 * @param delimiter      the delimiter used in the log files for seperating the
+	 *                       entries. Defaults to {@code ;}
+	 * @param entriesPerFile the logger collects up to this number of elemnt before
+	 *                       writing the file to disk. Defaults to {@code 60}
 	 */
 	@PUT
 	@Path("{enablelogging : (?i)enablelogging}")
@@ -302,7 +312,8 @@ public class SystaRESTAPI {
 	}
 
 	/**
-	 * disables the logging of the received data packets. Writes the collected packets from memory to disk, even if the last file is not full
+	 * disables the logging of the received data packets. Writes the collected
+	 * packets from memory to disk, even if the last file is not full
 	 */
 	@PUT
 	@Path("{disablelogging : (?i)disablelogging}")

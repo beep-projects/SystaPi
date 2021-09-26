@@ -26,8 +26,11 @@ import com.sun.net.httpserver.HttpServer;
 import jakarta.ws.rs.core.UriBuilder;
 
 /**
- * The main function of this class starts an {@link com.sun.net.httpserver.HttpServer} for providing {@link SystaRESTAPI}.
- * The main method requires a configured SystaREST.properties for setting the interfaces to use. On interface is used for the connection to the Paradigma SystaComfort II and one for acessing the REST API.
+ * The main function of this class starts an
+ * {@link com.sun.net.httpserver.HttpServer} for providing {@link SystaRESTAPI}.
+ * The main method requires a configured SystaREST.properties for setting the
+ * interfaces to use. On interface is used for the connection to the Paradigma
+ * SystaComfort II and one for acessing the REST API.
  */
 public class SystaRESTServer {
 
@@ -64,7 +67,8 @@ public class SystaRESTServer {
 
 		// create REST API server
 		System.out.println("[RESTServer] Starting RESTServer");
-		URI baseUri = UriBuilder.fromUri("http://" + restAPIIPv4 + "/").port(Integer.parseInt(props.getProperty("RESTAPI_PORT"))).build();
+		URI baseUri = UriBuilder.fromUri("http://" + restAPIIPv4 + "/")
+				.port(Integer.parseInt(props.getProperty("RESTAPI_PORT"))).build();
 		ResourceConfig config = new ResourceConfig(SystaRESTAPI.class);
 		config.property(SystaRESTAPI.PROP_PARADIGMA_IP, paradigmIPv4);
 		// config.property("jersey.config.server.wadl.disableWadl", true);
@@ -72,15 +76,13 @@ public class SystaRESTServer {
 		server.start();
 		System.out.println("[RESTServer] RESTServer started at " + baseUri);
 		try {
-			//start the SystaRESTAPI
-			System.out.println("Calling: "+baseUri+"SystaREST/start");
-	        HttpClient client = HttpClient.newHttpClient();
-	        HttpRequest request = HttpRequest.newBuilder()
-	                .uri(URI.create(baseUri+"SystaREST/start"))
-	                .POST(HttpRequest.BodyPublishers.ofString(""))
-	                .build();
-	        //send the POST SystaREST/start request
-	        client.send(request, HttpResponse.BodyHandlers.ofString());
+			// start the SystaRESTAPI
+			System.out.println("Calling: " + baseUri + "SystaREST/start");
+			HttpClient client = HttpClient.newHttpClient();
+			HttpRequest request = HttpRequest.newBuilder().uri(URI.create(baseUri + "SystaREST/start"))
+					.POST(HttpRequest.BodyPublishers.ofString("")).build();
+			// send the POST SystaREST/start request
+			client.send(request, HttpResponse.BodyHandlers.ofString());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -124,7 +126,8 @@ public class SystaRESTServer {
 	/**
 	 * Helper function to print information about a given {@link NetworkInterface}
 	 * 
-	 * @param netint the {@link NetworkInterface} for which the information should be print
+	 * @param netint the {@link NetworkInterface} for which the information should
+	 *               be print
 	 * 
 	 */
 	private static void displayInterfaceInformation(NetworkInterface netint) throws SocketException {

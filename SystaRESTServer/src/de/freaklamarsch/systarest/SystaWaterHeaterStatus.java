@@ -1,7 +1,9 @@
 package de.freaklamarsch.systarest;
 
 /**
- * Provides the status information of a Home Assistant @see <a href="https://www.home-assistant.io/integrations/water_heater/">Water Heater</a>
+ * Provides the status information of a Home Assistant @see
+ * <a href="https://www.home-assistant.io/integrations/water_heater/">Water
+ * Heater</a>
  */
 public class SystaWaterHeaterStatus {
 	/**
