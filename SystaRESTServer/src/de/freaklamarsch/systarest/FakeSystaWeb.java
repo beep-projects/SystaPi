@@ -196,6 +196,7 @@ public class FakeSystaWeb implements Runnable {
 		SystaStatus status = new SystaStatus();
 		int i = readIndex; // save readIndex, so we do not read inconsistent data if it gets updated
 		if (i < 0 || timestamp[i] <= 0) {
+			System.out.println("i: "+i+", timestamp: "+timestamp[i]);
 			return null;
 		}
 		status.outsideTemp = intData[i][SystaIndex.OUTSIDE_TEMP] / 10.0;
@@ -454,17 +455,6 @@ public class FakeSystaWeb implements Runnable {
 	 * @param data ByteBuffer that holds the received data
 	 */
 	private void processType1(ByteBuffer data) {
-		/*
-		 * data.position(0); while (data.remaining() >= 4) {
-		 * System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " +
-		 * data.get()); }
-		 */
-		/*
-		 * if(writeIndex < 0) { //this should usually not happen, except when testing //
-		 * calculate the buffer id for writing writeIndex = (readIndex + 1) %
-		 * RING_BUFFER_SIZE; }
-		 */
-
 		data.position(24);
 		while (data.remaining() >= 4) {
 			intData[writeIndex][(data.position() - 24) / 4] = data.getInt();

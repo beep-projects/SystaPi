@@ -71,7 +71,7 @@ class SystaRESTAPITest extends JerseyTest {
 		assertEquals("", json.getString("paradigmaIP"));
 		assertEquals(0, json.getInt("paradigmaPort"));
 		assertFalse(json.getBoolean("loggingData"));
-		assertEquals(60, json.getInt("logFileSize"));
+		assertEquals(180, json.getInt("logFileSize"));
 		assertEquals("SystaREST", json.getString("logFilePrefix"));
 		assertEquals(";", json.getString("logFileDelimiter"));
 		assertTrue(json.getString("logFileRootPath").endsWith("SystaRESTServer/bin/"));
@@ -158,7 +158,7 @@ class SystaRESTAPITest extends JerseyTest {
 		assertEquals("", json.getString("paradigmaIP"));
 		assertEquals(0, json.getInt("paradigmaPort"));
 		assertTrue(json.getBoolean("loggingData"));
-		assertEquals(10, json.getInt("logFileSize"));
+		assertEquals(30, json.getInt("logFileSize"));
 		assertEquals("test", json.getString("logFilePrefix"));
 		assertEquals("<>", json.getString("logFileDelimiter"));
 		assertTrue(json.getString("logFileRootPath").endsWith("SystaRESTServer/bin/"));
@@ -186,7 +186,7 @@ class SystaRESTAPITest extends JerseyTest {
 		assertEquals("", json.getString("paradigmaIP"));
 		assertEquals(0, json.getInt("paradigmaPort"));
 		assertFalse(json.getBoolean("loggingData"));
-		assertEquals(60, json.getInt("logFileSize"));
+		assertEquals(180, json.getInt("logFileSize"));
 		assertEquals("SystaREST", json.getString("logFilePrefix"));
 		assertEquals(";", json.getString("logFileDelimiter"));
 		assertTrue(json.getString("logFileRootPath").endsWith("SystaRESTServer/bin/"));

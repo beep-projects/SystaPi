@@ -16,7 +16,7 @@ public class SystaWaterHeaterStatus {
 	/**
 	 * possible operation modes of Home Assistant Water Heaters^
 	 */
-	public enum operationMode {
+	public enum operationMode { 
 		OPERATION_MODE_HEAT, OPERATION_MODE_OFF
 	};
 

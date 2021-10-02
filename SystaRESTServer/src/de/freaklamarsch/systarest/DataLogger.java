@@ -1,6 +1,7 @@
 package de.freaklamarsch.systarest;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -50,7 +51,8 @@ public class DataLogger<T> {
 	private boolean saveLoggedData = false;
 	private String logFilePrefix = "DataLogger";
 	private String logFilename = "";
-	private String logFileRootPath = DataLogger.class.getClassLoader().getResource("").getPath();
+	//private String logFileRootPath = DataLogger.class.getClassLoader().getResource("").getPath();
+	private String logFileRootPath = System.getProperty("user.home") + File.separator + "logs";
 	private String logEntryDelimiter = ";";
 	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
 	private int writerFileCount = 0;
@@ -253,7 +255,12 @@ public class DataLogger<T> {
 			c++; // move to next column for next record
 			r = 1; // keep in mind, that the first column is already filled with the timestamps
 		}
-		String fileName = logFileRootPath + logFilePrefix + "-" + logFilename + "-" + writerFileCount + ".txt";
+        //make sure the log dir exists
+		File path = new File(logFileRootPath);
+		if (!path.exists()) {
+			path.mkdirs();
+		}
+		String fileName = logFileRootPath + File.separator + logFilePrefix + "-" + logFilename + "-" + writerFileCount + ".txt";
 		try {
 			FileWriter myWriter = new FileWriter(fileName);
 			BufferedWriter bufferedWriter = new BufferedWriter(myWriter);

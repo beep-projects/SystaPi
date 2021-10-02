@@ -6,6 +6,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +24,24 @@ class FakeSystaWebTest {
 		Method method = null;
 		;
 		try {
+			//processType1 is only called from run(), so we have to set some
+			//variables first which usually get set by run()
+			//make the fields accessible
+			Field RING_BUFFER_SIZE = FakeSystaWeb.class.getDeclaredField("RING_BUFFER_SIZE");
+			RING_BUFFER_SIZE.setAccessible(true);
+			Field readIndex = FakeSystaWeb.class.getDeclaredField("readIndex");
+			readIndex.setAccessible(true);
+			Field writeIndex = FakeSystaWeb.class.getDeclaredField("writeIndex");
+			writeIndex.setAccessible(true);
+			Field timestamp = FakeSystaWeb.class.getDeclaredField("timestamp");
+			timestamp.setAccessible(true);
+			//set the write index
+			writeIndex.setInt(fsw, (readIndex.getInt(fsw) + 1) % RING_BUFFER_SIZE.getInt(fsw));
+			//set the timestamp
+			long[] tmpTimestamp = (long[])timestamp.get(fsw);
+			tmpTimestamp[writeIndex.getInt(fsw)] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+			timestamp.set(fsw, tmpTimestamp);
+			//now we can invoke processType1
 			method = FakeSystaWeb.class.getDeclaredMethod("processType1", ByteBuffer.class);
 			method.setAccessible(true);
 			method.invoke(fsw, data);

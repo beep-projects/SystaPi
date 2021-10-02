@@ -1,6 +1,6 @@
-# This is a basic workflow to help you get started with Actions
+# this action will run JUnit tests for the SystaREST server
 
-name: CI
+name: JUnit
 
 # Controls when the workflow will run
 on:
@@ -22,15 +22,22 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu' # See 'Supported distributions' for available options
+          java-version: '11'
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: run JUnit tests
+        run: java -jar .github/workflows/junit-platform-console-standalone-1.8.1.jar -cp . --scan-classpath
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      # Publish the test results
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v2
+        if: always() # always run even if the previous step fails
+        with:
+          report_paths: '**/build/test-results/test/TEST-*.xml'
