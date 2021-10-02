@@ -33,7 +33,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: run JUnit tests
-        run: java -jar .github/workflows/junit-platform-console-standalone-1.8.1.jar -cp . --scan-classpath
+        run: java -jar .github/workflows/junit-platform-console-standalone-1.8.1.jar -cp . --scan-classpath -reports-dir='**/build/test-results/test/'
 
       # Publish the test results
       - name: Publish Test Report
