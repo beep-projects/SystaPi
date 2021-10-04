@@ -50,26 +50,40 @@ sudo apt install -y dnsmasq
 echo ""
 echo "configure eth0 to use 192.168.1.1 as static IP address"
 echo "configuring /etc/dhcpcd.conf"
-sudo echo "" >> /etc/dhcpcd.conf
-sudo echo "#configuring a static IP for connecting to the Paradigma Systa Comfort II" >> /etc/dhcpcd.conf
-sudo echo "interface eth0" >> /etc/dhcpcd.conf
-sudo echo "static ip_address=192.168.1.1/24" >> /etc/dhcpcd.conf
+#sudo echo "" >> /etc/dhcpcd.conf
+#sudo echo "#configuring a static IP for connecting to the Paradigma Systa Comfort II" >> /etc/dhcpcd.conf
+#sudo echo "interface eth0" >> /etc/dhcpcd.conf
+#sudo echo "static ip_address=192.168.1.1/24" >> /etc/dhcpcd.conf
+echo "" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+echo "#configuring a static IP for connecting to the Paradigma Systa Comfort II" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+echo "interface eth0" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+echo "static ip_address=192.168.1.1/24" | sudo tee -a /etc/dhcpcd.conf > /dev/null
 
 sudo systemctl daemon-reload
 
 echo "configuring /etc/dnsmasq.conf"
-sudo echo "" >> /etc/dnsmasq.conf
-sudo echo "#configuration to fake the remote portal for the Paradigma Systa Comfort II" >> /etc/dnsmasq.conf
-sudo echo "dhcp-range=192.168.1.10,192.168.1.25,12h  ## 12h is the lease time" >> /etc/dnsmasq.conf
-sudo echo "interface=eth0" >> /etc/dnsmasq.conf
-sudo echo "listen-address=192.168.1.1" >> /etc/dnsmasq.conf
-sudo echo "no-dhcp-interface=wlan0" >> /etc/dnsmasq.conf
-sudo echo "address=/paradigma.remoteportal.de/192.168.1.1" >> /etc/dnsmasq.conf 
+#sudo echo "" >> /etc/dnsmasq.conf
+#sudo echo "#configuration to fake the remote portal for the Paradigma Systa Comfort II" >> /etc/dnsmasq.conf
+#sudo echo "dhcp-range=192.168.1.10,192.168.1.25,12h  ## 12h is the lease time" >> /etc/dnsmasq.conf
+#sudo echo "interface=eth0" >> /etc/dnsmasq.conf
+#sudo echo "listen-address=192.168.1.1" >> /etc/dnsmasq.conf
+#sudo echo "no-dhcp-interface=wlan0" >> /etc/dnsmasq.conf
+#sudo echo "address=/paradigma.remoteportal.de/192.168.1.1" >> /etc/dnsmasq.conf 
+echo "" | sudo tee -a /etc/dnsmasq.conf > /dev/null
+echo "#configuration to fake the remote portal for the Paradigma Systa Comfort II" | sudo tee -a /etc/dnsmasq.conf > /dev/null
+echo "dhcp-range=192.168.1.10,192.168.1.25,12h  ## 12h is the lease time" | sudo tee -a /etc/dnsmasq.conf > /dev/null
+echo "interface=eth0" | sudo tee -a /etc/dnsmasq.conf > /dev/null
+echo "listen-address=192.168.1.1" | sudo tee -a /etc/dnsmasq.conf > /dev/null
+echo "no-dhcp-interface=wlan0" | sudo tee -a /etc/dnsmasq.conf > /dev/null
+echo "address=/paradigma.remoteportal.de/192.168.1.1" | sudo tee -a /etc/dnsmasq.conf > /dev/null
 
 echo "configuring /etc/dnsmasq.hosts"
-sudo echo "" >> /etc/dnsmasq.hosts
-sudo echo "#configure DNS spoofing for paradigma.remoteportal.de" >> /etc/dnsmasq.hosts
-sudo echo "192.168.1.1 paradigma.remoteportal.de" >> /etc/dnsmasq.hosts
+#sudo echo "" >> /etc/dnsmasq.hosts
+#sudo echo "#configure DNS spoofing for paradigma.remoteportal.de" >> /etc/dnsmasq.hosts
+#sudo echo "192.168.1.1 paradigma.remoteportal.de" >> /etc/dnsmasq.hosts
+echo "" | sudo tee -a /etc/dnsmasq.hosts > /dev/null
+echo "#configure DNS spoofing for paradigma.remoteportal.de" | sudo tee -a /etc/dnsmasq.hosts > /dev/null
+echo "192.168.1.1 paradigma.remoteportal.de" | sudo tee -a /etc/dnsmasq.hosts > /dev/null
 
 echo "restart dnsmasq"
 sudo /etc/init.d/dnsmasq restart 
@@ -79,17 +93,27 @@ echo "install OpenJDK build from Azul for Pi Zero (ARM 32-bit HF v6)"
 if [ ! -d /usr/lib/jvm ]; then
   sudo mkdir /usr/lib/jvm
 fi
-cd /usr/lib/jvm
-sudo wget https://cdn.azul.com/zulu-embedded/bin/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz
-sudo tar -xzvf zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz 
-sudo rm zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz
-sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf/bin/java 1
-sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf/bin/javac 1
+cd /usr/lib/jvm || exit 1
 
+#sudo wget https://cdn.azul.com/zulu-embedded/bin/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz
+#sudo tar -xzvf zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz 
+#sudo rm zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz
+#sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf/bin/java 1
+#sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf/bin/javac 1
+sudo wget https://cdn.azul.com/zulu-embedded/bin/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz
+sudo tar -xzvf zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz 
+sudo rm zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz
+sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf/bin/java 1
+sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf/bin/javac 1
 
 #copy SystaRESTServer to the pi homefolder for easy access
 echo "copy SystaRESTServer from /boot to /home/pi"
 cp /boot/SystaRESTServer /home/pi/
+
+echo "build SystaRESTServer from source files"
+(cd /home/pi/SystaRESTServer || exit 1 ; ./build.sh)
+
+#make sure all the files belong to the user pi
 sudo chown -R pi:pi /home/pi/SystaRESTServer
 
 #create service file
