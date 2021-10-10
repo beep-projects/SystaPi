@@ -11,7 +11,7 @@ This project is inspired by this post on the VDR portal [Heizungssteuerung: Date
 
 Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort.
 
-<img src="resources/SystaPi.jpg" alt="SystaPi" width="30%"></img> <img src="resources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" width="30%"></img> <img src="https://cloud.githubusercontent.com/assets/4307137/10105284/26aa7ad4-63ae-11e5-88b7-bc523a095c9f.png" width="30%"></img> <img src="resources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" width="30%"></img> 
+<img src="resources/SystaPi.jpg" alt="SystaPi" width="30%"></img> <img src="resources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" width="30%"></img> <img src="resources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" width="30%"></img> 
 
 ## Content
 
@@ -65,6 +65,21 @@ This is what I am using for this project, but any Raspberry Pi with at least one
 * ENC28J60 Ethernet HAT
 * Micro SD card >256MB
 * Micro USB Powersupply 5V / 1A
+
+Of course you also need a Paradigma SystaComfort or Paradigmy SystaComfort II. The following are the software versions that I succesfully used with **SystaPi**
+    SystaComfort
+      V1.14  8.08.14
+    System
+      V2.09.2
+    Basis
+      V 0.23
+
+    SystaComfort
+      V1.26  10.02.20
+    System
+      V2.16.1
+    Basis
+      V 0.34
 
 ## Installation
 
