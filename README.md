@@ -11,7 +11,28 @@ This project is inspired by this post on the VDR portal [Heizungssteuerung: Date
 
 Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort.
 
-<img src="resources/SystaPi.jpg" alt="SystaPi" style="zoom:25%;" /> <img src="resources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" style="zoom: 25%;" /><img src="resources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" style="zoom: 25%;" /> 
+<img src="resources/SystaPi.jpg" alt="SystaPi" width="30%"></img> <img src="resources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" width="30%"></img> <img src="https://cloud.githubusercontent.com/assets/4307137/10105284/26aa7ad4-63ae-11e5-88b7-bc523a095c9f.png" width="30%"></img> <img src="resources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" width="30%"></img> 
+
+## Content
+
+- [Directory Structure of this Project](#directory-structure-of-this-project)
+- [Parts List](#parts-list)
+- [Installation](#installation)
+  - [Linux](#linux)
+  - [Windows / manual installation](#windows--manual-installation)
+  - [Troubleshooting the installation](#troubleshooting-the-installation)
+- [The SystaREST API](#the-systarest-api)
+  - [start](#start)
+  - [stop](#stop)
+  - [servicestatus](#servicestatus)
+  - [rawdata](#rawdata)
+  - [waterheater](#waterheater)
+  - [status](#status)
+  - [enablelogging](#enablelogging)
+  - [disablelogging](#disablelogging)
+- [Known Issues](#known-issues)
+- [Links](#links)
+
 
 ## Directory Structure of this Project
 
