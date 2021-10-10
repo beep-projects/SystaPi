@@ -68,6 +68,7 @@ This is what I am using for this project, but any Raspberry Pi with at least one
 
 Of course you also need a Paradigma SystaComfort or Paradigmy SystaComfort II. The following are the software versions that I succesfully used with **SystaPi**
 
+|                               |   |                                |
 |-------------------------------|---|--------------------------------|
 | SystaComfort `V1.14  8.08.14` |   | SystaComfort `V1.26  10.02.20` |
 | System `V2.09.2`              |   | System `V2.16.1`               |
