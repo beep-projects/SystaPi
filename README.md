@@ -66,7 +66,7 @@ This is what I am using for this project, but any Raspberry Pi with at least one
 * Micro SD card >256MB
 * Micro USB Powersupply 5V / 1A
 
-Of course you also need a Paradigma SystaComfort or Paradigmy SystaComfort II. The following are the software versions that I succesfully used with **SystaPi**
+Of course you also need a Paradigma SystaComfort or Paradigmy SystaComfort II. The following are the paradigma software versions that I succesfully used with **SystaPi**
 
 |                  |   |        #1        |   |       #2          |
 |------------------|---|------------------|---|-------------------|
