@@ -1,6 +1,15 @@
+/*
+* Copyright (c) 2021, The beep-projects contributors
+* this file originated from https://github.com/beep-projects
+* Do not remove the lines above.
+* The rest of this source code is subject to the terms of the Mozilla Public License.
+* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+*/
+
 package de.freaklamarsch.systarest;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -9,15 +18,18 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 /**
- * A {@code DataLogger} can be used for logging data entries represented as {@code int[]} to delimited text files.
- * The default delimiter used for this is {@code ;}, making it a logger for CSV files. 
- * The {@code DataLogger} has a defined capacity, which is the number of elements that can be stored. Depending on the {@link #saveLoggedData} setting
- * adding new elements will trigger {@link #writeLoggedDataToFile} and empty the {@link #dataBuffer} or just overwrite the oldest element stored.
+ * A {@code DataLogger} can be used for logging data entries represented as
+ * {@code T[]} to delimited text files. The default delimiter used for this is
+ * {@code ;}, making it a logger for CSV files. The {@code DataLogger} has a
+ * defined capacity, which is the number of elements that can be stored.
+ * Depending on the {@link #saveLoggedData} setting adding new elements will
+ * trigger {@link #writeLoggedDataToFile} and empty the {@link #dataBuffer} or
+ * just overwrite the oldest element stored.
  */
-public class DataLogger {
+public class DataLogger<T> {
 
 	/**
-	 * Inner class for representing the status of this @see DataLogger. 
+	 * Inner class for representing the status of this @see DataLogger.
 	 */
 	public class DataLoggerStatus {
 		public final int capacity;
@@ -42,11 +54,13 @@ public class DataLogger {
 
 	private static final int DEFAULT_CAPACITY = 60;
 	private int capacity = DEFAULT_CAPACITY;
-	private CircularBuffer<int[]> dataBuffer = null;
+	private CircularBuffer<T[]> dataBuffer = null;
 	private CircularBuffer<String> timestampBuffer = null;
 	private boolean saveLoggedData = false;
 	private String logFilePrefix = "DataLogger";
-	private String logFileRootPath = DataLogger.class.getClassLoader().getResource("").getPath();
+	private String logFilename = "";
+	//private String logFileRootPath = DataLogger.class.getClassLoader().getResource("").getPath();
+	private String logFileRootPath = System.getProperty("user.home") + File.separator + "logs";
 	private String logEntryDelimiter = ";";
 	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
 	private int writerFileCount = 0;
@@ -56,7 +70,7 @@ public class DataLogger {
 	 * {@value #DEFAULT_CAPACITY} entries.
 	 */
 	public DataLogger() {
-		this(DEFAULT_CAPACITY);
+		this("", DEFAULT_CAPACITY);
 	}
 
 	/**
@@ -66,13 +80,14 @@ public class DataLogger {
 	 * @param entriesPerFile this is the number of entries contained in each written
 	 *                       log file.
 	 */
-	public DataLogger(int entriesPerFile) {
+	public DataLogger(String filename, int entriesPerFile) {
 		if (entriesPerFile > 0) {
 			this.capacity = entriesPerFile;
 		} else {
 			this.capacity = DEFAULT_CAPACITY;
 		}
-		this.dataBuffer = new CircularBuffer<int[]>(capacity);
+		this.logFilename = filename;
+		this.dataBuffer = new CircularBuffer<T[]>(capacity);
 		this.dataBuffer.setOverwrite(true);
 		this.timestampBuffer = new CircularBuffer<String>(capacity);
 		this.timestampBuffer.setOverwrite(true);
@@ -122,7 +137,7 @@ public class DataLogger {
 	 *                       this value
 	 */
 	public synchronized void saveLoggedData(int entriesPerFile) {
-		//access to dataBuffer and timestampBuffer has to be synchronized
+		// access to dataBuffer and timestampBuffer has to be synchronized
 		if (saveLoggedData == true) {
 			stopSavingLoggedData();
 		} else {
@@ -133,7 +148,7 @@ public class DataLogger {
 		} else {
 			this.capacity = DEFAULT_CAPACITY;
 		}
-		this.dataBuffer = new CircularBuffer<int[]>(capacity);
+		this.dataBuffer = new CircularBuffer<T[]>(capacity);
 		this.dataBuffer.setOverwrite(true);
 		this.timestampBuffer = new CircularBuffer<String>(capacity);
 		this.timestampBuffer.setOverwrite(true);
@@ -142,6 +157,7 @@ public class DataLogger {
 
 	/**
 	 * activate the saving of logged data and set the {@link #logFilePrefix}
+	 * 
 	 * @param filePrefix the value to use for {@link #logFilePrefix}
 	 */
 	public void saveLoggedData(String filePrefix) {
@@ -150,9 +166,11 @@ public class DataLogger {
 	}
 
 	/**
-	 * activate the saving of logged data and set the {@link #logFilePrefix}, {@link #logEntryDelimiter}, {@link #capacity}.
-	 * @param filePrefix the value to use for {@link #logFilePrefix}
-	 * @param delimiter the value to use for {@link #logEntryDelimiter}
+	 * activate the saving of logged data and set the {@link #logFilePrefix},
+	 * {@link #logEntryDelimiter}, {@link #capacity}.
+	 * 
+	 * @param filePrefix     the value to use for {@link #logFilePrefix}
+	 * @param delimiter      the value to use for {@link #logEntryDelimiter}
 	 * @param entriesPerFile the value to use for {@link #capacity}
 	 */
 	public void saveLoggedData(String filePrefix, String delimiter, int entriesPerFile) {
@@ -162,10 +180,11 @@ public class DataLogger {
 	}
 
 	/**
-	 * if data is currently saved to a file, this command will write the last file and stop the saving of files. This will clear the {@code DataLogger}.
+	 * if data is currently saved to a file, this command will write the last file
+	 * and stop the saving of files. This will clear the {@code DataLogger}.
 	 */
 	public void stopSavingLoggedData() {
-		if(saveLoggedData) {
+		if (saveLoggedData) {
 			saveLoggedData = false;
 			// write out the last file
 			writeLoggedDataToFile();
@@ -173,14 +192,14 @@ public class DataLogger {
 	}
 
 	/**
-	 * add int[] data and its timestamp to dataBuffer, respectively timestampBuffer
+	 * add T[] data and its timestamp to dataBuffer, respectively timestampBuffer
 	 * 
-	 * @param data      the int[] that should be added to the dataBuffer
+	 * @param data      the T[] that should be added to the dataBuffer
 	 * @param timestamp the timestamp for the added data. It will be added to
 	 *                  timestampBuffer
 	 */
-	public synchronized void addData(int[] data, long timestamp) {
-		//access to dataBuffer and timestampBuffer has to be synchronized
+	public synchronized void addData(T[] data, long timestamp) {
+		// access to dataBuffer and timestampBuffer has to be synchronized
 		// make sure that there is new data to write
 		String newTimestamp = formatter.format(LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC));
 		String lastTimestamp = timestampBuffer.peek();
@@ -194,7 +213,7 @@ public class DataLogger {
 		timestampBuffer.add(newTimestamp);
 		// save a copy of data, otherwise the stored array will change when the outside
 		// array changes
-		int[] d = Arrays.copyOf(data, data.length);
+		T[] d = Arrays.copyOf(data, data.length);
 		dataBuffer.add(d);
 
 		if (timestampBuffer.isFull() && saveLoggedData == true) {
@@ -203,7 +222,7 @@ public class DataLogger {
 	}
 
 	private synchronized boolean writeLoggedDataToFile() {
-		//access to dataBuffer and timestampBuffer has to be synchronized
+		// access to dataBuffer and timestampBuffer has to be synchronized
 		if (timestampBuffer.isEmpty() || dataBuffer.isEmpty()) {
 			return false;
 		} else if (timestampBuffer.size() != dataBuffer.size()) {
@@ -229,17 +248,27 @@ public class DataLogger {
 		c = 0;// begin in first column
 		// add the data records column by column to the fileContent
 		while (!dataBuffer.isEmpty()) {
-			int[] entry = dataBuffer.remove();
+			T[] entry = dataBuffer.remove();
 			// System.out.println("add next entry");
-			for (int e : entry) {
+			for (T e : entry) {
 				// System.out.println("R: "+r+", C: "+c+", E: "+e);
-				fileContent[r][c] = Integer.toString(e);
+				// fileContent[r][c] = Integer.toString(e);
+				if (e == null) {
+					fileContent[r][c] = "";
+				} else {
+					fileContent[r][c] = "" + e;
+				}
 				r++;
 			}
 			c++; // move to next column for next record
 			r = 1; // keep in mind, that the first column is already filled with the timestamps
 		}
-		String fileName = logFileRootPath + logFilePrefix + "-" + writerFileCount + ".txt";
+        //make sure the log dir exists
+		File path = new File(logFileRootPath);
+		if (!path.exists()) {
+			path.mkdirs();
+		}
+		String fileName = logFileRootPath + File.separator + logFilePrefix + "-" + logFilename + "-" + writerFileCount + ".txt";
 		try {
 			FileWriter myWriter = new FileWriter(fileName);
 			BufferedWriter bufferedWriter = new BufferedWriter(myWriter);

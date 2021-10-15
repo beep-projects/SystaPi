@@ -28,9 +28,11 @@ package de.freaklamarsch.systarest;
  * https://github.com/eugenp/tutorials/blob/master/data-structures/src/main/java/com/baeldung/circularbuffer/CircularBuffer.java
  */
 /**
- * Implementation of a circular buffer. A circular buffer is a data structure that uses
- * a single, fixed-size buffer as if it were connected end-to-end. By default, this implementation 
- * denies adding new elements if the buffer is full. This behaviour can be changed by setting {@link #overwrite}
+ * Implementation of a circular buffer. A circular buffer is a data structure
+ * that uses a single, fixed-size buffer as if it were connected end-to-end. By
+ * default, this implementation denies adding new elements if the buffer is
+ * full. This behaviour can be changed by setting {@link #overwrite}
+ * 
  * @param <E> object type to store within this buffer
  */
 public class CircularBuffer<E> {
@@ -43,8 +45,11 @@ public class CircularBuffer<E> {
 	private boolean overwrite;
 
 	/**
-	 * Creates a {@code CircularBuffer} with a capacity of {@code capacity} elements.
-	 * @param capacity number of elements that can be stored in the {@code CircularBuffer}
+	 * Creates a {@code CircularBuffer} with a capacity of {@code capacity}
+	 * elements.
+	 * 
+	 * @param capacity number of elements that can be stored in the
+	 *                 {@code CircularBuffer}
 	 */
 	@SuppressWarnings("unchecked")
 	public CircularBuffer(int capacity) {
@@ -56,7 +61,8 @@ public class CircularBuffer<E> {
 	}
 
 	/**
-	 * moves the markers to represent an empty buffer. Note, this does not immediately destroy the stored elements in the buffer.
+	 * moves the markers to represent an empty buffer. Note, this does not
+	 * immediately destroy the stored elements in the buffer.
 	 */
 	public void clear() {
 		// mark the buffer as empty
@@ -66,6 +72,7 @@ public class CircularBuffer<E> {
 
 	/**
 	 * Add an element to the {@code CircularBuffer}
+	 * 
 	 * @param element the element added to the {@code CircularBuffer}
 	 * @return true if the element could be added to the buffer, false otherwise
 	 */
@@ -76,10 +83,11 @@ public class CircularBuffer<E> {
 			int nextWriteSeq = writeSequence + 1;
 			data[nextWriteSeq % capacity] = element;
 
-			//if the buffer is full and overwrite is active
-			//the read index has to be moved, for removing the first element
-			//this has to be done before the write index is moved, otherwise the isFull() test will fail
-			if(isFull() && overwrite) {
+			// if the buffer is full and overwrite is active
+			// the read index has to be moved, for removing the first element
+			// this has to be done before the write index is moved, otherwise the isFull()
+			// test will fail
+			if (isFull() && overwrite) {
 				readSequence++;
 			}
 			writeSequence++;
@@ -91,6 +99,7 @@ public class CircularBuffer<E> {
 
 	/**
 	 * Removes the oldest element from the {@code CircularBuffer} and returns it
+	 * 
 	 * @return the oldest element
 	 */
 	public E remove() {
@@ -103,7 +112,7 @@ public class CircularBuffer<E> {
 	}
 
 	/**
-	 *  @return the oldest element from the buffer without removing it
+	 * @return the oldest element from the buffer without removing it
 	 */
 	public E peek() {
 		if (isNotEmpty()) {
@@ -121,28 +130,30 @@ public class CircularBuffer<E> {
 	}
 
 	/**
-	 * @return  the size of the {@code CircularBuffer}, i.e. elements currently stored.
+	 * @return the size of the {@code CircularBuffer}, i.e. elements currently
+	 *         stored.
 	 */
 	public int size() {
 		return (writeSequence - readSequence) + 1;
 	}
 
 	/**
-	 * @param overwrite Set the behavior if an element is added to a full {@code CircularBuffer}.
-	 * If set to {@code true}, the oldest element is overwritten.
-	 * If set to {@code false}, add will ignore the add request and return {@code false}.
+	 * @param overwrite Set the behavior if an element is added to a full
+	 *                  {@code CircularBuffer}. If set to {@code true}, the oldest
+	 *                  element is overwritten. If set to {@code false}, add will
+	 *                  ignore the add request and return {@code false}.
 	 */
 	public void setOverwrite(boolean overwrite) {
 		this.overwrite = overwrite;
 	}
-	
+
 	/**
 	 * @return the current value of {@link #overwrite}
 	 */
 	public boolean getOverwrite() {
 		return overwrite;
 	}
-	
+
 	/**
 	 * @return if this {@code CircularBuffer} is empty or not.
 	 */

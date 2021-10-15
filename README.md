@@ -1,6 +1,6 @@
 ![banner](resources/banner.png)
 
-[![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/blob/main/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub forks](https://img.shields.io/github/forks/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/network) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) ![GitHub repo size](https://img.shields.io/github/repo-size/beep-projects/SystaPi) ![GitHub all releases](https://img.shields.io/github/downloads/beep-projects/SystaPi/total) 
+[![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/blob/main/LICENSE) [![JUnit](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml) [![shellcheck](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml) [![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub forks](https://img.shields.io/github/forks/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/network) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) ![GitHub repo size](https://img.shields.io/github/repo-size/beep-projects/SystaPi)
 
 # SystaPi and SystaREST
 
@@ -11,7 +11,28 @@ This project is inspired by this post on the VDR portal [Heizungssteuerung: Date
 
 Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort.
 
-<img src="resources/SystaPi.jpg" alt="SystaPi" style="zoom:25%;" /> <img src="resources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" style="zoom: 25%;" /><img src="resources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" style="zoom: 25%;" /> 
+<img src="resources/SystaPi.jpg" alt="SystaPi" width="30%"></img> <img src="resources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" width="30%"></img> <img src="resources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" width="30%"></img> 
+
+## Content
+
+- [Directory Structure of this Project](#directory-structure-of-this-project)
+- [Parts List](#parts-list)
+- [Installation](#installation)
+  - [Linux](#linux)
+  - [Windows / manual installation](#windows--manual-installation)
+  - [Troubleshooting the installation](#troubleshooting-the-installation)
+- [The SystaREST API](#the-systarest-api)
+  - [start](#start)
+  - [stop](#stop)
+  - [servicestatus](#servicestatus)
+  - [rawdata](#rawdata)
+  - [waterheater](#waterheater)
+  - [status](#status)
+  - [enablelogging](#enablelogging)
+  - [disablelogging](#disablelogging)
+- [Known Issues](#known-issues)
+- [Links](#links)
+
 
 ## Directory Structure of this Project
 
@@ -44,6 +65,14 @@ This is what I am using for this project, but any Raspberry Pi with at least one
 * ENC28J60 Ethernet HAT
 * Micro SD card >256MB
 * Micro USB Powersupply 5V / 1A
+
+Of course you also need a Paradigma SystaComfort or Paradigmy SystaComfort II. The following are the paradigma software versions that I succesfully used with **SystaPi**
+
+|                  |   |        #1        |   |       #2          |
+|------------------|---|------------------|---|-------------------|
+| **SystaComfort** |   | `V1.14  8.08.14` |   | `V1.26  10.02.20` |
+| **System**       |   | `V2.09.2`        |   | `V2.16.1`         |
+| **Basis**        |   | `V0.23`          |   | `V0.34`           |
 
 ## Installation
 

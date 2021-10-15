@@ -1,9 +1,16 @@
+/*
+* Copyright (c) 2021, The beep-projects contributors
+* this file originated from https://github.com/beep-projects
+* Do not remove the lines above.
+* The rest of this source code is subject to the terms of the Mozilla Public License.
+* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+*/
 package de.freaklamarsch.systarest;
 
 /**
- * class representing the known indices of the SystaWeb UDP data packet.
- * If new fields are decoded, this class should be updated.
- * The documentation is taken from the German manual
+ * class representing the known indices of the SystaWeb UDP data packet. If new
+ * fields are decoded, this class should be updated. The documentation is taken
+ * from the German manual
  */
 public final class SystaIndex {
 
@@ -161,40 +168,36 @@ public final class SystaIndex {
 	final static int BOILER_TEMP_SET = 34;
 	// final static int = 35
 	/**
-	 * Betriebsart 
-	 * 0 = Auto Prog. 1 
-	 * 1 = Auto Prog. 2 
-	 * 2 = Auto Prog. 3 
-	 * 3 = Dauernd Normal 
-	 * 4 = Dauernd Komfort 
-	 * 5 = Dauernd Absenken 
-	 * 6 = Sommer 
-	 * 7 = Aus 
-	 * 8 = Party
+	 * Betriebsart 0 = Auto Prog. 1 1 = Auto Prog. 2 2 = Auto Prog. 3 3 = Dauernd
+	 * Normal 4 = Dauernd Komfort 5 = Dauernd Absenken 6 = Sommer 7 = Aus 8 = Party
 	 * 14= Test oder Kaminfeger
 	 * 
-	 * • Automatik 1, 2 oder 3 - Anlage läuft im Regelbetrieb, gemäß den Einstellungen im Zeitprogramm 1, 2 oder 3 Trinkwassererwärmung und
+	 * • Automatik 1, 2 oder 3 - Anlage läuft im Regelbetrieb, gemäß den
+	 * Einstellungen im Zeitprogramm 1, 2 oder 3 Trinkwassererwärmung und
 	 * Zirkulation laufen entsprechend den Einstellungen im jeweiligen Zeitprogramm.
 	 * 
-	 * • Dauernd Normal - Heizkreis wird auf „Sollwert Raumtemperatur Normal“ geregelt, Trinkwassererwärmung und Zirkulation laufen entsprechend den
-	 * Einstellungen im jeweiligen Zeitprogramm. 
+	 * • Dauernd Normal - Heizkreis wird auf „Sollwert Raumtemperatur Normal“
+	 * geregelt, Trinkwassererwärmung und Zirkulation laufen entsprechend den
+	 * Einstellungen im jeweiligen Zeitprogramm.
 	 * 
-	 * • Dauernd Komfort - Heizkreis wird auf „Sollwert Raumtemperatur Komfort“ geregelt, Trinkwassererwärmung und
-	 * Zirkulation laufen entsprechend den Einstellungen im jeweiligen Zeitprogramm.
+	 * • Dauernd Komfort - Heizkreis wird auf „Sollwert Raumtemperatur Komfort“
+	 * geregelt, Trinkwassererwärmung und Zirkulation laufen entsprechend den
+	 * Einstellungen im jeweiligen Zeitprogramm.
 	 * 
 	 * • Dauernd Abgesenkt - Heizkreis wird auf „Sollwert Raumtemperatur Abgesenkt“
 	 * geregelt, Trinkwassererwärmung und Zirkulation laufen entsprechend den
-	 * Einstellungen im jeweiligen Zeitprogramm. 
+	 * Einstellungen im jeweiligen Zeitprogramm.
 	 * 
-	 * • Sommer - Heizung ist ausgeschaltet, Trinkwassererwärmung und Zirkulation laufen entsprechend den
-	 * Einstellungen im jeweiligen Zeitprogramm. 
+	 * • Sommer - Heizung ist ausgeschaltet, Trinkwassererwärmung und Zirkulation
+	 * laufen entsprechend den Einstellungen im jeweiligen Zeitprogramm.
 	 * 
-	 * • Aus - Heizung, Trinkwassererwärmung und Zirkulation sind ausgeschaltet, Frostschutz ist
-	 * sichergestellt 
+	 * • Aus - Heizung, Trinkwassererwärmung und Zirkulation sind ausgeschaltet,
+	 * Frostschutz ist sichergestellt
 	 * 
-	 * • Party - Unabhängig vom Heizzeitprogramm verwendet der Regler den „Sollwert Raumtemperatur Normal“. 
-	 * Unabhängig vom Warmwasserzeitprogramm  verwendet der Regler den „Sollwert Warmwassertemperatur Normal“. Die
-	 * Zirkulation ist freigegeben.
+	 * • Party - Unabhängig vom Heizzeitprogramm verwendet der Regler den „Sollwert
+	 * Raumtemperatur Normal“. Unabhängig vom Warmwasserzeitprogramm verwendet der
+	 * Regler den „Sollwert Warmwassertemperatur Normal“. Die Zirkulation ist
+	 * freigegeben.
 	 */
 	final static int OPERATION_MODE = 36;
 	/**

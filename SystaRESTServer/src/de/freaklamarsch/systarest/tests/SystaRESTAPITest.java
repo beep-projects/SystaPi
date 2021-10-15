@@ -1,3 +1,10 @@
+/*
+* Copyright (c) 2021, The beep-projects contributors
+* this file originated from https://github.com/beep-projects
+* Do not remove the lines above.
+* The rest of this source code is subject to the terms of the Mozilla Public License.
+* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+*/
 package de.freaklamarsch.systarest.tests;
 
 import static org.junit.Assert.assertEquals;
@@ -71,7 +78,7 @@ class SystaRESTAPITest extends JerseyTest {
 		assertEquals("", json.getString("paradigmaIP"));
 		assertEquals(0, json.getInt("paradigmaPort"));
 		assertFalse(json.getBoolean("loggingData"));
-		assertEquals(60, json.getInt("logFileSize"));
+		assertEquals(180, json.getInt("logFileSize"));
 		assertEquals("SystaREST", json.getString("logFilePrefix"));
 		assertEquals(";", json.getString("logFileDelimiter"));
 		assertTrue(json.getString("logFileRootPath").endsWith("SystaRESTServer/bin/"));
@@ -158,7 +165,7 @@ class SystaRESTAPITest extends JerseyTest {
 		assertEquals("", json.getString("paradigmaIP"));
 		assertEquals(0, json.getInt("paradigmaPort"));
 		assertTrue(json.getBoolean("loggingData"));
-		assertEquals(10, json.getInt("logFileSize"));
+		assertEquals(30, json.getInt("logFileSize"));
 		assertEquals("test", json.getString("logFilePrefix"));
 		assertEquals("<>", json.getString("logFileDelimiter"));
 		assertTrue(json.getString("logFileRootPath").endsWith("SystaRESTServer/bin/"));
@@ -186,7 +193,7 @@ class SystaRESTAPITest extends JerseyTest {
 		assertEquals("", json.getString("paradigmaIP"));
 		assertEquals(0, json.getInt("paradigmaPort"));
 		assertFalse(json.getBoolean("loggingData"));
-		assertEquals(60, json.getInt("logFileSize"));
+		assertEquals(180, json.getInt("logFileSize"));
 		assertEquals("SystaREST", json.getString("logFilePrefix"));
 		assertEquals(";", json.getString("logFileDelimiter"));
 		assertTrue(json.getString("logFileRootPath").endsWith("SystaRESTServer/bin/"));

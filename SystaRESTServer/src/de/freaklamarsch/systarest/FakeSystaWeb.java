@@ -1,3 +1,10 @@
+/*
+* Copyright (c) 2021, The beep-projects contributors
+* this file originated from https://github.com/beep-projects
+* Do not remove the lines above.
+* The rest of this source code is subject to the terms of the Mozilla Public License.
+* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+*/
 package de.freaklamarsch.systarest;
 
 import java.io.IOException;
@@ -14,13 +21,14 @@ import de.freaklamarsch.systarest.DataLogger.DataLoggerStatus;
 import de.freaklamarsch.systarest.SystaWaterHeaterStatus.tempUnit;
 
 /**
- * @see Runnable implementation to mock the Paradigma SystaWeb service. This class opens a @see DatagramSocket for the communication with a Paradigma SystaComfort II.
- * This class provides access to the received data.
+ * @see Runnable implementation to mock the Paradigma SystaWeb service. This
+ *      class opens a @see DatagramSocket for the communication with a Paradigma
+ *      SystaComfort II. This class provides access to the received data.
  */
 public class FakeSystaWeb implements Runnable {
-	
+
 	/**
-	 * Inner class for representing the status of this @see FakeSystaWeb 
+	 * Inner class for representing the status of this @see FakeSystaWeb
 	 */
 	public class FakeSystaWebStatus {
 		public final boolean running;
@@ -76,7 +84,7 @@ public class FakeSystaWeb implements Runnable {
 	private int writeIndex = -1;
 	private long dataPacketsReceived = 0;
 	private byte[][] mac = new byte[RING_BUFFER_SIZE][6];
-	private int[][] rawData = new int[RING_BUFFER_SIZE][MAX_NUMBER_ENTRIES + 1];
+	private Integer[][] intData = new Integer[RING_BUFFER_SIZE][MAX_NUMBER_ENTRIES];
 	private byte[] reply = new byte[REPLY_MSG_LENGTH];
 	private long[] timestamp = new long[RING_BUFFER_SIZE];
 
@@ -91,7 +99,8 @@ public class FakeSystaWeb implements Runnable {
 
 	private int WRITER_MAX_DATA = 60;
 	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
-	private DataLogger log = new DataLogger(WRITER_MAX_DATA);
+	private DataLogger<Integer> logInt = new DataLogger<Integer>("data", WRITER_MAX_DATA);
+	private DataLogger<Byte> logRaw = new DataLogger<Byte>("raw", WRITER_MAX_DATA);
 
 	// constructor
 	public FakeSystaWeb() {
@@ -101,7 +110,7 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	public FakeSystaWebStatus getStatus() {
-		DataLoggerStatus dls = log.getStatus();
+		DataLoggerStatus dls = logRaw.getStatus();
 		// if we have received data within the last 120 seconds, we are considered being
 		// connected
 		boolean connected = (readIndex < 0) ? false
@@ -149,10 +158,10 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	/**
-	 * @return the rawData of the current measurement, or null if no measurement has
+	 * @return the intData of the current measurement, or null if no measurement has
 	 *         been done so far
 	 */
-	public int[] getData() {
+	public Integer[] getData() {
 		// safe readIndex, so we do not read inconsistent data, if it gets updated
 		// between calls
 		// System.out.println("[FakeSystaWeb] FSW.getData()");
@@ -160,7 +169,7 @@ public class FakeSystaWeb implements Runnable {
 		// System.out.println("FSW.getData(): i=="+i);
 		if (i >= 0 && timestamp[i] > 0) {
 			// System.out.println("[FakeSystaWeb] FSW.getData(): return rawData["+i+"]");
-			return rawData[i];
+			return intData[i];
 		} else {
 			// System.out.println("[FakeSystaWeb] FSW.getData(): return null");
 			return null;
@@ -175,13 +184,13 @@ public class FakeSystaWeb implements Runnable {
 		}
 		status.minTemp = 40.0; // TODO check this value
 		status.maxTemp = 65.0; // TODO check this value
-		status.currentTemperature = rawData[i][SystaIndex.HOT_WATER_TEMP] / 10.0;
-		status.targetTemperature = rawData[i][SystaIndex.HOT_WATER_TEMP_SET] / 10.0;
-		status.targetTemperatureHigh = rawData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
+		status.currentTemperature = intData[i][SystaIndex.HOT_WATER_TEMP] / 10.0;
+		status.targetTemperature = intData[i][SystaIndex.HOT_WATER_TEMP_SET] / 10.0;
+		status.targetTemperatureHigh = intData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
 		status.targetTemperatureLow = Math.max(0.0,
-				status.targetTemperature - rawData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0);
+				status.targetTemperature - intData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0);
 		status.temperatureUnit = tempUnit.TEMP_CELSIUS;
-		status.currentOperation = WATER_HEATER_OPERATION_MODES[rawData[i][SystaIndex.HOT_WATER_OPERATION_MODE]];
+		status.currentOperation = WATER_HEATER_OPERATION_MODES[intData[i][SystaIndex.HOT_WATER_OPERATION_MODE]];
 		status.operationList = WATER_HEATER_OPERATION_MODES;
 		status.supportedFeatures = new String[] {}; // TODO check what supported features are
 		status.is_away_mode_on = false; // TODO match with ferien mode if possible
@@ -194,79 +203,80 @@ public class FakeSystaWeb implements Runnable {
 		SystaStatus status = new SystaStatus();
 		int i = readIndex; // save readIndex, so we do not read inconsistent data if it gets updated
 		if (i < 0 || timestamp[i] <= 0) {
+			System.out.println("i: "+i+", timestamp: "+timestamp[i]);
 			return null;
 		}
-		status.outsideTemp = rawData[i][SystaIndex.OUTSIDE_TEMP] / 10.0;
-		status.circuit1FlowTemp = rawData[i][SystaIndex.CIRCUIT_1_FLOW_TEMP] / 10.0;
-		status.circuit1ReturnTemp = rawData[i][SystaIndex.CIRCUIT_1_RETURN_TEMP] / 10.0;
-		status.hotWaterTemp = rawData[i][SystaIndex.HOT_WATER_TEMP] / 10.0;
-		status.bufferTempTop = rawData[i][SystaIndex.BUFFER_TEMP_TOP] / 10.0;
-		status.bufferTempBottom = rawData[i][SystaIndex.BUFFER_TEMP_BOTTOM] / 10.0;
-		status.circulationTemp = rawData[i][SystaIndex.CIRCULATION_TEMP] / 10.0;
-		status.circuit2FlowTemp = rawData[i][SystaIndex.CIRCUIT_2_FLOW_TEMP] / 10.0;
-		status.circuit2ReturnTemp = rawData[i][SystaIndex.CIRCUIT_2_RETURN_TEMP] / 10.0;
-		status.roomTempActual1 = rawData[i][SystaIndex.ROOM_TEMP_ACTUAL_1] / 10.0;
-		status.roomTempActual2 = rawData[i][SystaIndex.ROOM_TEMP_ACTUAL_2] / 10.0;
-		status.collectorTempActual = rawData[i][SystaIndex.COLLECTOR_TEMP_ACTUAL] / 10.0;
-		status.boilerFlowTemp = rawData[i][SystaIndex.BOILER_FLOW_TEMP] / 10.0;
-		status.boilerReturnTemp = rawData[i][SystaIndex.BOILER_RETURN_TEMP] / 10.0;
-		status.stoveFlowTemp = rawData[i][SystaIndex.STOVE_FLOW_TEMP] / 10.0;
-		status.stoveReturnTemp = rawData[i][SystaIndex.STOVE_RETURN_TEMP] / 10.0;
-		status.woodBoilerBufferTempTop = rawData[i][SystaIndex.WOOD_BOILER_BUFFER_TEMP_TOP] / 10.0;
-		status.swimmingpoolTemp = rawData[i][SystaIndex.SWIMMINGPOOL_TEMP] / 10.0;
-		status.swimmingpoolFlowTeamp = rawData[i][SystaIndex.SWIMMINGPOOL_FLOW_TEMP] / 10.0;
-		status.swimmingpoolReturnTemp = rawData[i][SystaIndex.SWIMMINGPOOL_RETURN_TEMP] / 10.0;
-		status.hotWaterTempSet = rawData[i][SystaIndex.HOT_WATER_TEMP_SET] / 10.0;
-		status.roomTempSet1 = rawData[i][SystaIndex.ROOM_TEMP_SET_1] / 10.0;
-		status.circuit1FlowTempSet = rawData[i][SystaIndex.CIRCUIT_1_FLOW_TEMP_SET] / 10.0;
-		status.circuit2FlowTempSet = rawData[i][SystaIndex.CIRCUIT_2_FLOW_TEMP_SET] / 10.0;
-		status.roomTempSet2 = rawData[i][SystaIndex.ROOM_TEMP_SET_2] / 10.0;
-		status.bufferTempSet = rawData[i][SystaIndex.BUFFER_TEMP_SET] / 10.0;
-		status.boilerTempSet = rawData[i][SystaIndex.BOILER_TEMP_SET] / 10.0;
-		status.operationMode = rawData[i][SystaIndex.OPERATION_MODE];
-		status.roomTempSetNormal = rawData[i][SystaIndex.ROOM_TEMP_SET_NORMAL] / 10.0;
-		status.roomTempSetComfort = rawData[i][SystaIndex.ROOM_TEMP_SET_COMFORT] / 10.0;
-		status.roomTempSetLowering = rawData[i][SystaIndex.ROOM_TEMP_SET_LOWERING] / 10.0;
-		status.heatingOperationMode = rawData[i][SystaIndex.HEATING_OPERATION_MODE];
-		status.controlledBy = rawData[i][SystaIndex.CONTROLLED_BY];
-		status.heatingCurveBasePoint = rawData[i][SystaIndex.HEATING_CURVE_BASE_POINT] / 10.0;
-		status.heatingCurveGradient = rawData[i][SystaIndex.HEATING_CURVE_GRADIENT] / 10.0;
-		status.maxFlowTemp = rawData[i][SystaIndex.MAX_FLOW_TEMP] / 10.0;
-		status.heatingLimitTemp = rawData[i][SystaIndex.HEATING_LIMIT_TEMP] / 10.0;
-		status.heatingLimitTeampLowering = rawData[i][SystaIndex.HEATING_LIMIT_TEMP_LOWERING] / 10.0;
-		status.antiFreezeOutsideTemp = rawData[i][SystaIndex.ANTI_FREEZE_OUTSIDE_TEMP] / 10.0;
-		status.heatUpTime = rawData[i][SystaIndex.HEAT_UP_TIME]; // in minutes
-		status.roomImpact = rawData[i][SystaIndex.ROOM_IMPACT] / 10.0;
-		status.boilerSuperelevation = rawData[i][SystaIndex.BOILER_SUPERELEVATION];
-		status.spreadingHeatingCircuit = rawData[i][SystaIndex.SPREADING_HEATING_CIRCUIT] / 10.0;
-		status.heatingMinSpeedPump = rawData[i][SystaIndex.HEATING_MIN_SPEED_PUMP]; // in %
-		status.mixerRuntime = rawData[i][SystaIndex.MIXER_RUNTIME]; // in minutes
-		status.roomTempCorrection = rawData[i][SystaIndex.ROOM_TEMP_CORRECTION] / 10.0;
-		status.underfloorHeatingBasePoint = rawData[i][SystaIndex.UNDERFLOOR_HEATING_BASE_POINT] / 10.0;
-		status.underfloorHeatingGradient = rawData[i][SystaIndex.UNDERFLOOR_HEATING_GRADIENT] / 10.0;
-		status.hotWaterTempNormal = rawData[i][SystaIndex.HOT_WATER_TEMP_NORMAL] / 10.0;
-		status.hotWaterTempComfort = rawData[i][SystaIndex.HOT_WATER_TEMP_COMFORT] / 10.0;
-		status.hotWaterOperationMode = rawData[i][SystaIndex.HOT_WATER_OPERATION_MODE];
-		status.hotWaterHysteresis = rawData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0;
-		status.hotWaterTempMax = rawData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
-		status.pumpOverrun = rawData[i][SystaIndex.PUMP_OVERRUN];
-		status.bufferTempMax = rawData[i][SystaIndex.BUFFER_TEMP_MAX] / 10.0;
-		status.bufferTempMin = rawData[i][SystaIndex.BUFFER_TEMP_MIN] / 10.0;
-		status.boilerHysteresis = rawData[i][SystaIndex.BOILER_HYSTERESIS] / 10.0;
-		status.boilerOperationTime = rawData[i][SystaIndex.BOILER_RUNTIME_MIN];
-		status.boilerShutdownTemp = rawData[i][SystaIndex.BOILER_SHUTDOWN_TEMP] / 10.0;
-		status.boilerMinSpeedPump = rawData[i][SystaIndex.BOILER_MIN_SPEED_PUMP];
-		status.circulationPumpOverrun = rawData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN];
-		status.circulationHysteresis = rawData[i][SystaIndex.CIRCULATION_HYSTERESIS] / 10.0;
-		status.adjustRoomTempBy = rawData[i][SystaIndex.ADJUST_ROOM_TEMP_BY] / 10.0;
-		status.boilerOperationTimeHours = rawData[i][SystaIndex.BOILER_OPERATION_TIME_HOURS];
-		status.boilerOperationTimeMinutes = rawData[i][SystaIndex.BOILER_OPERATION_TIME_MINUTES];
-		status.numberBurnerStarts = rawData[i][SystaIndex.BURNER_NUMBER_STARTS];
-		status.solarPowerActual = rawData[i][SystaIndex.SOLAR_POWER_ACTUAL] / 10.0;
-		status.solarGainDay = rawData[i][SystaIndex.SOLAR_GAIN_DAY] / 10.0;
-		status.solarGainTotal = rawData[i][SystaIndex.SOLAR_GAIN_TOTAL] / 10.0;
-		status.countdown = rawData[i][SystaIndex.COUNTDOWN];
-		status.relay = rawData[i][SystaIndex.RELAY];
+		status.outsideTemp = intData[i][SystaIndex.OUTSIDE_TEMP] / 10.0;
+		status.circuit1FlowTemp = intData[i][SystaIndex.CIRCUIT_1_FLOW_TEMP] / 10.0;
+		status.circuit1ReturnTemp = intData[i][SystaIndex.CIRCUIT_1_RETURN_TEMP] / 10.0;
+		status.hotWaterTemp = intData[i][SystaIndex.HOT_WATER_TEMP] / 10.0;
+		status.bufferTempTop = intData[i][SystaIndex.BUFFER_TEMP_TOP] / 10.0;
+		status.bufferTempBottom = intData[i][SystaIndex.BUFFER_TEMP_BOTTOM] / 10.0;
+		status.circulationTemp = intData[i][SystaIndex.CIRCULATION_TEMP] / 10.0;
+		status.circuit2FlowTemp = intData[i][SystaIndex.CIRCUIT_2_FLOW_TEMP] / 10.0;
+		status.circuit2ReturnTemp = intData[i][SystaIndex.CIRCUIT_2_RETURN_TEMP] / 10.0;
+		status.roomTempActual1 = intData[i][SystaIndex.ROOM_TEMP_ACTUAL_1] / 10.0;
+		status.roomTempActual2 = intData[i][SystaIndex.ROOM_TEMP_ACTUAL_2] / 10.0;
+		status.collectorTempActual = intData[i][SystaIndex.COLLECTOR_TEMP_ACTUAL] / 10.0;
+		status.boilerFlowTemp = intData[i][SystaIndex.BOILER_FLOW_TEMP] / 10.0;
+		status.boilerReturnTemp = intData[i][SystaIndex.BOILER_RETURN_TEMP] / 10.0;
+		status.stoveFlowTemp = intData[i][SystaIndex.STOVE_FLOW_TEMP] / 10.0;
+		status.stoveReturnTemp = intData[i][SystaIndex.STOVE_RETURN_TEMP] / 10.0;
+		status.woodBoilerBufferTempTop = intData[i][SystaIndex.WOOD_BOILER_BUFFER_TEMP_TOP] / 10.0;
+		status.swimmingpoolTemp = intData[i][SystaIndex.SWIMMINGPOOL_TEMP] / 10.0;
+		status.swimmingpoolFlowTeamp = intData[i][SystaIndex.SWIMMINGPOOL_FLOW_TEMP] / 10.0;
+		status.swimmingpoolReturnTemp = intData[i][SystaIndex.SWIMMINGPOOL_RETURN_TEMP] / 10.0;
+		status.hotWaterTempSet = intData[i][SystaIndex.HOT_WATER_TEMP_SET] / 10.0;
+		status.roomTempSet1 = intData[i][SystaIndex.ROOM_TEMP_SET_1] / 10.0;
+		status.circuit1FlowTempSet = intData[i][SystaIndex.CIRCUIT_1_FLOW_TEMP_SET] / 10.0;
+		status.circuit2FlowTempSet = intData[i][SystaIndex.CIRCUIT_2_FLOW_TEMP_SET] / 10.0;
+		status.roomTempSet2 = intData[i][SystaIndex.ROOM_TEMP_SET_2] / 10.0;
+		status.bufferTempSet = intData[i][SystaIndex.BUFFER_TEMP_SET] / 10.0;
+		status.boilerTempSet = intData[i][SystaIndex.BOILER_TEMP_SET] / 10.0;
+		status.operationMode = intData[i][SystaIndex.OPERATION_MODE];
+		status.roomTempSetNormal = intData[i][SystaIndex.ROOM_TEMP_SET_NORMAL] / 10.0;
+		status.roomTempSetComfort = intData[i][SystaIndex.ROOM_TEMP_SET_COMFORT] / 10.0;
+		status.roomTempSetLowering = intData[i][SystaIndex.ROOM_TEMP_SET_LOWERING] / 10.0;
+		status.heatingOperationMode = intData[i][SystaIndex.HEATING_OPERATION_MODE];
+		status.controlledBy = intData[i][SystaIndex.CONTROLLED_BY];
+		status.heatingCurveBasePoint = intData[i][SystaIndex.HEATING_CURVE_BASE_POINT] / 10.0;
+		status.heatingCurveGradient = intData[i][SystaIndex.HEATING_CURVE_GRADIENT] / 10.0;
+		status.maxFlowTemp = intData[i][SystaIndex.MAX_FLOW_TEMP] / 10.0;
+		status.heatingLimitTemp = intData[i][SystaIndex.HEATING_LIMIT_TEMP] / 10.0;
+		status.heatingLimitTeampLowering = intData[i][SystaIndex.HEATING_LIMIT_TEMP_LOWERING] / 10.0;
+		status.antiFreezeOutsideTemp = intData[i][SystaIndex.ANTI_FREEZE_OUTSIDE_TEMP] / 10.0;
+		status.heatUpTime = intData[i][SystaIndex.HEAT_UP_TIME]; // in minutes
+		status.roomImpact = intData[i][SystaIndex.ROOM_IMPACT] / 10.0;
+		status.boilerSuperelevation = intData[i][SystaIndex.BOILER_SUPERELEVATION];
+		status.spreadingHeatingCircuit = intData[i][SystaIndex.SPREADING_HEATING_CIRCUIT] / 10.0;
+		status.heatingMinSpeedPump = intData[i][SystaIndex.HEATING_MIN_SPEED_PUMP]; // in %
+		status.mixerRuntime = intData[i][SystaIndex.MIXER_RUNTIME]; // in minutes
+		status.roomTempCorrection = intData[i][SystaIndex.ROOM_TEMP_CORRECTION] / 10.0;
+		status.underfloorHeatingBasePoint = intData[i][SystaIndex.UNDERFLOOR_HEATING_BASE_POINT] / 10.0;
+		status.underfloorHeatingGradient = intData[i][SystaIndex.UNDERFLOOR_HEATING_GRADIENT] / 10.0;
+		status.hotWaterTempNormal = intData[i][SystaIndex.HOT_WATER_TEMP_NORMAL] / 10.0;
+		status.hotWaterTempComfort = intData[i][SystaIndex.HOT_WATER_TEMP_COMFORT] / 10.0;
+		status.hotWaterOperationMode = intData[i][SystaIndex.HOT_WATER_OPERATION_MODE];
+		status.hotWaterHysteresis = intData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0;
+		status.hotWaterTempMax = intData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
+		status.pumpOverrun = intData[i][SystaIndex.PUMP_OVERRUN];
+		status.bufferTempMax = intData[i][SystaIndex.BUFFER_TEMP_MAX] / 10.0;
+		status.bufferTempMin = intData[i][SystaIndex.BUFFER_TEMP_MIN] / 10.0;
+		status.boilerHysteresis = intData[i][SystaIndex.BOILER_HYSTERESIS] / 10.0;
+		status.boilerOperationTime = intData[i][SystaIndex.BOILER_RUNTIME_MIN];
+		status.boilerShutdownTemp = intData[i][SystaIndex.BOILER_SHUTDOWN_TEMP] / 10.0;
+		status.boilerMinSpeedPump = intData[i][SystaIndex.BOILER_MIN_SPEED_PUMP];
+		status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN];
+		status.circulationHysteresis = intData[i][SystaIndex.CIRCULATION_HYSTERESIS] / 10.0;
+		status.adjustRoomTempBy = intData[i][SystaIndex.ADJUST_ROOM_TEMP_BY] / 10.0;
+		status.boilerOperationTimeHours = intData[i][SystaIndex.BOILER_OPERATION_TIME_HOURS];
+		status.boilerOperationTimeMinutes = intData[i][SystaIndex.BOILER_OPERATION_TIME_MINUTES];
+		status.numberBurnerStarts = intData[i][SystaIndex.BURNER_NUMBER_STARTS];
+		status.solarPowerActual = intData[i][SystaIndex.SOLAR_POWER_ACTUAL] / 10.0;
+		status.solarGainDay = intData[i][SystaIndex.SOLAR_GAIN_DAY] / 10.0;
+		status.solarGainTotal = intData[i][SystaIndex.SOLAR_GAIN_TOTAL] / 10.0;
+		status.countdown = intData[i][SystaIndex.COUNTDOWN];
+		status.relay = intData[i][SystaIndex.RELAY];
 		status.heatingPumpIsOn = (status.relay & SystaStatus.HEATING_PUMP_MASK) != 0;
 		status.chargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_MASK) != 0;
 		status.circulationPumpIsOn = (status.relay & SystaStatus.CIRCULATION_PUMP_MASK) != 0;
@@ -277,10 +287,10 @@ public class FakeSystaWeb implements Runnable {
 		status.unknowRelayState3IsOn = (status.relay & SystaStatus.UNKNOWN_3_MASK) != 0;
 		status.unknowRelayState4IsOn = (status.relay & SystaStatus.UNKNOWN_4_MASK) != 0;
 		status.unknowRelayState5IsOn = (status.relay & SystaStatus.UNKNOWN_5_MASK) != 0;
-		status.error = rawData[i][SystaIndex.ERROR];
-		status.operationModeX = rawData[i][SystaIndex.OPERATION_MODE_X];
-		status.heatingOperationModeX = rawData[i][SystaIndex.HEATING_OPERATION_MODE_X];
-		status.stovePumpSpeedActual = rawData[i][SystaIndex.STOVE_PUMP_SPEED_ACTUAL];
+		status.error = intData[i][SystaIndex.ERROR];
+		status.operationModeX = intData[i][SystaIndex.OPERATION_MODE_X];
+		status.heatingOperationModeX = intData[i][SystaIndex.HEATING_OPERATION_MODE_X];
+		status.stovePumpSpeedActual = intData[i][SystaIndex.STOVE_PUMP_SPEED_ACTUAL];
 		status.timestamp = timestamp[i];
 		status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
 		return status;
@@ -336,8 +346,10 @@ public class FakeSystaWeb implements Runnable {
 			}
 			// calculate the buffer id for writing
 			writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
+			timestamp[writeIndex] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 			remoteAddress = receivePacket.getAddress();
 			remotePort = receivePacket.getPort();
+			logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);
 			// get the entire content
 			ByteBuffer data = ByteBuffer.wrap(receivePacket.getData()).order(ByteOrder.LITTLE_ENDIAN);
 			// parse it
@@ -359,20 +371,31 @@ public class FakeSystaWeb implements Runnable {
 			} else if (type == 0x01) {
 				processType1(data);
 				// writing done, release the buffer for reading
-				//readIndex = writeIndex;
+				// readIndex = writeIndex;
 			} else if (type == 0x02) {
 				// processType2(data, currentWriteBuffer);
 			}
 			// send the reply for the received data
 			sendReply(socket, data, remoteAddress, remotePort);
 			if (type == 0x01) {
-				log.addData(rawData[readIndex], timestamp[readIndex]);
+				logInt.addData(intData[readIndex], timestamp[readIndex]);
 			}
 		}
 		System.out.println("[FakeSystaWeb] UDP communication with Paradigma SystaComfort II stopped");
 		socket.close();
 		stopRequested = false;
 		running = false;
+	}
+
+	private Byte[] toByteArray(byte[] bytes) {
+		if (bytes == null) {
+			return null;
+		}
+		Byte[] b = new Byte[bytes.length];
+		for (int i = 0; i < bytes.length; i++) {
+			b[i] = Byte.valueOf(bytes[i]);
+		}
+		return b;
 	}
 
 	/**
@@ -439,19 +462,9 @@ public class FakeSystaWeb implements Runnable {
 	 * @param data ByteBuffer that holds the received data
 	 */
 	private void processType1(ByteBuffer data) {
-		/*data.position(0);
-		while (data.remaining() >= 4) {
-			System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.get());
-		}*/
-		if(writeIndex < 0) { //this should usually not happen, except when testing
-			// calculate the buffer id for writing
-			writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
-		}
-
-		timestamp[writeIndex] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 		data.position(24);
 		while (data.remaining() >= 4) {
-			rawData[writeIndex][(data.position() - 24) / 4] = data.getInt();
+			intData[writeIndex][(data.position() - 24) / 4] = data.getInt();
 		}
 		readIndex = writeIndex;
 	}
@@ -469,23 +482,28 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	public void logRawData() {
-		log.saveLoggedData();
+		logRaw.saveLoggedData();
+		logInt.saveLoggedData();
 	}
 
 	public void logRawData(int entriesPerFile) {
-		log.saveLoggedData(entriesPerFile);
+		logRaw.saveLoggedData(entriesPerFile * 3);
+		logInt.saveLoggedData(entriesPerFile);
 	}
 
 	public void logRawData(String filePrefix) {
-		log.saveLoggedData(filePrefix);
+		logRaw.saveLoggedData(filePrefix);
+		logInt.saveLoggedData(filePrefix);
 	}
 
 	public void logRawData(String filePrefix, String delimiter, int entriesPerFile) {
-		log.saveLoggedData(filePrefix, delimiter, entriesPerFile);
+		logRaw.saveLoggedData(filePrefix, delimiter, entriesPerFile * 3);
+		logInt.saveLoggedData(filePrefix, delimiter, entriesPerFile);
 	}
 
 	public void stopLoggingRawData() {
-		log.stopSavingLoggedData();
+		logRaw.stopSavingLoggedData();
+		logInt.stopSavingLoggedData();
 	}
 
 	/*

@@ -1,7 +1,16 @@
+/*
+* Copyright (c) 2021, The beep-projects contributors
+* this file originated from https://github.com/beep-projects
+* Do not remove the lines above.
+* The rest of this source code is subject to the terms of the Mozilla Public License.
+* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+*/
 package de.freaklamarsch.systarest;
 
 /**
- * Provides the status information of a Home Assistant @see <a href="https://www.home-assistant.io/integrations/water_heater/">Water Heater</a>
+ * Provides the status information of a Home Assistant @see
+ * <a href="https://www.home-assistant.io/integrations/water_heater/">Water
+ * Heater</a>
  */
 public class SystaWaterHeaterStatus {
 	/**
@@ -14,7 +23,7 @@ public class SystaWaterHeaterStatus {
 	/**
 	 * possible operation modes of Home Assistant Water Heaters^
 	 */
-	public enum operationMode {
+	public enum operationMode { 
 		OPERATION_MODE_HEAT, OPERATION_MODE_OFF
 	};
 
