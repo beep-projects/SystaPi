@@ -68,11 +68,11 @@ This is what I am using for this project, but any Raspberry Pi with at least one
 
 Of course you also need a Paradigma SystaComfort or Paradigmy SystaComfort II. The following are the paradigma software versions that I succesfully used with **SystaPi**
 
-|                  |   |        #1        |   |       #2          |
-|------------------|---|------------------|---|-------------------|
-| **SystaComfort** |   | `V1.14  8.08.14` |   | `V1.26  10.02.20` |
-| **System**       |   | `V2.09.2`        |   | `V2.16.1`         |
-| **Basis**        |   | `V0.23`          |   | `V0.34`           |
+|                  |   |        #1        |   |       #2          |   |       #3          |
+|------------------|---|------------------|---|-------------------|---|-------------------|
+| **SystaComfort** |   | `V1.14  8.08.14` |   | `V1.26  10.02.20` |   | `V1.12  20.05.14` |
+| **System**       |   | `V2.09.2`        |   | `V2.16.1`         |   | `V2.09.1`         |
+| **Basis**        |   | `V0.23`          |   | `V0.34`           |   | `V0.23`           |
 
 ## Installation
 
