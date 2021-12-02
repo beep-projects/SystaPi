@@ -14,9 +14,9 @@ class SystaComfort(object):
   """ class for communication with a Systa Comfort II unit """
 
   def __init__(self):
-    self.systaweb_ip = None
+    self.systaweb_ip = "192.168.1.1"
     self.systaweb_port = 22460
-    self.systa_bcast_ip = None
+    self.systa_bcast_ip = "192.168.1.255"
     self.systa_bcast_port = 8001
     self.sc_info_string = "NULL"
     self.unit_ip = "0.0.0.0"
