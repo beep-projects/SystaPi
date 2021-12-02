@@ -147,6 +147,13 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 7. Power up the Raspberry Pi
 
 8. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and whatch the installation process
+
+    ```bash
+    ssh -x pi@systapi.local
+    tail -f /boot/secondrun.log
+    ```
+The password for the ```pi``` user is not changed from the default, so you should change it
 
 ### Windows / manual installation
 
@@ -193,23 +200,33 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 6. Make sure that the `boot`-partition of the Micro SD card is accessible via file explorer
 
-7. Copy all files from the `SystaPi_files` subfolder to `boot`-partition of the Micro SD card
+7. Open cmdline.txt from the Micro SD card and copy the `root=PARTUUID=`-Number over into the `cmdline.txt` in the `SystaPi_files` subfolder. If you do not do this step, your pi will not boot!
 
-8. Copy the `SystaRESTServer` folder and all of its content to the `boot`-partition.
+8. Copy all files from the `SystaPi_files` subfolder to `boot`-partition of the Micro SD card
 
-9. Eject the Micro SD card and insert it into your Raspberry Pi
+9. Copy the `SystaRESTServer` folder and all of its content to the `boot`-partition.
 
-10. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
+10. Eject the Micro SD card and insert it into your Raspberry Pi
 
-11. Power up the Raspberry Pi
+11. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
 
-12. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+12. Power up the Raspberry Pi
+
+13. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and whatch the installation process
+
+    ```bash
+    ssh -x pi@systapi.local
+    tail -f /boot/secondrun.log
+    ```
+The password for the ```pi``` user is not changed from the default, so you should change it
 
 ### Troubleshooting the installation
 
-1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong
-2. If you do not know where the install script died on the Raspberry Pi, have a look into the `/boot` folder via `ls /boot/*.sh`. 
-The files `firstrun.sh`, `secondrun.sh` and `thirdrun.sh`  are stored there and run one after each other. After a successful run, each of the files removes itself. So the first file not deleted, is the one that failed
+1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong.
+2. If the pi does not boot, check if you did step 7 in case of a manual installation.
+3. If you do not know where the install script died on the Raspberry Pi, have a look into the `/boot` folder via `ls /boot/*.sh`. 
+Each script creates a log file, so check `firstrun.log`, `secondrun.log` and `thirdrun.log`, to see where the script failed.
 4. SystaRESTServer is installed as a service on the raspberry pi. 
 `systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
 
