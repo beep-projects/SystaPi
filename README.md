@@ -200,7 +200,7 @@ The password for the ```pi``` user is not changed from the default, so you shoul
 
 6. Make sure that the `boot`-partition of the Micro SD card is accessible via file explorer
 
-7. Open cmdline.txt from the Micro SD card and copy the `root=PARTUUID=`-Number over into the `cmdline.txt` in the `SystaPi_files` subfolder. If you do not do this step, your pi will not boot!
+7. Open `cmdline.txt` from the Micro SD card and copy the `root=PARTUUID=`-Number over into the `cmdline.txt` in the `SystaPi_files` subfolder. If you do not do this step, your pi will not boot!
 
 8. Copy all files from the `SystaPi_files` subfolder to `boot`-partition of the Micro SD card
 
