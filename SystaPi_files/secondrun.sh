@@ -108,7 +108,7 @@ sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.50.1
 
 #copy SystaRESTServer to the pi homefolder for easy access
 echo "copy SystaRESTServer from /boot to /home/pi"
-cp /boot/SystaRESTServer /home/pi/
+cp -R /boot/SystaRESTServer /home/pi/
 
 echo "build SystaRESTServer from source files"
 (cd /home/pi/SystaRESTServer || exit 1 ; ./build.sh)
