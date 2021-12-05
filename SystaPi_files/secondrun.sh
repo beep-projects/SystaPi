@@ -34,6 +34,8 @@ trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>/boot/secondrun.log 2>&1
 
 echo "START secondrun.sh"
+#the following variables should be set by firstrun.sh
+IP_PREFIX="192.168.1"
 
 #network should be up, update the system
 echo "updating the system"
@@ -48,42 +50,42 @@ waitForApt
 sudo apt install -y dnsmasq
 
 echo ""
-echo "configure eth0 to use 192.168.1.1 as static IP address"
+echo "configure eth0 to use ${IP_PREFIX}.1 as static IP address"
 echo "configuring /etc/dhcpcd.conf"
 #sudo echo "" >> /etc/dhcpcd.conf
 #sudo echo "#configuring a static IP for connecting to the Paradigma Systa Comfort II" >> /etc/dhcpcd.conf
 #sudo echo "interface eth0" >> /etc/dhcpcd.conf
-#sudo echo "static ip_address=192.168.1.1/24" >> /etc/dhcpcd.conf
+#sudo echo "static ip_address=${IP_PREFIX}.1/24" >> /etc/dhcpcd.conf
 echo "" | sudo tee -a /etc/dhcpcd.conf > /dev/null
 echo "#configuring a static IP for connecting to the Paradigma Systa Comfort II" | sudo tee -a /etc/dhcpcd.conf > /dev/null
 echo "interface eth0" | sudo tee -a /etc/dhcpcd.conf > /dev/null
-echo "static ip_address=192.168.1.1/24" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+echo "static ip_address=${IP_PREFIX}.1/24" | sudo tee -a /etc/dhcpcd.conf > /dev/null
 
 sudo systemctl daemon-reload
 
 echo "configuring /etc/dnsmasq.conf"
 #sudo echo "" >> /etc/dnsmasq.conf
 #sudo echo "#configuration to fake the remote portal for the Paradigma Systa Comfort II" >> /etc/dnsmasq.conf
-#sudo echo "dhcp-range=192.168.1.10,192.168.1.25,12h  ## 12h is the lease time" >> /etc/dnsmasq.conf
+#sudo echo "dhcp-range=${IP_PREFIX}.10,${IP_PREFIX}.25,12h  ## 12h is the lease time" >> /etc/dnsmasq.conf
 #sudo echo "interface=eth0" >> /etc/dnsmasq.conf
-#sudo echo "listen-address=192.168.1.1" >> /etc/dnsmasq.conf
+#sudo echo "listen-address=${IP_PREFIX}.1" >> /etc/dnsmasq.conf
 #sudo echo "no-dhcp-interface=wlan0" >> /etc/dnsmasq.conf
-#sudo echo "address=/paradigma.remoteportal.de/192.168.1.1" >> /etc/dnsmasq.conf 
+#sudo echo "address=/paradigma.remoteportal.de/${IP_PREFIX}.1" >> /etc/dnsmasq.conf 
 echo "" | sudo tee -a /etc/dnsmasq.conf > /dev/null
 echo "#configuration to fake the remote portal for the Paradigma Systa Comfort II" | sudo tee -a /etc/dnsmasq.conf > /dev/null
-echo "dhcp-range=192.168.1.10,192.168.1.25,12h  ## 12h is the lease time" | sudo tee -a /etc/dnsmasq.conf > /dev/null
+echo "dhcp-range=${IP_PREFIX}.10,${IP_PREFIX}.25,12h  ## 12h is the lease time" | sudo tee -a /etc/dnsmasq.conf > /dev/null
 echo "interface=eth0" | sudo tee -a /etc/dnsmasq.conf > /dev/null
-echo "listen-address=192.168.1.1" | sudo tee -a /etc/dnsmasq.conf > /dev/null
+echo "listen-address=${IP_PREFIX}.1" | sudo tee -a /etc/dnsmasq.conf > /dev/null
 echo "no-dhcp-interface=wlan0" | sudo tee -a /etc/dnsmasq.conf > /dev/null
-echo "address=/paradigma.remoteportal.de/192.168.1.1" | sudo tee -a /etc/dnsmasq.conf > /dev/null
+echo "address=/paradigma.remoteportal.de/${IP_PREFIX}.1" | sudo tee -a /etc/dnsmasq.conf > /dev/null
 
 echo "configuring /etc/dnsmasq.hosts"
 #sudo echo "" >> /etc/dnsmasq.hosts
 #sudo echo "#configure DNS spoofing for paradigma.remoteportal.de" >> /etc/dnsmasq.hosts
-#sudo echo "192.168.1.1 paradigma.remoteportal.de" >> /etc/dnsmasq.hosts
+#sudo echo "${IP_PREFIX}.1 paradigma.remoteportal.de" >> /etc/dnsmasq.hosts
 echo "" | sudo tee -a /etc/dnsmasq.hosts > /dev/null
 echo "#configure DNS spoofing for paradigma.remoteportal.de" | sudo tee -a /etc/dnsmasq.hosts > /dev/null
-echo "192.168.1.1 paradigma.remoteportal.de" | sudo tee -a /etc/dnsmasq.hosts > /dev/null
+echo "${IP_PREFIX}.1 paradigma.remoteportal.de" | sudo tee -a /etc/dnsmasq.hosts > /dev/null
 
 echo "restart dnsmasq"
 sudo /etc/init.d/dnsmasq restart 

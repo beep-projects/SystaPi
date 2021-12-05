@@ -35,6 +35,9 @@ HOSTNAME=systapi
 # but you also can enter your passphrase as plain text, if you accept the potential insecurity of that approach
 SSID=MY_WIFI
 WPA_PASSPHRASE=3755b1112a687d1d37973547f94d218e6673f99f73346967a6a11f4ce386e41e
+# define the network to use for communication between systapi and Systa Comfort
+# change if you use the same network range on your wifi network
+IP_PREFIX="192.168.1"
 # configure your timezone and key board settings
 TIMEZONE="Europe/Berlin"
 COUNTRY="DE"
@@ -48,6 +51,9 @@ ENABLE_ENC28J60=true
 #-------------------------------------------------------------------------------
 #------------------------ END OF CONFIGURATION ---------------------------------
 #-------------------------------------------------------------------------------
+
+#copy the IP_PREFIX into secondrun.sh and remove a trailing . if present
+sed -i "s/^IP_PREFIX=.*/IP_PREFIX=${IP_PREFIX%.}/" /boot/secondrun.sh
 
 echo "setting hostname"
 

@@ -1,11 +1,12 @@
-![banner](resources/banner.png)
+
 
 [![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/blob/main/LICENSE) [![JUnit](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml) [![shellcheck](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml) [![Pylint](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml) [![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub forks](https://img.shields.io/github/forks/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/network) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) ![GitHub repo size](https://img.shields.io/github/repo-size/beep-projects/SystaPi)
 
 # SystaPi and SystaREST
 
 SystaPi adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST ([Javadoc](http://beep-projects.github.io/SystaPi)). 
-Because the communication protocol is not publicly available, the server has a rudimentary logging functionality integrated. You can set triggers on value changes with your home automation system and start logging of values for analysis.
+Note: The communication protocol is not publicly available, everything here is based on reverse engineering and will only work for systems that are used by contributors. So please contribute. 
+To support you in reverse engineering, the server has a rudimentary logging functionality integrated. You can use this to set triggers on value changes with your home automation system and start logging of values for analysis.
 
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).
 
@@ -50,6 +51,8 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
     │   ├── lib                 # .jar files required for running the server
     │   └── src                 # src files of the server, for everyone who wants to improve this
     ├── docs                    # Javadoc for SystaREST Java classes available at http://beep-projects.github.io/SystaPi
+    ├── helpers                 # collection of ressources that are helpful for reverse engineering the SystaComfort protocol
+    │                           # or setting up systapi
     ├── resources               # folder for images or other files linked with README.md
     ├── install_systapi.sh      # Script for automatically downloading, flashing and configuring 
     │                           # a Micro SD card for running the SystaREST server
@@ -102,7 +105,8 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 2. Open `SystaPi-main/SystaPi_files/firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
    Most probably you want to generate your `WPA_PASSPHRASE` via `wpa_passphrase MY_WIFI passphrase` , or  use the [WPA PSK (Raw Key) Generator](https://www.wireshark.org/tools/wpa-psk.html), and add the credentials to the file.
-
+   If you use the network `192.168.1.x` for your local network, you should change the `IP_PREFIX` to another IP range, to avoid network collisions
+   
    ```bash
    #-------------------------------------------------------------------------------
    #----------------------- START OF CONFIGURATION --------------------------------
@@ -116,6 +120,9 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    # but you also can enter your passphrase as plain text, if you accept the potential insecurity of that approach
    SSID=MY_WIFI
    WPA_PASSPHRASE=3755b1112a687d1d37973547f94d218e6673f99f73346967a6a11f4ce386e41e
+   # define the network to use for communication between systapi and Systa Comfort
+   # change if you use the same network range on your wifi network
+   IP_PREFIX="192.168.1"
    # configure your timezone and key board settings
    TIMEZONE="Europe/Berlin"
    COUNTRY="DE"
@@ -130,7 +137,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    #------------------------ END OF CONFIGURATION ---------------------------------
    #-------------------------------------------------------------------------------
    ```
-
+   
 3. Insert the Micro SD card that you want to get prepared as SystaPi into your computing device
 
 4. Continue in the shell
@@ -147,13 +154,13 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 7. Power up the Raspberry Pi
 
 8. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
-For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and whatch the installation process
+    For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and whatch the installation process
 
-    ```bash
-    ssh -x pi@systapi.local
-    tail -f /boot/secondrun.log
-    ```
-The password for the ```pi``` user is not changed from the default, so you should change it
+   ```bash
+   ssh -x pi@systapi.local
+   tail -f /boot/secondrun.log
+   ```
+    The password for the ```pi``` user is not changed from the default, so you should change it
 
 ### Windows / manual installation
 
@@ -167,8 +174,8 @@ The password for the ```pi``` user is not changed from the default, so you shoul
 4. Change into the `SystaPi_files` subfolder of the extracted archive
 
 5. Open `firstrun.sh` with a text editor and configure everything in the marked section to your liking.
-
    Most probably you want to use something like [WPA PSK (Raw Key) Generator](https://www.wireshark.org/tools/wpa-psk.html) and add the generated credentials to the file.
+   If you use the network `192.168.1.x` for your local network, you should change the `IP_PREFIX` to another IP range, to avoid network collisions
 
    ```bash
    #-------------------------------------------------------------------------------
@@ -183,6 +190,9 @@ The password for the ```pi``` user is not changed from the default, so you shoul
    # but you also can enter your passphrase as plain text, if you accept the potential insecurity of that approach
    SSID=MY_WIFI
    WPA_PASSPHRASE=3755b1112a687d1d37973547f94d218e6673f99f73346967a6a11f4ce386e41e
+   # define the network to use for communication between systapi and Systa Comfort
+   # change if you use the same network range on your wifi network
+   IP_PREFIX="192.168.1"
    # configure your timezone and key board settings
    TIMEZONE="Europe/Berlin"
    COUNTRY="DE"
