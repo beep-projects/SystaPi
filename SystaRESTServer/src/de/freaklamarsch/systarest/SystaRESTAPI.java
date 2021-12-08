@@ -328,4 +328,25 @@ public class SystaRESTAPI {
 		fsw.stopLoggingRawData();
 	}
 
+	/**
+	 * set the operation mode of the Systa Comfort
+	 * 
+	 * @param mode     the intended operation mode
+	 *                 0 = Auto Prog. 1
+	 *                 1 = Auto Prog. 2
+	 *                 2 = Auto Prog. 3
+	 *                 3 = Continuous Normal 
+	 *                 4 = Continuous Comfort 
+	 *                 5 = Continuous Lowering 
+	 *                 6 = Summer 
+	 *                 7 = Off 
+	 *                 8 = Party 
+	 *                 14= Test or chimney sweep
+	 */
+	@PUT
+	@Path("{operationmode : (?i)operationmode}")
+	public void operationmode(@DefaultValue("0") @QueryParam("mode") int mode) {
+		fsw.setOperationMode(mode);
+	}
+
 }
