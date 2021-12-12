@@ -66,7 +66,7 @@ class SystaComfort(object):
     if not self.systaweb_ip:
       print("----- Search Result -----")
       print("No compatible device found on the available interfaces")
-      print("Interfaces tested: %s" % interfaces)
+      print(f"Interfaces tested: {interfaces}")
       print("-------------------------")
       return False
 
@@ -106,16 +106,16 @@ class SystaComfort(object):
     systa_socket.close()
 
     print("----- Search Result -----")
-    print("MAC:", self.unit_mac)
-    print("IP:", self.unit_ip)
-    print("S-Touch Port: %s" % self.unit_stouch_port)
-    print("Name:", self.unit_name)
-    print("ID:", self.unit_id)
-    print("App:", self.unit_app)
-    print("Platform:", self.unit_platform)
-    print("Version: %s.%s" % (float(self.unit_sc_version) / 100.0, self.unit_sc_minor))
-    print("Base Version: %s" % self.unit_base_version)
-    print("UDP password: %s" % self.unit_password)
+    print(f"MAC: {self.unit_mac}")
+    print(f"IP: {self.unit_ip}") 
+    print(f"S-Touch Port: {self.unit_stouch_port}")
+    print(f"Name: {self.unit_name}")
+    print(f"ID: {self.unit_id}")
+    print(f"App: {self.unit_app}")
+    print(f"Platform: {self.unit_platform}")
+    print(f"Version: {float(self.unit_sc_version) / 100.0}.{self.unit_sc_minor}")
+    print(f"Base Version: {self.unit_base_version}")
+    print(f"UDP password: {self.unit_password}")
     print("-------------------------")
 
     if self.unit_platform != 9:
@@ -171,7 +171,7 @@ class SystaComfort(object):
       interfaces = self.find_system_ips()
     for ip, bcastip in interfaces:
       # bind to socket
-      print("Listening for 60s on %s:%s" % (ip, self.systaweb_port))
+      print(f"Listening for 60s on {ip}:{self.systaweb_port}")
       systa_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
       # make sure the socket can be reused by other functions
       systa_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
@@ -227,7 +227,7 @@ class SystaComfort(object):
       # does not send the next data packets.
       print("1 / 3 messages received")
       print("your system seems not to be supported at the moment")
-      print("please contribute to tthe SystaPi project!")
+      print("please contribute to the SystaPi project!")
     else:
       # Nothing received, so the SystaComfort is most likely
       # not configured to send the data packets to this SystaPi
@@ -253,7 +253,7 @@ class SystaComfort(object):
     # listen for the next message coming from the SystaComfort
     data, addr = systa_socket.recvfrom(1048)
     hex_str = "".join(format(x, "02x") for x in data)
-    print("received message: %s, from %s" % (hex_str, addr))
+    print(f"received message: {hex_str}, from {addr}")
 
     # loop for waiting a number of messages before
     # actually trying to set the operation mode
@@ -262,7 +262,7 @@ class SystaComfort(object):
       # listen for the next message coming from the SystaComfort
       data, addr = systa_socket.recvfrom(1048)
       hex_str = "".join(format(x, "02x") for x in data)
-      print("received message: %s, from %s" % (hex_str, addr))
+      print(f"received message: {hex_str}, from {addr}")
 
     # announce parameter change
     message = bytearray(data[0:28])
@@ -294,11 +294,11 @@ class SystaComfort(object):
 
     systa_socket.sendto(message, addr)
     hex_str = "".join(format(x, "02x") for x in message)
-    print("sent announcment: %s, to %s" % (hex_str, addr))
+    print(f"sent announcment: {hex_str}, from {addr}")
 
     data, addr = systa_socket.recvfrom(1048)
     hex_str = "".join(format(x, "02x") for x in data)
-    print("received message: %s, from %s" % (hex_str, addr))
+    print(f"received message: {hex_str}, from {addr}")
 
   def find_system_ips(self):
     """checks the configured network interfaces of the host system
