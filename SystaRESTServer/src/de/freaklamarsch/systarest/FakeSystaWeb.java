@@ -10,14 +10,25 @@ package de.freaklamarsch.systarest;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InterfaceAddress;
 import java.net.InetAddress;
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 import de.freaklamarsch.systarest.DataLogger.DataLoggerStatus;
+import de.freaklamarsch.systarest.DeviceTouchSearch.DeviceTouchDeviceInfo;
 import de.freaklamarsch.systarest.SystaWaterHeaterStatus.tempUnit;
 
 /**
@@ -70,6 +81,53 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
+	/**
+	 * Inner class for representing the info about a SystaComfort unit
+	 */
+	public class SystaComfortInfo {
+        public final String systawebIp;
+	    public final int systawebPort;
+	    public final String  systaBcastIp;
+	    public final int systaBcastPort;
+	    public final String scInfoString;
+	    public final String unitIp;
+	    public final int unitStouchPort;
+	    public final String unitName;
+	    public final String unitId;
+	    public final int unitApp;
+	    public final int unitPlatform;
+        public final String unitScFullVersion;
+	    public final int unitScVersion;
+	    public final int unitScMinor;
+	    public final String unitPassword;
+	    public final String unitBaseVersion;
+	    public final String unitMac;
+	    
+	    public SystaComfortInfo(String systawebIp, int systawebPort, String systaBcastIp, int systaBcastPort,
+			    String scInfoString, String unitIp, int unitStouchPort, String unitName, String unitId, int unitApp,
+			    int unitPlatform, String unitScFullVersion, int unitScVersion, int unitScMinor, String unitPassword, String unitBaseVersion,
+                String unitMac) {
+	        this.systawebIp = systawebIp;
+		    this.systawebPort = systawebPort;
+		    this.systaBcastIp = systaBcastIp;
+		    this.systaBcastPort = systaBcastPort;
+		    this.scInfoString = scInfoString;
+		    this.unitIp = unitIp;
+		    this.unitStouchPort = unitStouchPort;
+		    this.unitName = unitName;
+		    this.unitId = unitId;
+		    this.unitApp = unitApp;
+		    this.unitPlatform = unitPlatform;
+	        this.unitScFullVersion = unitScFullVersion;
+		    this.unitScVersion = unitScVersion;
+		    this.unitScMinor = unitScMinor;
+		    this.unitPassword = unitPassword;
+		    this.unitBaseVersion = unitBaseVersion;
+		    this.unitMac = unitMac;
+   	
+	    }
+	}
+	
 	private InetAddress remoteAddress;
 	private int remotePort;
 	private final int PORT = 22460;
@@ -122,6 +180,11 @@ public class FakeSystaWeb implements Runnable {
 				dls.bufferedEntries);
 	}
 
+	public DeviceTouchDeviceInfo findSystaComfort() {
+		return DeviceTouchSearch.search();
+	}
+	
+	
 	/**
 	 * @return the inetAddress
 	 */

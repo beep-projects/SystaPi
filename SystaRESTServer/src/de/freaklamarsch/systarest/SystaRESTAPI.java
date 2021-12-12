@@ -17,7 +17,9 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.model.ResourceMethod;
 
+import de.freaklamarsch.systarest.DeviceTouchSearch.DeviceTouchDeviceInfo;
 import de.freaklamarsch.systarest.FakeSystaWeb.FakeSystaWebStatus;
+import de.freaklamarsch.systarest.FakeSystaWeb.SystaComfortInfo;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonBuilderFactory;
@@ -122,6 +124,53 @@ public class SystaRESTAPI {
 		System.out.println("[ParadigmaRESTAPI] stop: stopped");
 	}
 
+	/**
+	 * find SystaComfort units using the search capability of the device touch protocol.
+	 * This function looks over all available network interfaces and tries to discover
+	 * device touch capable units using a search broadcast message.
+	 * 
+	 * @return a JSON object representing the found unit, or null
+	 */
+	@GET
+	@Path("{findsystacomfort : (?i)findsystacomfort}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public JsonObject findSystaComfort() {
+		// System.out.println("Service Status called");
+		try {
+			DeviceTouchDeviceInfo sci = fsw.findSystaComfort();
+			if(sci == null) {
+				return null;
+			}
+			else {
+                JsonObject jo = jsonFactory.createObjectBuilder()
+					.add("SystaWebIP", sci.localIp)
+					.add("SystaWebPort", 22460)
+					.add("DeviceTouchBcastIP", sci.bcastIp)
+					.add("DeviceTouchBcastPort", sci.bcastPort)
+					.add("deviceTouchInfoString", sci.string)
+				    .add("unitIP", sci.ip)
+				    .add("unitName", sci.name)
+				    .add("unitId", sci.id)
+				    .add("unitApp", sci.app)
+				    .add("unitPlatform", sci.platform)
+				    .add("unitVersion", sci.version)
+				    .add("unitMajor", sci.major)
+				    .add("unitMinor", sci.minor)
+				    .add("unitBaseVersion", sci.baseVersion)
+				    .add("unitMac", sci.mac)
+				    .add("DeviceTouchPort", sci.bcastPort)
+				    .add("DeviceTouchPassword", (sci.password==null) ? "null" : sci.password)
+				    .build();
+			    return jo;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	
+	
 	/**
 	 * return the status of the SystaRESTAPI service
 	 * 

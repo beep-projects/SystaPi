@@ -25,6 +25,11 @@ class FakeSystaWebTest {
 	ByteBuffer data = ByteBuffer.allocate(1021).order(ByteOrder.LITTLE_ENDIAN);
 
 	@Test
+	void findSC() {
+		FakeSystaWeb fsw = new FakeSystaWeb();
+		fsw.findSystaComfort();
+	}
+	@Test
 	void testProcessType1() {
 		initializeData();
 		FakeSystaWeb fsw = new FakeSystaWeb();

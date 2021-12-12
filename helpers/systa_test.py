@@ -14,30 +14,36 @@ class SystaComfort(object):
   """ class for communication with a Systa Comfort II unit """
 
   def __init__(self):
-    self.systaweb_ip = "192.168.1.1"
+    self.systaweb_ip = None
     self.systaweb_port = 22460
-    self.systa_bcast_ip = "192.168.1.255"
+    self.systa_bcast_ip = None
     self.systa_bcast_port = 8001
-    self.sc_info_string = "NULL"
-    self.unit_ip = "0.0.0.0"
+    self.sc_info_string = None
+    self.unit_ip = None
     self.unit_stouch_port = 0
-    self.unit_name = "NULL"
+    self.unit_name = None
     self.unit_id = 0
     self.unit_app = 0
     self.unit_platform = 0
     self.unit_sc_version = 0
     self.unit_sc_minor = 0
-    self.unit_password = "NULL"
-    self.unit_base_version = "NULL"
-    self.unit_mac = "NULL"
+    self.unit_password = None
+    self.unit_base_version = None
+    self.unit_mac = None
 
   def find_sc(self):
     """check if the SystaPi is connected to any Systa Comfort"""
+    # TODO this search is reverse engineered with a single unit.
+    # If someone has more device touch capable devices in the network
+    # this part has to be adapted to support this
+    
     # get all available interfaces
     interfaces = self.find_system_ips()
     # loop over all interfaces and try to find a Systa Comfort
     systa_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    # make sure the socket can be reused by other functions
     systa_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    systa_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     # Enable broadcasting mode
     systa_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     # Set a timeout so the socket does not block
@@ -46,7 +52,6 @@ class SystaComfort(object):
     systa_socket.settimeout(2)
     # configure connection with SystaComfort
     message = b"0 1 A"
-    connected = False
     for ip, bcastip in interfaces:
       systa_socket.sendto(message, (bcastip, self.systa_bcast_port))
       try:
@@ -54,11 +59,14 @@ class SystaComfort(object):
         if "systa" in data.decode("iso-8859-1").lower():
           self.systaweb_ip = ip
           self.systa_bcast_ip = bcastip
-          connected = True
           break
       except: # pylint: disable=bare-except
         pass
-    if not connected:
+    if not self.systaweb_ip:
+      print("----- Search Result -----")
+      print("No compatible device found on the available interfaces")
+      print("Interfaces tested: %s" % interfaces)
+      print("-------------------------")
       return False
 
     sc_info_string = data.decode("iso-8859-1").split(" ")
@@ -95,10 +103,10 @@ class SystaComfort(object):
       data, addr = systa_socket.recvfrom(1048)
       self.unit_password = data.decode("iso-8859-1").split(" ")[2].strip()[:-1]
 
-    # init done, close socket
+    # search done, close socket
     systa_socket.close()
 
-    print("---- Find SC Result ----")
+    print("----- Search Result -----")
     print("MAC:", self.unit_mac)
     print("IP:", self.unit_ip)
     print("S-Touch Port: %s" % self.unit_stouch_port)
@@ -106,14 +114,22 @@ class SystaComfort(object):
     print("ID:", self.unit_id)
     print("App:", self.unit_app)
     print("Platform:", self.unit_platform)
-    print("SystaComfort Version: %s.%s" % (float(self.unit_sc_version) / 100.0, self.unit_sc_minor))
+    print("Version: %s.%s" % (float(self.unit_sc_version) / 100.0, self.unit_sc_minor))
     print("Base Version: %s" % self.unit_base_version)
     print("UDP password: %s" % self.unit_password)
-    print("---------------------")
+    print("-------------------------")
+    
+    if self.unit_platform != 9:
+      # 9 = Paradigma
+      # 10 = Wodtke
+      print("The found system does not seem to be a unit from Paradigma")
+    elif not self.unit_stouch_port:
+      print("Your SystaComfort does not support the S-Touch app")
+    print("-------------------------")
     return True
 
   def send_reply(self, data, addr, systa_socket):
-    """ send the standard reply paket on pakets receive from Systa Comfort"""
+    """ send the standard reply paket on packets received from Systa Comfort"""
     # send reply
     message = bytearray(data[0:16])
     for i in range(8, 16):
@@ -137,7 +153,92 @@ class SystaComfort(object):
 
     systa_socket.sendto(message, addr)
     hex_str = "".join(format(x, "02x") for x in message)
-    print("sent reply: %s, to %s" % (hex_str, addr))
+    #print("sent reply: %s, to %s" % (hex_str, addr))
+
+  def listen_for_device(self):
+    """ listen for data packets from SystaComfort to SystaWeb.
+        For this test, the SystaComfort has to be DNS faked to use the device running this script
+        as destination for the data packets
+    """
+    print("---- Connection test ----")
+     
+    # listen for messages sent to SystaWeb
+    messages_received = 0
+    interfaces = []
+    if self.systaweb_ip:
+      interfaces.append((self.systaweb_ip, None))
+    else:
+      # get all available interfaces
+      interfaces = self.find_system_ips()
+    for ip, bcastip in interfaces:
+      # bind to socket
+      print("Listening for 60s on %s:%s" % (ip, self.systaweb_port))
+      systa_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+      # make sure the socket can be reused by other functions
+      systa_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+      systa_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+      # disable broadcasting mode
+      systa_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 0)
+      # Set a timeout so the socket does not block indefinitely when trying to receive data.
+      # 62 second should be enough, as the SystaComfort has a send interval of 60s
+      systa_socket.settimeout(61)
+      systa_socket.bind((ip, self.systaweb_port))
+
+      try:
+        # listen for a new data message coming from the SystaComfort
+        data, addr = systa_socket.recvfrom(1048)
+        messages_received += 1
+        #hex_str = "".join(format(x, "02x") for x in data)
+        #print("received message: %s, from %s" % (hex_str, addr))
+
+        # reply to the received message for evaluating if communication works
+        # Each data update of the SystaComfort consists of 3-4 messages that have to be 
+        # replied to keep the communication flow alive
+        # lets see if we can get two more messages, to confirm that we are connected to
+        # a compatible device
+        for x in range(0, 2):   # pylint: disable=unused-variable
+          self.send_reply(data, addr, systa_socket)
+          # listen for the next message coming from the SystaComfort
+          data, addr = systa_socket.recvfrom(1048)
+          messages_received += 1
+          #hex_str = "".join(format(x, "02x") for x in data)
+          #print("received message: %s, from %s" % (hex_str, addr))
+
+        if (messages_received > 0):
+          # there was at least one message received on this network interface
+          # TODO because we currently only support one SystaComfort, this is ok for us
+          # stop checking the other interfaces
+          self.systaweb_ip = ip
+          self.systa_bcast_ip = bcastip
+          break
+      except: # pylint: disable=bare-except
+        # nothing to do
+        # rx timeouts from the socket are expected to happen if the
+        # connected system is not compatible or fully configured
+        systa_socket.close()
+        pass
+
+    if (messages_received == 3):
+      # all three messages received, communication is working fine
+      print("3 / 3 messages received")
+      print("your system seems to be properly configured")
+    elif (messages_received == 1):
+      # SystaComfort is sending messages to the faked SystaWeb
+      # but the reply to this message seems to be wrong, so the SystaComfort
+      # does not send the next data packets. 
+      print("1 / 3 messages received")
+      print("your system seems not to be supported at the moment")
+      print("please contribute to tthe SystaPi project!")
+    else:
+      # Nothing received, so the SystaComfort is most likely
+      # not configured to send the data packets to this SystaPi
+      print("0 / 3 messages received")
+      print("your system is not properly configured")
+    
+    print("-------------------------")
+
+    # function done, close socket
+    systa_socket.close()
 
   def set_operation_mode(self, mode):   # pylint: disable=unused-argument
     """ set the Systa Comfort to the given operation mode"""
@@ -147,6 +248,7 @@ class SystaComfort(object):
     # disable broadcasting mode
     systa_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 0)
     # bind to socket
+    print((self.systaweb_ip, self.systaweb_port))
     systa_socket.bind((self.systaweb_ip, self.systaweb_port))
 
     # listen for the next message coming from the SystaComfort
@@ -232,4 +334,5 @@ class SystaComfort(object):
 # -------------MAIN-----------------
 sc = SystaComfort()
 sc.find_sc()
-sc.set_operation_mode(2)
+sc.listen_for_device()
+#sc.set_operation_mode(2)
