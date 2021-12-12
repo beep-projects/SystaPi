@@ -10,6 +10,7 @@ from __future__ import print_function
 import socket
 import os
 
+
 class SystaComfort(object):
   """ class for communication with a Systa Comfort II unit """
 
@@ -36,7 +37,7 @@ class SystaComfort(object):
     # TODO this search is reverse engineered with a single unit.
     # If someone has more device touch capable devices in the network
     # this part has to be adapted to support this
-    
+
     # get all available interfaces
     interfaces = self.find_system_ips()
     # loop over all interfaces and try to find a Systa Comfort
@@ -60,7 +61,7 @@ class SystaComfort(object):
           self.systaweb_ip = ip
           self.systa_bcast_ip = bcastip
           break
-      except: # pylint: disable=bare-except
+      except:  # pylint: disable=bare-except
         pass
     if not self.systaweb_ip:
       print("----- Search Result -----")
@@ -76,16 +77,14 @@ class SystaComfort(object):
     self.unit_id = sc_info_string[6]
     self.unit_app = int("0x" + self.unit_id[0:2], base=16)
     self.unit_platform = int("0x" + self.unit_id[2:4], base=16)
-    self.unit_sc_version = int(
-        "0x" + self.unit_id[6:8] + self.unit_id[4:6], base=16)
+    self.unit_sc_version = int("0x" + self.unit_id[6:8] + self.unit_id[4:6], base=16)
     self.unit_sc_minor = int("0x" + self.unit_id[8:10], base=16)
     self.unit_base_version = sc_info_string[8]
     self.unit_mac = sc_info_string[10]
 
     # get communication port for S-Touch communication
     message = (self.unit_mac + " 6 A R DISP Port").encode("iso-8859-1")
-    systa_socket.sendto(
-        message, (self.systa_bcast_ip, self.systa_bcast_port))
+    systa_socket.sendto(message, (self.systa_bcast_ip, self.systa_bcast_port))
     data, addr = systa_socket.recvfrom(1048)
     # replies seen so far:
     # 0 7 unknown value:Uremoteportalde
@@ -118,7 +117,7 @@ class SystaComfort(object):
     print("Base Version: %s" % self.unit_base_version)
     print("UDP password: %s" % self.unit_password)
     print("-------------------------")
-    
+
     if self.unit_platform != 9:
       # 9 = Paradigma
       # 10 = Wodtke
@@ -152,7 +151,7 @@ class SystaComfort(object):
     message[15] = checksum[1]
 
     systa_socket.sendto(message, addr)
-    hex_str = "".join(format(x, "02x") for x in message)
+    #hex_str = "".join(format(x, "02x") for x in message)
     #print("sent reply: %s, to %s" % (hex_str, addr))
 
   def listen_for_device(self):
@@ -161,7 +160,7 @@ class SystaComfort(object):
         as destination for the data packets
     """
     print("---- Connection test ----")
-     
+
     # listen for messages sent to SystaWeb
     messages_received = 0
     interfaces = []
@@ -192,11 +191,11 @@ class SystaComfort(object):
         #print("received message: %s, from %s" % (hex_str, addr))
 
         # reply to the received message for evaluating if communication works
-        # Each data update of the SystaComfort consists of 3-4 messages that have to be 
+        # Each data update of the SystaComfort consists of 3-4 messages that have to be
         # replied to keep the communication flow alive
         # lets see if we can get two more messages, to confirm that we are connected to
         # a compatible device
-        for x in range(0, 2):   # pylint: disable=unused-variable
+        for x in range(0, 2):  # pylint: disable=unused-variable
           self.send_reply(data, addr, systa_socket)
           # listen for the next message coming from the SystaComfort
           data, addr = systa_socket.recvfrom(1048)
@@ -204,28 +203,28 @@ class SystaComfort(object):
           #hex_str = "".join(format(x, "02x") for x in data)
           #print("received message: %s, from %s" % (hex_str, addr))
 
-        if (messages_received > 0):
+        if messages_received > 0:
           # there was at least one message received on this network interface
           # TODO because we currently only support one SystaComfort, this is ok for us
           # stop checking the other interfaces
           self.systaweb_ip = ip
           self.systa_bcast_ip = bcastip
           break
-      except: # pylint: disable=bare-except
+      except:  # pylint: disable=bare-except
         # nothing to do
         # rx timeouts from the socket are expected to happen if the
         # connected system is not compatible or fully configured
         systa_socket.close()
         pass
 
-    if (messages_received == 3):
+    if messages_received == 3:
       # all three messages received, communication is working fine
       print("3 / 3 messages received")
       print("your system seems to be properly configured")
-    elif (messages_received == 1):
+    elif messages_received == 1:
       # SystaComfort is sending messages to the faked SystaWeb
       # but the reply to this message seems to be wrong, so the SystaComfort
-      # does not send the next data packets. 
+      # does not send the next data packets.
       print("1 / 3 messages received")
       print("your system seems not to be supported at the moment")
       print("please contribute to tthe SystaPi project!")
@@ -234,13 +233,13 @@ class SystaComfort(object):
       # not configured to send the data packets to this SystaPi
       print("0 / 3 messages received")
       print("your system is not properly configured")
-    
+
     print("-------------------------")
 
     # function done, close socket
     systa_socket.close()
 
-  def set_operation_mode(self, mode):   # pylint: disable=unused-argument
+  def set_operation_mode(self, mode):  # pylint: disable=unused-argument
     """ set the Systa Comfort to the given operation mode"""
     # listen for messages sent to SystaWeb
     systa_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -258,7 +257,7 @@ class SystaComfort(object):
 
     # loop for waiting a number of messages before
     # actually trying to set the operation mode
-    for x in range(0, 1):   # pylint: disable=unused-variable
+    for x in range(0, 1):  # pylint: disable=unused-variable
       self.send_reply(data, addr, systa_socket)
       # listen for the next message coming from the SystaComfort
       data, addr = systa_socket.recvfrom(1048)
