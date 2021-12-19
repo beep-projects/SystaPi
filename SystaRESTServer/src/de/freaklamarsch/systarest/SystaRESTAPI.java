@@ -158,7 +158,8 @@ public class SystaRESTAPI {
 				    .add("unitMinor", sci.minor)
 				    .add("unitBaseVersion", sci.baseVersion)
 				    .add("unitMac", sci.mac)
-				    .add("DeviceTouchPort", sci.bcastPort)
+				    .add("STouchAppSupported", sci.stouchSupported)
+				    .add("DeviceTouchPort", sci.port)
 				    .add("DeviceTouchPassword", (sci.password==null) ? "null" : sci.password)
 				    .build();
 			    return jo;
@@ -328,6 +329,7 @@ public class SystaRESTAPI {
 				.add("bufferTempMin", ps.bufferTempMin).add("boilerHysteresis", ps.boilerHysteresis)
 				.add("boilerOperationTime", ps.boilerOperationTime).add("boilerShutdownTemp", ps.boilerShutdownTemp)
 				.add("boilerMinSpeedPump", ps.boilerMinSpeedPump)
+				.add("boilerOperationMode", ps.boilerOperationMode).add("boilderOperationModeName", ps.boilerOperationModes[ps.boilerOperationMode])
 				.add("circulationPumpOverrun", ps.circulationPumpOverrun)
 				.add("circulationHysteresis", ps.circulationHysteresis).add("adjustRoomTempBy", ps.adjustRoomTempBy)
 				.add("boilerOperationTimeHours", ps.boilerOperationTimeHours)

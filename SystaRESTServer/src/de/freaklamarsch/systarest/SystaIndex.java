@@ -590,8 +590,8 @@ public final class SystaIndex {
 	final static int STOVE_PUMP_SPEED_ACTUAL = 246;
 	// final static int = 247
 	/**
-	 * Status ???
+	 * Status Kessel
 	 */
-	// final static int = 248
+	final static int BOILER_STATUS = 248;
 	// final static int = 249
 }

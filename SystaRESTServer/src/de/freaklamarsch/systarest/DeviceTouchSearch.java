@@ -31,6 +31,7 @@ public class DeviceTouchSearch {
 		public int minor = -1;
 		public String baseVersion = null;
 		public String password = null;
+		public boolean stouchSupported = false;
 	}
 
 	private static final int MAX_DATA_LENGTH = 1024;
@@ -64,6 +65,8 @@ public class DeviceTouchSearch {
                 			deviceInfo.port = getDeviceTouchPort(deviceInfo, ia, searchSocket, receivePacket);
                             if(deviceInfo.port != -1) {
                             	deviceInfo.password = getDeviceTouchPassword(deviceInfo, ia, searchSocket, receivePacket);
+                            	//if this point is reach, port and password for S-Touch App are known
+                            	deviceInfo.stouchSupported = true;
                 			}
             			} catch (Exception e) {
             				// do nothing

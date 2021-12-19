@@ -290,6 +290,60 @@ public class SystaStatus {
 			"Continuous Comfort", "Continuous Lowering", "Summer", "Off", "Party", "undef", "undef", "undef", "undef",
 			"undef", "undef", "Test" };
 	/**
+	 * Status Kessel (Holding Registers, Adresse 41) 
+	 * Wert Bedeutung 
+	 * 0 der Kessel ist aus 
+	 * 1 der Kessel ist an (Handbetrieb, Kurzschluss TR, Kaminfeger) 
+	 * 2 der Kessel bereitet Warmwasser 
+	 * 3 der Kessel ist für den Heizkreis an 
+	 * 4 der Kessel ist durch den Holzkessel (SystaComfort Wood) gesperrt 
+	 * 5 der Kessel ist durch den Wodtke-Pelletsofen (SystaComfort Stove) gesperrt 
+	 * 6 der Kessel ist gesperrt, weil die Außentemperatur über der Heizgrenztemperatur liegt 
+	 * 7 Wärmepumpe befindet sich im Kühlbetrieb 
+	 * 8 der Gasbrennwert-Kombikessel bereitet Warmwasser 
+	 * 9 der Kessel deckt den Warmwasserbedarf des Slaves (SystaComfort II MS) 
+	 * 10 Wärmepumpe befindet sich für den Slave im Kühlbetrieb (SystaComfort II MS) 
+	 * 11 der Kessel deckt den Heizbedarf des Slaves (SystaComfort II MS) 
+	 * 12 der Kessel ist nur auf Grund der Mindestlaufzeit aktiv 
+	 * 13 Startverzögerung der Kessel-Kaskade ist aktiv
+	 * 
+	 * Betriebsart 
+	 * 0 = aus 1 = Handbetrieb 2 = Warmwasserbereitung 3 = Heizkreis heizen
+	 * 4 = gesperrt (Holzkessel) 5 = gesperrt (Pelletsofen) 6 = gesperrt (Aussentemperatur) 7 = Kühlbetrieb 
+	 * 8 = Warmwasserbereitung (Kombikessel) 9 = Warmwasserbereitung (Slave) 10 = Kühlbetrieb (Slave) 
+	 * 11 = Heizkreis heizen (Slave) 12 = Mindestlaufzeit 13 = Startverzögerung aktiv
+	 * 14= Test oder Kaminfeger
+	 * 
+	 * 
+	 * Status Boiler (Holding Registers, Address 41) 
+	 * Value Meaning 
+     * 0 the boiler is off 
+	 * 1 boiler is on (manual operation, short circuit TR, chimney sweep) 
+	 * 2 boiler is preparing hot water 
+	 * 3 the boiler is on for the heating circuit 
+	 * 4 the boiler is blocked by the wood boiler (SystaComfort Wood) 
+	 * 5 the boiler is blocked by the Wodtke pellet stove (SystaComfort Stove) 
+	 * 6 the boiler is blocked because the outdoor temperature is above the heating limit temperature 
+	 * 7 heat pump is in cooling mode 
+	 * 8 the gas condensing combi boiler is preparing hot water 
+	 * 9 the boiler covers the hot water demand of the slave (SystaComfort II MS) 
+	 * 10 heat pump is in cooling mode for the slave (SystaComfort II MS) 
+	 * 11 the boiler covers the heating demand of the slave (SystaComfort II MS) 
+	 * 12 the boiler is only active due to minimum running time 
+	 * 13 start delay of boiler cascade is active
+	 * 
+	 * Operating mode 
+	 * 0 = off 1 = manual mode 2 = hot water preparation 3 = heating circuit
+	 * 4 = blocked (wood boiler) 5 = blocked (pellet stove) 6 = blocked (outside temperature) 7 = cooling mode 
+	 * 8 = hot water preparation (combi boiler) 9 = hot water preparation (slave) 10 = cooling mode (slave) 
+	 * 11 = heating circuit (slave) 12 = minimum running time 13 = start delay active
+	 */
+	public int boilerOperationMode;
+	public final String[] boilerOperationModes = { "off", "manual", "hot water", "heating circuit",
+			"blocked (wood boiler)", "blocked (pellet stove)", "blocked (outside temperature)", "cooling mode",
+			"hot water (combi boiler)", "hot water (slave)", "cooling mode (slave)", "heating circuit (slave)",
+			"minimum running time", "start delay active" };
+	/**
 	 * Raumtemperatur normal (soll)
 	 * 
 	 * Room temperature normal (set)
@@ -581,6 +635,7 @@ public class SystaStatus {
 	public static final int CHARGE_PUMP_MASK = 0x0080;
 	public static final int CIRCULATION_PUMP_MASK = 0x0100;
 	public static final int BOILER_MASK = 0x0200;
+	public static final int BURNER_MASK = 0x0004; //TODO verify this assumption
 	public static final int UNKNOWN_1_MASK = 0x0002;
 	public static final int UNKNOWN_2_MASK = 0x0003;
 	public static final int UNKNOWN_3_MASK = 0x0008;

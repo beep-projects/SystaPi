@@ -329,6 +329,7 @@ public class FakeSystaWeb implements Runnable {
 		status.boilerOperationTime = intData[i][SystaIndex.BOILER_RUNTIME_MIN];
 		status.boilerShutdownTemp = intData[i][SystaIndex.BOILER_SHUTDOWN_TEMP] / 10.0;
 		status.boilerMinSpeedPump = intData[i][SystaIndex.BOILER_MIN_SPEED_PUMP];
+		status.boilerOperationMode = intData[i][SystaIndex.BOILER_STATUS];
 		status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN];
 		status.circulationHysteresis = intData[i][SystaIndex.CIRCULATION_HYSTERESIS] / 10.0;
 		status.adjustRoomTempBy = intData[i][SystaIndex.ADJUST_ROOM_TEMP_BY] / 10.0;
@@ -343,8 +344,10 @@ public class FakeSystaWeb implements Runnable {
 		status.heatingPumpIsOn = (status.relay & SystaStatus.HEATING_PUMP_MASK) != 0;
 		status.chargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_MASK) != 0;
 		status.circulationPumpIsOn = (status.relay & SystaStatus.CIRCULATION_PUMP_MASK) != 0;
-		status.boilerIsOn = (status.relay & SystaStatus.BOILER_MASK) != 0;
-		status.burnerIsOn = status.boilerIsOn && ((status.boilerFlowTemp - status.boilerReturnTemp) > 0.2);
+		status.boilerIsOn = ((status.relay & SystaStatus.BOILER_MASK) != 0 ) ||
+				(List.of(1, 2, 3, 8, 9, 11, 12).contains(status.boilerOperationMode) ) ;
+		status.burnerIsOn = (status.boilerIsOn && ((status.boilerFlowTemp - status.boilerReturnTemp) > 0.2)) ||
+				((status.relay & SystaStatus.BOILER_MASK) != 0 ); //TODO verify this assumption
 		status.unknowRelayState1IsOn = (status.relay & SystaStatus.UNKNOWN_1_MASK) != 0;
 		status.unknowRelayState2IsOn = (status.relay & SystaStatus.UNKNOWN_2_MASK) != 0;
 		status.unknowRelayState3IsOn = (status.relay & SystaStatus.UNKNOWN_3_MASK) != 0;
