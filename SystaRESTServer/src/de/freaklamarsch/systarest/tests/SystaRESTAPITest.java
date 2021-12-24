@@ -8,7 +8,9 @@
 package de.freaklamarsch.systarest.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -203,7 +205,7 @@ class SystaRESTAPITest extends JerseyTest {
 
 	/**
 	 * Helper function to get the IPv4 address for a given interface name
-	 * 
+	 *
 	 * @param interfaceName
 	 * @return the configured IPv4 address as {@code String}, e.g. "127.0.0.1", or
 	 *         null if no configured IPv4 address was found

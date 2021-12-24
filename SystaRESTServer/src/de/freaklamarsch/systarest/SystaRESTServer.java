@@ -7,17 +7,13 @@
 */
 package de.freaklamarsch.systarest;
 
-import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -105,7 +101,7 @@ public class SystaRESTServer {
 
 	/**
 	 * Helper function to get the IPv4 address for a given interface name
-	 * 
+	 *
 	 * @param interfaceName
 	 * @return the configured IPv4 address as {@code String}, e.g. "127.0.0.1", or
 	 *         null if no configured IPv4 address was found
@@ -132,10 +128,10 @@ public class SystaRESTServer {
 
 	/**
 	 * Helper function to print information about a given {@link NetworkInterface}
-	 * 
+	 *
 	 * @param netint the {@link NetworkInterface} for which the information should
 	 *               be print
-	 * 
+	 *
 	 */
 	private static void displayInterfaceInformation(NetworkInterface netint) throws SocketException {
 		System.out.printf("Display name: %s\n", netint.getDisplayName());

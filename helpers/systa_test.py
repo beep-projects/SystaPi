@@ -9,6 +9,8 @@
 from __future__ import print_function
 import socket
 import os
+from datetime import datetime
+import random
 
 
 class SystaComfort(object):
@@ -107,14 +109,14 @@ class SystaComfort(object):
 
     print("----- Search Result -----")
     print(f"MAC: {self.unit_mac}")
-    print(f"IP: {self.unit_ip}") 
-    print(f"S-Touch Port: {self.unit_stouch_port}")
+    print(f"IP: {self.unit_ip}")
     print(f"Name: {self.unit_name}")
     print(f"ID: {self.unit_id}")
     print(f"App: {self.unit_app}")
     print(f"Platform: {self.unit_platform}")
     print(f"Version: {float(self.unit_sc_version) / 100.0}.{self.unit_sc_minor}")
     print(f"Base Version: {self.unit_base_version}")
+    print(f"S-Touch Port: {self.unit_stouch_port}")
     print(f"UDP password: {self.unit_password}")
     print("-------------------------")
 
@@ -135,9 +137,7 @@ class SystaComfort(object):
       message[i] = 0
 
     # checksum #1
-    mac_int = int.from_bytes(data[4:6], "little")
-    op_int = 0x8E82
-    c_sum = (mac_int + op_int) & 0xFFFF
+    c_sum = self.mac_checksum(message)
     checksum = c_sum.to_bytes(2, "little")
     message[12] = checksum[0]
     message[13] = checksum[1]
@@ -187,8 +187,6 @@ class SystaComfort(object):
         # listen for a new data message coming from the SystaComfort
         data, addr = systa_socket.recvfrom(1048)
         messages_received += 1
-        #hex_str = "".join(format(x, "02x") for x in data)
-        #print("received message: %s, from %s" % (hex_str, addr))
 
         # reply to the received message for evaluating if communication works
         # Each data update of the SystaComfort consists of 3-4 messages that have to be
@@ -200,8 +198,6 @@ class SystaComfort(object):
           # listen for the next message coming from the SystaComfort
           data, addr = systa_socket.recvfrom(1048)
           messages_received += 1
-          #hex_str = "".join(format(x, "02x") for x in data)
-          #print("received message: %s, from %s" % (hex_str, addr))
 
         if messages_received > 0:
           # there was at least one message received on this network interface
@@ -214,8 +210,10 @@ class SystaComfort(object):
         # nothing to do
         # rx timeouts from the socket are expected to happen if the
         # connected system is not compatible or fully configured
-        systa_socket.close()
         pass
+
+    # function done, close socket
+    systa_socket.close()
 
     if messages_received == 3:
       # all three messages received, communication is working fine
@@ -236,8 +234,83 @@ class SystaComfort(object):
 
     print("-------------------------")
 
-    # function done, close socket
-    systa_socket.close()
+    if messages_received == 3:
+      # all three messages received, communication is working fine
+      return True
+    # communication is not working
+    return False
+
+  def try_and_error_offset_serach(self):
+    """ tries offset values for the pwd offset until a suitable value is found"""
+    # listen for messages sent to SystaWeb
+    systa_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    systa_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    # disable broadcasting mode
+    systa_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 0)
+    # bind to socket
+    print(f"{datetime.now().time()} Offset search on: {(self.systaweb_ip, self.systaweb_port)}")
+    systa_socket.bind((self.systaweb_ip, self.systaweb_port))
+    cnt_offset = 0x10F9
+
+    while True:
+      # listen for the next message coming from the SystaComfort
+      # the first message might take a while
+      systa_socket.settimeout(61)
+      data, addr = systa_socket.recvfrom(1048)
+
+      # loop for waiting a number of messages before
+      # actually trying to set the operation mode
+      for x in range(0, 3):  # pylint: disable=unused-variable
+        packet_type = data[8]
+        packet_subtype = data[16]
+        print(f"skip {x}: {packet_type}:{packet_subtype}")
+        self.send_reply(data, addr, systa_socket)
+        # listen for the next message coming from the SystaComfort
+        data, addr = systa_socket.recvfrom(1048)
+
+      packet_type = data[8]
+      packet_subtype = data[16]
+      print(f"reply to: {packet_type}:{packet_subtype}")
+      # announce parameter change
+      message = bytearray(data[0:28])
+      for i in range(8, 28):
+        message[i] = 0
+      message[8] = 0x01
+      message[12] = 0x02
+      message[14] = 0x08
+      message[19] = 0x31
+      message[20] = 0x32
+      message[21] = 0x31
+      message[22] = 0x32
+
+      # checksum #1
+      c_sum = self.mac_checksum(message)
+      checksum = c_sum.to_bytes(2, "little")
+      message[24] = checksum[0]
+      message[25] = checksum[1]
+
+      # checksum #2
+      counter_int = int.from_bytes(data[6:8], "little")
+      c_sum = (counter_int + cnt_offset) & 0xFFFF
+      checksum = c_sum.to_bytes(2, "little")
+      message[26] = checksum[0]
+      message[27] = checksum[1]
+
+      systa_socket.sendto(message, addr)
+      try:
+        # to be successful an answer within one second is expected
+        systa_socket.settimeout(1)
+        data, addr = systa_socket.recvfrom(1048)
+        hex_str = "".join(format(x, "02x") for x in data)
+        print(f"received message: {hex_str}, from {addr}")
+        print(f"{datetime.now().time()} Offset was correct: 0x" + (format(cnt_offset, "02x")))
+        break
+      except:  # pylint: disable=bare-except
+        print(f"{datetime.now().time()} Offset was not correct: 0x" + (format(cnt_offset, "02x")))
+        # test next offset
+        #cnt_offset = (cnt_offset + 0x0100*random.randint(0,255)) & 0xFFFF #+256
+        # test another random offset
+        cnt_offset = (cnt_offset + 0x0100 * random.randint(0, 256)) & 0xFFFF  #+256
 
   def set_operation_mode(self, mode):  # pylint: disable=unused-argument
     """ set the Systa Comfort to the given operation mode"""
@@ -277,9 +350,7 @@ class SystaComfort(object):
     message[22] = 0x32
 
     # checksum #1
-    mac_int = int.from_bytes(data[4:6], "little")
-    op_int = 0xBFB5
-    c_sum = (mac_int + op_int) & 0xFFFF
+    c_sum = self.mac_checksum(message)
     checksum = c_sum.to_bytes(2, "little")
     message[24] = checksum[0]
     message[25] = checksum[1]
@@ -299,6 +370,23 @@ class SystaComfort(object):
     data, addr = systa_socket.recvfrom(1048)
     hex_str = "".join(format(x, "02x") for x in data)
     print(f"received message: {hex_str}, from {addr}")
+
+  def mac_checksum(self, data):
+    mac = int.from_bytes(data[4:6], "little")  # last 2 byte of MAC
+    offset = 0x8e82
+    if data[12] == 0x02 and data[14] == 0x08:
+      offset = 0xbfb5
+    elif data[12] == 0x02 and data[14] == 0x11:
+      if data[16] == 0x1f:  # Room temp heat (Raum Temp Heizen)
+        offset = 0x8e7e
+      elif data[16] == 0x1c:  # Operating Mode (Betriebsart) ... 0=Auto1 1=Auto2 ...
+        offset = 0x8e7f
+      elif data[16] == 0x20:  # Room temp comf (Raum Temp Komf)
+        offset = 0x8ea3
+      elif data[16] == 0x21:  # Room temp low. (Raum Temp Offset)
+        offset = 0x8eae
+      offset += data[20]
+    return (mac + offset) & 0xffff
 
   def find_system_ips(self):
     """checks the configured network interfaces of the host system
@@ -326,12 +414,23 @@ class SystaComfort(object):
     if operstate == "up":
       # the interface is up
       return True
-
     return False
 
 
+def find_pwd_offset():
+  sc = SystaComfort()
+  if sc.find_sc() and sc.listen_for_device():
+    sc.try_and_error_offset_serach()
+
+
+def test_system_configuration():
+  sc = SystaComfort()
+  sc.find_sc()
+  sc.listen_for_device()
+
+
 # -------------MAIN-----------------
-sc = SystaComfort()
-sc.find_sc()
-sc.listen_for_device()
-#sc.set_operation_mode(2)
+if __name__ == "__main__":
+  #sc.set_operation_mode(2)
+  #test_system_configuration()
+  find_pwd_offset()

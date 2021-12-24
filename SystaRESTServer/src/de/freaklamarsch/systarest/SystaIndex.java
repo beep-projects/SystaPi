@@ -1,10 +1,10 @@
 /*
-* Copyright (c) 2021, The beep-projects contributors
-* this file originated from https://github.com/beep-projects
-* Do not remove the lines above.
-* The rest of this source code is subject to the terms of the Mozilla Public License.
-* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
-*/
+ * Copyright (c) 2021, The beep-projects contributors
+ * this file originated from https://github.com/beep-projects
+ * Do not remove the lines above.
+ * The rest of this source code is subject to the terms of the Mozilla Public License.
+ * You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+ */
 package de.freaklamarsch.systarest;
 
 /**
@@ -97,15 +97,15 @@ public final class SystaIndex {
 	/**
 	 * Vorlauf Ofen ist
 	 */
-	final static int STOVE_FLOW_TEMP = 14;
+	final static int LOG_BOILER_FLOW_TEMP = 14;
 	/**
 	 * Rücklauf Ofen ist
 	 */
-	final static int STOVE_RETURN_TEMP = 15;
+	final static int LOG_BOILER_RETURN_TEMP = 15;
 	/**
 	 * (Holzkessel Puffer oben)
 	 */
-	final static int WOOD_BOILER_BUFFER_TEMP_TOP = 16;
+	final static int LOG_BOILER_BUFFER_TEMP_TOP = 16;
 	/**
 	 * (Schwimmbadtemperatur)
 	 */
@@ -168,36 +168,7 @@ public final class SystaIndex {
 	final static int BOILER_TEMP_SET = 34;
 	// final static int = 35
 	/**
-	 * Betriebsart 0 = Auto Prog. 1 1 = Auto Prog. 2 2 = Auto Prog. 3 3 = Dauernd
-	 * Normal 4 = Dauernd Komfort 5 = Dauernd Absenken 6 = Sommer 7 = Aus 8 = Party
-	 * 14= Test oder Kaminfeger
-	 * 
-	 * • Automatik 1, 2 oder 3 - Anlage läuft im Regelbetrieb, gemäß den
-	 * Einstellungen im Zeitprogramm 1, 2 oder 3 Trinkwassererwärmung und
-	 * Zirkulation laufen entsprechend den Einstellungen im jeweiligen Zeitprogramm.
-	 * 
-	 * • Dauernd Normal - Heizkreis wird auf „Sollwert Raumtemperatur Normal“
-	 * geregelt, Trinkwassererwärmung und Zirkulation laufen entsprechend den
-	 * Einstellungen im jeweiligen Zeitprogramm.
-	 * 
-	 * • Dauernd Komfort - Heizkreis wird auf „Sollwert Raumtemperatur Komfort“
-	 * geregelt, Trinkwassererwärmung und Zirkulation laufen entsprechend den
-	 * Einstellungen im jeweiligen Zeitprogramm.
-	 * 
-	 * • Dauernd Abgesenkt - Heizkreis wird auf „Sollwert Raumtemperatur Abgesenkt“
-	 * geregelt, Trinkwassererwärmung und Zirkulation laufen entsprechend den
-	 * Einstellungen im jeweiligen Zeitprogramm.
-	 * 
-	 * • Sommer - Heizung ist ausgeschaltet, Trinkwassererwärmung und Zirkulation
-	 * laufen entsprechend den Einstellungen im jeweiligen Zeitprogramm.
-	 * 
-	 * • Aus - Heizung, Trinkwassererwärmung und Zirkulation sind ausgeschaltet,
-	 * Frostschutz ist sichergestellt
-	 * 
-	 * • Party - Unabhängig vom Heizzeitprogramm verwendet der Regler den „Sollwert
-	 * Raumtemperatur Normal“. Unabhängig vom Warmwasserzeitprogramm verwendet der
-	 * Regler den „Sollwert Warmwassertemperatur Normal“. Die Zirkulation ist
-	 * freigegeben.
+	 * Betriebsart
 	 */
 	final static int OPERATION_MODE = 36;
 	/**
@@ -279,11 +250,11 @@ public final class SystaIndex {
 	/**
 	 * Spreizung Heizkreis
 	 */
-	final static int SPREADING_HEATING_CIRCUIT = 59;
+	final static int HEATING_CIRCUIT_SPREADING = 59;
 	/**
 	 * Minimale Drehzahl Pumpe PHK %
 	 */
-	final static int HEATING_MIN_SPEED_PUMP = 60; // in %
+	final static int HEATING_PUMP_SPEED_MIN = 60; // in %
 	// final static int = 61
 	/**
 	 * Mischer Laufzeit (minuten)
@@ -442,7 +413,7 @@ public final class SystaIndex {
 	/**
 	 * Minimale Drehzahl Pumpe PK %
 	 */
-	final static int BOILER_MIN_SPEED_PUMP = 164;
+	final static int BOILER_PUMP_SPEED_MIN = 164;
 	// final static int = 165
 	// final static int = 166
 	// final static int = 167
@@ -459,7 +430,7 @@ public final class SystaIndex {
 	// final static int = 172
 	// final static int = 173
 	// final static int = 174
-	// final static int = 175
+	final static int LOG_BOILER_SETTINGS = 175;
 	/**
 	 * Raumtemperatur ändern um
 	 */
@@ -477,30 +448,52 @@ public final class SystaIndex {
 	/**
 	 * Anzahl Brennerstarts
 	 */
-	final static int BURNER_NUMBER_STARTS = 181;
+	final static int BURNER_NUMBER_OF_STARTS = 181;
 	/**
-	 * Solare Leistung momentane Leistung der Solaranlage Die solare Leistung
-	 * berechnet sich aus folgenden Messwerten: • Differenz zwischen der Temperatur
-	 * am Kollektoraustritt und der Temperatur am Kollektoreintritt • Volumenstrom
-	 * durch der Solaranlage
+	 * Solare Leistung 
 	 */
 	final static int SOLAR_POWER_ACTUAL = 182;
 	/**
-	 * Tagesgewinn??? die an diesem Tag bisher von der Solaranlage erzeugte
-	 * Energiemenge Die Anzeige wird um Mitternacht selbsttätig auf 0 zurückgesetzt.
+	 * Tagesgewinn
 	 */
 	final static int SOLAR_GAIN_DAY = 183;
 	/**
-	 * (Solargewinn gesamt???) die insgesamt von der Solaranlage erzeugte
-	 * Energiemenge seit Inbetriebnahme der Solaranlage oder seit dem letzten
-	 * Löschen des Solargewinns
+	 * Solargewinn gesamt
 	 */
 	final static int SOLAR_GAIN_TOTAL = 184;
-	// final static int = 185
-	final static int COUNTDOWN = 186;
-	// final static int = 187
-	// final static int = 188
-	// final static int = 189
+	/**
+	 * Systemstarts
+	 */
+	final static int SYSTEM_NUMBER_OF_STARTS = 185;
+	/**
+	 * Vorhaltezeit 1
+	 */
+	final static int CIRCUIT_1_LEAD_TIME = 186;
+	/**
+	 * Vorhaltezeit 2
+	 */
+	final static int CIRCUIT_2_LEAD_TIME = 187;
+	/**
+	 * Vorhaltezeit 3
+	 */
+	final static int CIRCUIT_3_LEAD_TIME = 188;
+	/**
+	 * Minimale Temperatur im oberen Bereich des Pufferspeichers
+	 */
+	final static int LOG_BOILER_BUFFER_TEMP_MIN = 189;
+	/**
+	 * Minimale Temperatur des Scheitholzkessels 
+	 */
+	final static int LOG_BOILER_TEMP_MIN = 190;
+	/**
+	 * Minimaler Sollwert für die Temperaturdifferenz zwischen Kesselvorlauf TVKH
+	 * und Kesselrücklauf TRKH
+	 */
+	final static int LOG_BOILER_SPREADING_MIN = 191;
+	/**
+	 * Minimale Drehzahl der Kesselpumpe PKH.
+	 */
+	final static int LOG_BOILER_PUMP_SPEED_MIN = 192;
 	// final static int = 190
 	// final static int = 191
 	// final static int = 192
@@ -535,13 +528,13 @@ public final class SystaIndex {
 	// final static int = 218
 	// final static int = 219
 	/**
-	 * Relais Heizkreispumpe = Relais & 0x0001 Relais & 0x0002 Relais & 0x0004
-	 * Relais & 0x0008 Relais & 0x0010 Ladepumpe = Relais & 0x0080 Zirkulationspumpe
-	 * = Relais & 0x0100 Kessel = Relais & 0x0200 Relais & 0x0800 Brenner = Kessel
-	 * && (FLOW_TEMP_BOILER - RETURN_TEMP_BOILER > 2)
+	 * Relais
 	 */
 	final static int RELAY = 220;
-	// final static int = 221
+	/**
+	 * Heizkreispumpe Geschwindigkeit x*5%
+	 */
+	final static int HEATING_PUMP_SPEED_ACTUAL = 221;
 	/**
 	 * Status ???
 	 */
@@ -585,9 +578,9 @@ public final class SystaIndex {
 	// final static int = 244
 	// final static int = 245
 	/**
-	 * Ofen pumpe ???
+	 * Ofenpumpe Geschwindigkeit x*5%
 	 */
-	final static int STOVE_PUMP_SPEED_ACTUAL = 246;
+	final static int LOG_BOILER_PUMP_SPEED_ACTUAL = 246;
 	// final static int = 247
 	/**
 	 * Status Kessel
