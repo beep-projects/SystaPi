@@ -39,12 +39,12 @@ your system seems to be properly configured
 ### Wireshark dissector
 
 For analyzing the S-Touch protocol I have started to write a [Wireshark](https://www.wireshark.org/) dissector in Lua. It is far from being finished, but it might be helpful for anyone who wants to continue this path. 
-If you want to give it a try, you have to place the [stouch.lua](helpers/stouch.lua) in the [plugin folder](https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html) of your Wireshark installation. This folder should be:
+If you want to give it a try, you have to place the [stouch.lua](../helpers/stouch.lua) in the [plugin folder](https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html) of your Wireshark installation. This folder should be:
 
 ```~/.local/lib/wireshark/plugins``` (Linux)  
 ```%APPDATA%\Wireshark\plugins``` or ```WIRESHARK\plugins``` (Windows)  
 ```%APPDIR%/Contents/PlugIns/wireshark``` or ```INSTALLDIR/lib/wireshark/plugins``` (macOS)  
 
-![s-touch_dissector](resources/s-touch_dissector.jpg)
+![s-touch_dissector](s-touch_dissector.jpg)
 
  

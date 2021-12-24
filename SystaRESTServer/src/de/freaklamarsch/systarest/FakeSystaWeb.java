@@ -13,7 +13,10 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -147,7 +150,7 @@ public class FakeSystaWeb implements Runnable {
 	private final String[] WATER_HEATER_OPERATION_MODES = { "off", "normal", "comfort", "locked" };
 
 	private int WRITER_MAX_DATA = 60;
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
+	private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;//ofPattern("E-dd.MM.yy-HH:mm:ss");
 	private DataLogger<Integer> logInt = new DataLogger<>("data", WRITER_MAX_DATA);
 	private DataLogger<Byte> logRaw = new DataLogger<>("raw", WRITER_MAX_DATA);
 
@@ -207,7 +210,9 @@ public class FakeSystaWeb implements Runnable {
 	 */
 	public String getTimestampString() {
 		return (readIndex < 0) ? "never"
-				: formatter.format(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC));
+				: formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+		//: formatter.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(timestamp[readIndex]), ZoneOffset.UTC));
+		//: formatter.format(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC));
 	}
 
 	/**
@@ -248,7 +253,9 @@ public class FakeSystaWeb implements Runnable {
 		status.supportedFeatures = new String[] {}; // TODO check what supported features are
 		status.is_away_mode_on = false; // TODO match with ferien mode if possible
 		status.timestamp = timestamp[i];
-		status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
+		//status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
+		status.timestampString = formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+		//formatter.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault()))
 		return status;
 	}
 
@@ -365,7 +372,8 @@ public class FakeSystaWeb implements Runnable {
 				& SystaStatus.LOG_BOILER_PARALLEL_OPERATION_MASK) != 0;
 		status.boilerHeatsBuffer = (status.logBoilerSettings & SystaStatus.BOILER_HEATS_BUFFER_MASK) != 0;
 		status.timestamp = timestamp[i];
-		status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
+		//status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
+		status.timestampString = formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
 		return status;
 	}
 
