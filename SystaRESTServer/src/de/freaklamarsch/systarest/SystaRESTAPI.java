@@ -1,10 +1,21 @@
 /*
- * Copyright (c) 2021, The beep-projects contributors
- * this file originated from https://github.com/beep-projects
- * Do not remove the lines above.
- * The rest of this source code is subject to the terms of the Mozilla Public License.
- * You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
- */
+* Copyright (c) 2021, The beep-projects contributors
+* this file originated from https://github.com/beep-projects
+* Do not remove the lines above.
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/
+*
+*/
 package de.freaklamarsch.systarest;
 
 import java.time.Instant;
@@ -313,7 +324,7 @@ public class SystaRESTAPI {
 				.add("roomTempSetComfort", ps.roomTempSetComfort).add("roomTempSetLowering", ps.roomTempSetLowering)
 				.add("roomImpact", ps.roomImpact)
 				.add("roomTempCorrection", ps.roomTempCorrection).add("collectorTempActual", ps.collectorTempActual)
-				.add("swimmingpoolTemp", ps.swimmingpoolTemp).add("swimmingpoolFlowTemp", ps.swimmingpoolFlowTemp)
+				.add("swimmingpoolFlowTemp", ps.swimmingpoolFlowTemp).add("swimmingpoolFlowTeamp", ps.swimmingpoolFlowTeamp)
 				.add("swimmingpoolReturnTemp", ps.swimmingpoolReturnTemp)
 				.add("heatingOperationMode", ps.heatingOperationMode)
 				.add("heatingOperationModeName", ps.heatingOperationModes[ps.heatingOperationMode])
