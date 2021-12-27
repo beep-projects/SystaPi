@@ -184,13 +184,13 @@ public class SystaStatus {
 	 * <br/>
 	 * Swimming pool temperature
 	 */
-	public double swimmingpoolFlowTemp;
+	public double swimmingpoolTemp;
 	/**
 	 * Vorlauf Schwimmbad<br/>
 	 * <br/>
 	 * Flow swimmingpool
 	 */
-	public double swimmingpoolFlowTeamp;
+	public double swimmingpoolFlowTemp;
 	/**
 	 * Rücklauf Schwimmbad<br/>
 	 * <br/>

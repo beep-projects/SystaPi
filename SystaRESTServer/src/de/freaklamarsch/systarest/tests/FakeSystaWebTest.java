@@ -83,8 +83,8 @@ class FakeSystaWebTest {
 		assertEquals(26.3, status.logBoilerFlowTemp);
 		assertEquals(36.8, status.logBoilerReturnTemp);
 		assertEquals(-30.2, status.logBoilerBufferTempTop);
+		assertEquals(0, status.swimmingpoolTemp);
 		assertEquals(0, status.swimmingpoolFlowTemp);
-		assertEquals(0, status.swimmingpoolFlowTeamp);
 		assertEquals(0, status.swimmingpoolReturnTemp);
 		assertEquals(0, status.hotWaterTempSet);
 		assertEquals(0, status.roomTempSet1);

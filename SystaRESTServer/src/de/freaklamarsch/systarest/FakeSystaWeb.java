@@ -13,13 +13,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -139,7 +137,7 @@ public class FakeSystaWeb implements Runnable {
   private int remotePort;
   private final int PORT = 22460;
   private final int MAX_DATA_LENGTH = 1048;
-  private final int MAX_NUMBER_ENTRIES = 250;
+  private final int MAX_NUMBER_ENTRIES = 256;
   private final int COUNTER_OFFSET_REPLY = 0x3FBF;
   private final int COUNTER_OFFSET_PWD = 0x10F9;
   private final int COUNTER_OFFSET_CHANGE = 0x3FBF;
@@ -147,10 +145,13 @@ public class FakeSystaWeb implements Runnable {
   private final int MAC_OFFSET_REPLY_VDR = 0x8E83;
   //private final int MAC_OFFSET_PWD = 0x8E83;
   //private final int MAC_OFFSET_PWD = 0x8E81;
-  private final int MAC_OFFSET_PWD = 0x8E82;
+  //private final int MAC_OFFSET_PWD = 0x8E82;
   private final int MAC_OFFSET_CHANGE = 0x8E7E;
   //private final int REPLY_MSG_LENGTH = 20;
 
+  //the SystaComfort sends burst of 3 to 4 messages every minute
+  //at the moment only packets of type 0x01 are processed, so 2 buffers should be enough
+  //TODO adjust this value if more packet types are processed
   private final int RING_BUFFER_SIZE = 2;
   private int readIndex = -1;
   private int writeIndex = -1;
@@ -170,7 +171,7 @@ public class FakeSystaWeb implements Runnable {
   private final String[] WATER_HEATER_OPERATION_MODES = { "off", "normal", "comfort", "locked" };
 
   private int WRITER_MAX_DATA = 60;
-  private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;//ofPattern("E-dd.MM.yy-HH:mm:ss");
+  //private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
   private DataLogger<Integer> logInt = new DataLogger<>("data", WRITER_MAX_DATA);
   private DataLogger<Byte> logRaw = new DataLogger<>("raw", WRITER_MAX_DATA);
 
@@ -257,16 +258,26 @@ public class FakeSystaWeb implements Runnable {
   /**
    * get the timestamp for the current measurement as human readable string
    *
-   * @return the timestamp as a LocalDateTime string, which is a date-time without
-   *         a time-zone in the ISO-8601 calendar system
+   * @return the timestamp as a LocalDateTime string, which is a date-time with
+   *         a time-zone offset in the ISO-8601 calendar system
+   *         e.g. 2021-12-24T14:49:27+01:00
+   *         or "never"
    */
   public String getTimestampString() {
     return (readIndex < 0) ? "never"
-        : formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
-    //: formatter.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(timestamp[readIndex]), ZoneOffset.UTC));
-    //: formatter.format(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC));
+        : getFormattedTimeString(timestamp[readIndex]);
   }
 
+  /**
+   * get the timestamp (epoch seconds) as formatted string for the local timezone
+   *
+   * @return the timestamp as a LocalDateTime string, which is a date-time with
+   *         a time-zone offset in the ISO-8601 calendar system
+   *         e.g. 2021-12-24T14:49:27+01:00
+   */
+  public String getFormattedTimeString(long timestamp) {
+    return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+  }
   /**
    * @return the intData of the current measurement, or null if no measurement has
    *         been done so far
@@ -305,9 +316,7 @@ public class FakeSystaWeb implements Runnable {
     status.supportedFeatures = new String[] {}; // TODO check what supported features are
     status.is_away_mode_on = false; // TODO match with ferien mode if possible
     status.timestamp = timestamp[i];
-    //status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
-    status.timestampString = formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
-    //formatter.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault()))
+    status.timestampString = getFormattedTimeString(timestamp[readIndex]);//formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
     return status;
   }
 
@@ -424,8 +433,7 @@ public class FakeSystaWeb implements Runnable {
         & SystaStatus.LOG_BOILER_PARALLEL_OPERATION_MASK) != 0;
     status.boilerHeatsBuffer = (status.logBoilerSettings & SystaStatus.BOILER_HEATS_BUFFER_MASK) != 0;
     status.timestamp = timestamp[i];
-    //status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
-    status.timestampString = formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+    status.timestampString = getFormattedTimeString(timestamp[readIndex]);//formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
     return status;
   }
 
@@ -441,6 +449,7 @@ public class FakeSystaWeb implements Runnable {
 
   /**
    * start the communication with a Paradigma SystaComfort II
+   * requires the globals inetAddress and PORT to be properly configured
    */
   @Override // from the Runnable interface
   public void run() {
@@ -512,7 +521,7 @@ public class FakeSystaWeb implements Runnable {
         typeOfLastReceivedMessage = MessageType.DATA1;
         readIndex = writeIndex;
         //sendPassword();
-        System.out.println("WI: "+writeIndex);
+        //System.out.println("WI: "+writeIndex);
         if(writeIndex==1) {
           sendPassword();
         } else {
@@ -701,8 +710,7 @@ public class FakeSystaWeb implements Runnable {
     while (data.remaining() >= 4) {
       intData[writeIndex][(data.position() - 24) / 4] = data.getInt();
     }
-    // TODO is this needed?
-    //readIndex = writeIndex;
+    readIndex = writeIndex;
   }
 
   /**

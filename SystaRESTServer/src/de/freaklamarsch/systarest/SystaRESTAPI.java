@@ -313,7 +313,7 @@ public class SystaRESTAPI {
 				.add("roomTempSetComfort", ps.roomTempSetComfort).add("roomTempSetLowering", ps.roomTempSetLowering)
 				.add("roomImpact", ps.roomImpact)
 				.add("roomTempCorrection", ps.roomTempCorrection).add("collectorTempActual", ps.collectorTempActual)
-				.add("swimmingpoolFlowTemp", ps.swimmingpoolFlowTemp).add("swimmingpoolFlowTeamp", ps.swimmingpoolFlowTeamp)
+				.add("swimmingpoolTemp", ps.swimmingpoolTemp).add("swimmingpoolFlowTemp", ps.swimmingpoolFlowTemp)
 				.add("swimmingpoolReturnTemp", ps.swimmingpoolReturnTemp)
 				.add("heatingOperationMode", ps.heatingOperationMode)
 				.add("heatingOperationModeName", ps.heatingOperationModes[ps.heatingOperationMode])
