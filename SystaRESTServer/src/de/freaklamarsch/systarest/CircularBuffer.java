@@ -1,21 +1,21 @@
 package de.freaklamarsch.systarest;
 
 /*
- * 
+ *
  * MIT License
- * 
+ *
  * Copyright (c) 2017 Eugen Paraschiv
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,7 +32,7 @@ package de.freaklamarsch.systarest;
  * that uses a single, fixed-size buffer as if it were connected end-to-end. By
  * default, this implementation denies adding new elements if the buffer is
  * full. This behaviour can be changed by setting {@link #overwrite}
- * 
+ *
  * @param <E> object type to store within this buffer
  */
 public class CircularBuffer<E> {
@@ -47,7 +47,7 @@ public class CircularBuffer<E> {
 	/**
 	 * Creates a {@code CircularBuffer} with a capacity of {@code capacity}
 	 * elements.
-	 * 
+	 *
 	 * @param capacity number of elements that can be stored in the
 	 *                 {@code CircularBuffer}
 	 */
@@ -72,7 +72,7 @@ public class CircularBuffer<E> {
 
 	/**
 	 * Add an element to the {@code CircularBuffer}
-	 * 
+	 *
 	 * @param element the element added to the {@code CircularBuffer}
 	 * @return true if the element could be added to the buffer, false otherwise
 	 */
@@ -99,7 +99,7 @@ public class CircularBuffer<E> {
 
 	/**
 	 * Removes the oldest element from the {@code CircularBuffer} and returns it
-	 * 
+	 *
 	 * @return the oldest element
 	 */
 	public E remove() {

@@ -8,6 +8,7 @@
 package de.freaklamarsch.systarest.tests;
 
 import static org.junit.Assert.assertEquals;
+
 import java.lang.reflect.Field;
 
 import org.junit.Test;
@@ -19,7 +20,7 @@ public class CircularBufferTest {
 	CircularBuffer<Integer> cb;// = new CircularBuffer<Integer>(testCapacity);
 
 	public CircularBufferTest() {
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 	}
 
 	@Test
@@ -32,7 +33,7 @@ public class CircularBufferTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 		assertEquals(testCapacity, cb.capacity());
 		assertEquals(0, cb.size());
 		assertEquals(true, cb.isEmpty());
@@ -41,7 +42,7 @@ public class CircularBufferTest {
 		assertEquals(null, cb.remove());
 		// test constructor with negative capacity
 		// this should create a buffer with DEFAULT_CAPACITY
-		cb = new CircularBuffer<Integer>(-1);
+		cb = new CircularBuffer<>(-1);
 		assertEquals(defaultCapacity, cb.capacity());
 		assertEquals(0, cb.size());
 		assertEquals(true, cb.isEmpty());
@@ -49,7 +50,7 @@ public class CircularBufferTest {
 		assertEquals(null, cb.peek());
 		assertEquals(null, cb.remove());
 		// test constructor with 0 capacity
-		cb = new CircularBuffer<Integer>(0);
+		cb = new CircularBuffer<>(0);
 		assertEquals(defaultCapacity, cb.capacity());
 		assertEquals(0, cb.size());
 		assertEquals(true, cb.isEmpty());
@@ -60,7 +61,7 @@ public class CircularBufferTest {
 
 	@Test
 	public void testAdd() {
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 		cb.setOverwrite(false);
 		int i = 0;
 		// fill the buffer to testCapacity-1 elements
@@ -121,7 +122,7 @@ public class CircularBufferTest {
 
 	@Test
 	public void testAddWithOverwrite() {
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 		cb.setOverwrite(true);
 		int i = 0;
 		// fill the buffer to testCapacity-1 elements
@@ -175,7 +176,7 @@ public class CircularBufferTest {
 
 	@Test
 	public void testRemove() {
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 		int i = 0;
 		// fill the buffer
 		while (!cb.isFull()) {
@@ -207,7 +208,7 @@ public class CircularBufferTest {
 
 	@Test
 	public void testClear() {
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 		int i = 0;
 		// fill the buffer
 		while (!cb.isFull()) {

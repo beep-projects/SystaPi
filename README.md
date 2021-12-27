@@ -4,11 +4,10 @@
 
 # SystaPi and SystaREST
 
-SystaPi adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs.
-The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST ([Javadoc](http://beep-projects.github.io/SystaPi)). 
-Note: The communication protocol is not publicly available, everything here is based on reverse engineering and will only work for systems that are used by contributors. So please contribute. 
-To support you in reverse engineering, the server has a rudimentary logging functionality integrated. You can use this to set triggers on value changes with your home automation system and start logging of values for analysis.
-
+**SystaPi** adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs.
+The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST, see the documentation for details of the supported fields [Javadoc: SystaStatus](https://beep-projects.github.io/SystaPi/de/freaklamarsch/systarest/SystaStatus.html).  
+**Note:** The communication protocol is not publicly available, everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. So please contribute information from your system.  
+To support you in reverse engineering, the server has a rudimentary logging functionality integrated. You can use this to set triggers on value changes with your home automation system and start logging of values for analysis.  
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).
 
 Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort.
@@ -271,6 +270,9 @@ curl -X POST http://systapi:1337/SystaREST/stop
 `GET` `/SystaREST/servicestatus`
 [http://systapi:1337/SystaREST/servicestatus](http://systapi:1337/SystaREST/servicestatus)
 Returns the status of the SystaREST server
+```bash
+curl "http://systapi:1337/SystaREST/servicestatus"
+```
 
 ```json
 {
@@ -297,6 +299,9 @@ Returns the status of the SystaREST server
 `GET` `/SystaREST/rawdata`
 [http://systapi:1337/SystaREST/rawdata](http://systapi:1337/SystaREST/rawdata)
 Returns the raw data received from the Paradigma Systa Comfort with added timestamp information.
+```bash
+curl "http://systapi:1337/SystaREST/rawdata"
+```
 
 ```json
 {
@@ -325,7 +330,11 @@ Returns the raw data received from the Paradigma Systa Comfort with added timest
 
 `GET` `/SystaREST/waterheater`
 [http://systapi:1337/SystaREST/waterheater](http://systapi:1337/SystaREST/waterheater)
-Returns the information for a Home Assistant [Water Heater](https://developers.home-assistant.io/docs/core/entity/water-heater/) 
+Returns the information for a Home Assistant [Water Heater](https://developers.home-assistant.io/docs/core/entity/water-heater/)
+
+```bash
+curl "http://systapi:1337/SystaREST/waterheater"
+```
 
 ```json
 {
@@ -356,99 +365,114 @@ Returns the information for a Home Assistant [Water Heater](https://developers.h
 `GET` `/SystaREST/status`
 [http://systapi:1337/SystaREST/status](http://systapi:1337/SystaREST/status)
 Returns all known fields from the received data.
+```bash
+curl "http://systapi:1337/SystaREST/status"
+```
 
 ```json
 {
-    "outsideTemp":16.2,
-    "circuit1FlowTemp":26.9,
-    "circuit1ReturnTemp":27.7,
-    "hotWaterTemp":66.6,
-    "bufferTempTop":66.0,
-    "bufferTempBottom":63.6,
+    "outsideTemp":7.9,
+    "operationMode":0,
+    "operationModeName":"Auto Prog. 1",
+    "circuit1FlowTemp":42.9,
+    "circuit1ReturnTemp":29.8,
+    "circuit1FlowTempSet":44.2,
+    "circuit1LeadTime":0,
+    "hotWaterTemp":59.3,
+    "hotWaterTempSet":50.0,
+    "hotWaterTempNormal":50.0,
+    "hotWaterTempComfort":60.0,
+    "hotWaterTempMax":85.0,
+    "hotWaterOperationMode":1,
+    "hotWaterOperationModeName":"normal",
+    "hotWaterHysteresis":5.0,
+    "bufferTempTop":54.6,
+    "bufferTempBottom":34.0,
+    "bufferTempSet":44.2,
+    "logBoilerFlowTemp":21.3,
+    "logBoilerReturnTemp":17.9,
+    "logBoilerBufferTempTop":-30.2,
+    "logBoilerBufferTempMin":30.0,
+    "logBoilerTempMin":65.0,
+    "logBoilerSpreadingMin":100.0,
+    "logBoilerPumpSpeedMin":60,
+    "logBoilerPumpSpeedActual":0,
+    "logBoilerSettings":19,
+    "boilerOperationMode":0,
+    "boilerOperationModeName":"off",
+    "boilerFlowTemp":37.6,
+    "boilerReturnTemp":37.6,
+    "boilerTempSet":0.0,
+    "boilerSuperelevation":0,
+    "boilerHysteresis":5.0,
+    "boilerOperationTime":5,
+    "boilerShutdownTemp":40.0,
+    "boilerPumpSpeedMin":25,
     "circulationTemp":-30.0,
+    "circulationPumpIsOn":false,
+    "circulationPumpOverrun":3,
+    "circulationHysteresis":5.0,
     "circuit2FlowTemp":-30.0,
     "circuit2ReturnTemp":-30.0,
+    "circuit2FlowTempSet":44.2,
     "roomTempActual1":0.0,
+    "roomTempSet1":20.0,
     "roomTempActual2":0.0,
+    "roomTempSet2":0.0,
+    "roomTempSetNormal":20.0,
+    "roomTempSetComfort":22.0,
+    "roomTempSetLowering":15.0,
+    "roomImpact":0.0,
+    "roomTempCorrection":0.0,
     "collectorTempActual":0.0,
-    "boilerFlowTemp":24.8,
-    "boilerReturnTemp":24.8,
-    "stoveFlowTemp":22.7,
-    "stoveReturnTemp":32.3,
-    "woodBoilerBufferTempTop":-30.2,
-    "swimmingpoolTemp":0.0,
+    "swimmingpoolFlowTemp":0.0,
     "swimmingpoolFlowTeamp":0.0,
     "swimmingpoolReturnTemp":0.0,
-    "hotWaterTempSet":0.0,
-    "roomTempSet1":0.0,
-    "circuit1FlowTempSet":0.0,
-    "circuit2FlowTempSet":0.0,
-    "roomTempSet2":0.0
-    "bufferTempSet":0.0
-    "boilerTempSet":0.0
-    "operationMode":7
-    "operationModeName":"Off"
-    "roomTempSetNormal":21.0
-    "roomTempSetComfort":24.0
-    "roomTempSetLowering":18.0
-    "heatingOperationMode":0
-    "heatingOperationModeName":"off"
-    "controlledBy":0
-    "controlMethodName":"external temp"
-    "heatingCurveBasePoint":34.0
-    "heatingCurveGradient":0.4
-    "maxFlowTemp":60.0
-    "heatingLimitTemp":15.0
-    "heatingLimitTeampLowering":15.0
-    "antiFreezeOutsideTemp":2.0
-    "heatUpTime":30
-    "roomImpact":0.0
-    "boilerSuperelevation":0
-    "spreadingHeatingCircuit":20.0
-    "heatingMinSpeedPump":100
-    "mixerRuntime":2
-    "roomTempCorrection":0.0
-    "underfloorHeatingBasePoint":35.0
-    "underfloorHeatingGradient":1.3
-    "hotWaterTempNormal":55.0
-    "hotWaterTempComfort":60.0
-    "hotWaterOperationMode":3
-    "hotWaterOperationModeName":"locked"
-    "hotWaterHysteresis":5.0
-    "hotWaterTempMax":65.0
-    "pumpOverrun":10
-    "bufferTempMax":85.0
-    "bufferTempMin":1.0
-    "boilerHysteresis":5.0
-    "boilerOperationTime":5
-    "boilerShutdownTemp":25.0
-    "boilerMinSpeedPump":25
-    "circulationPumpOverrun":3
-    "circulationHysteresis":5.0
-    "adjustRoomTempBy":0.0
-    "boilerOperationTimeHours":3885
-    "boilerOperationTimeMinutes":48
-    "numberBurnerStarts":2414
-    "solarPowerActual":0.0
-    "solarGainDay":0.0
-    "solarGainTotal":0.0,"countdown":0
-    "relay":2048
-    "heatingPumpIsOn":false
-    "chargePumpIsOn":false
-    "circulationPumpIsOn":false
-    "boilerIsOn":false
-    "burnerIsOn":false
-    "unknowRelayState1IsOn":false
-    "unknowRelayState2IsOn":false
-    "unknowRelayState3IsOn":false
-    "unknowRelayState4IsOn":false
-    "unknowRelayState5IsOn":true
-    "error":65535
-    "operationModeX":7
-    "heatingOperationModeX":0
-    "stovePumpSpeedActual":0
-    "timestamp":1625268469,
-    "timestampString":"Fri-02.07.21-23:27:49"
+    "heatingOperationMode":1,
+    "heatingOperationModeName":"normal",
+    "heatingCurveBasePoint":35.0,
+    "heatingCurveGradient":1.3,
+    "heatingLimitTemp":20.0,
+    "heatingLimitTeampLowering":10.0,
+    "heatingPumpSpeedActual":100,
+    "heatingPumpOverrun":10,
+    "heatingPumpIsOn":true,
+    "heatingCircuitSpreading":20.0,
+    "heatingPumpSpeedMin":100,
+    "controlledBy":0,
+    "controlMethodName":"external temp",
+    "maxFlowTemp":70.0,
+    "antiFreezeOutsideTemp":2.0,
+    "heatUpTime":120,
+    "mixerRuntime":2,
+    "mixer1IsOnWarm":false,
+    "mixer1IsOnCool":false,
+    "mixer1State":0,
+    "mixer1StateName":"off",
+    "underfloorHeatingBasePoint":35.0,
+    "underfloorHeatingGradient":1.3,
+    "bufferTempMax":95.0,
+    "bufferTempMin":0.0,
+    "adjustRoomTempBy":0.0,
+    "solarPowerActual":0.0,
+    "solarGainDay":0.0,
+    "solarGainTotal":0.0,
+    "relay":2049,
+    "chargePumpIsOn":false,
+    "boilerIsOn":false,
+    "burnerIsOn":false,
+    "systemNumberOfStarts":26,
+    "burnerNumberOfStarts":394,
+    "boilerOperationTimeHours":234,
+    "boilerOperationTimeMinutes":58,
+    "unknowRelayState1IsOn":false,
+    "unknowRelayState2IsOn":true,
+    "unknowRelayState5IsOn":true,
+    "error":65535,
+    "operationModeX":0,
+    "heatingOperationModeX":1,
+    "timestamp":1640345997,
+    "timestampString":"Fri-24.12.21-11:39:57"
 }
 ```
 
@@ -475,8 +499,6 @@ stop the logging of received data packets. This writes all currently stored data
 ```bash
 curl -X PUT http://systapi:1337/SystaREST/disblelogging
 ```
-
-
 
 ## Known Issues
 

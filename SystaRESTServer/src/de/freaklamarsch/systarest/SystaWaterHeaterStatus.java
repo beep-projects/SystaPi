@@ -18,14 +18,14 @@ public class SystaWaterHeaterStatus {
 	 */
 	public enum tempUnit {
 		TEMP_CELSIUS, TEMP_FAHRENHEIT, TEMP_KELVIN
-	};
+	}
 
 	/**
 	 * possible operation modes of Home Assistant Water Heaters^
 	 */
-	public enum operationMode { 
+	public enum operationMode {
 		OPERATION_MODE_HEAT, OPERATION_MODE_OFF
-	};
+	}
 
 	/**
 	 * The minimum temperature that can be set.

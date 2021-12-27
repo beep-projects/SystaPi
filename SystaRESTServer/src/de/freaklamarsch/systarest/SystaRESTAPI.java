@@ -1,14 +1,17 @@
 /*
-* Copyright (c) 2021, The beep-projects contributors
-* this file originated from https://github.com/beep-projects
-* Do not remove the lines above.
-* The rest of this source code is subject to the terms of the Mozilla Public License.
-* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
-*/
+ * Copyright (c) 2021, The beep-projects contributors
+ * this file originated from https://github.com/beep-projects
+ * Do not remove the lines above.
+ * The rest of this source code is subject to the terms of the Mozilla Public License.
+ * You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+ */
 package de.freaklamarsch.systarest;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +20,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.model.ResourceMethod;
 
+import de.freaklamarsch.systarest.DeviceTouchSearch.DeviceTouchDeviceInfo;
 import de.freaklamarsch.systarest.FakeSystaWeb.FakeSystaWebStatus;
 import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
@@ -42,14 +46,15 @@ public class SystaRESTAPI {
 	public final static String PROP_PARADIGMA_IP = "PARADIGMA_IP";
 	private static FakeSystaWeb fsw = null;
 	private static Thread t = null;
-	private final Map<String, Object> config = new HashMap<String, Object>();
+	private final Map<String, Object> config = new HashMap<>();
 	private final JsonBuilderFactory jsonFactory = Json.createBuilderFactory(config);
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
+	//private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
+	private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;//ofPattern("E-dd.MM.yy-HH:mm:ss");
 
 	/**
 	 * Create SystaRESTAPI object which provides the Jersey REST API resource for
 	 * the SystaRESTServer. The constructor is called by every call to the server
-	 * 
+	 *
 	 * @param config {@code ResourceConfig} that holds the property
 	 *               {@code PROP_PARADIGMA_IP} for configuring the used IP address
 	 */
@@ -83,7 +88,7 @@ public class SystaRESTAPI {
 	/**
 	 * start the associated {@link FakeSystaWeb}, for receiving packets from a
 	 * Paradigma SystaComfort II
-	 * 
+	 *
 	 * @param config {@code ResourceConfig} that holds the property
 	 *               {@code PROP_PARADIGMA_IP} for configuring the used IP address
 	 */
@@ -123,8 +128,41 @@ public class SystaRESTAPI {
 	}
 
 	/**
+	 * find SystaComfort units using the search capability of the device touch
+	 * protocol. This function looks over all available network interfaces and tries
+	 * to discover device touch capable units using a search broadcast message.
+	 *
+	 * @return a JSON object representing the found unit, or null
+	 */
+	@GET
+	@Path("{findsystacomfort : (?i)findsystacomfort}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public JsonObject findSystaComfort() {
+		// System.out.println("Service Status called");
+		try {
+			DeviceTouchDeviceInfo sci = fsw.findSystaComfort();
+			if (sci == null) {
+				return null;
+			} else {
+				JsonObject jo = jsonFactory.createObjectBuilder().add("SystaWebIP", sci.localIp)
+						.add("SystaWebPort", 22460).add("DeviceTouchBcastIP", sci.bcastIp)
+						.add("DeviceTouchBcastPort", sci.bcastPort).add("deviceTouchInfoString", sci.string)
+						.add("unitIP", sci.ip).add("unitName", sci.name).add("unitId", sci.id).add("unitApp", sci.app)
+						.add("unitPlatform", sci.platform).add("unitVersion", sci.version).add("unitMajor", sci.major)
+						.add("unitMinor", sci.minor).add("unitBaseVersion", sci.baseVersion).add("unitMac", sci.mac)
+						.add("STouchAppSupported", sci.stouchSupported).add("DeviceTouchPort", sci.port)
+						.add("DeviceTouchPassword", (sci.password == null) ? "null" : sci.password).build();
+				return jo;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
 	 * return the status of the SystaRESTAPI service
-	 * 
+	 *
 	 * @return JSONObject holding the status
 	 */
 	@GET
@@ -136,7 +174,9 @@ public class SystaRESTAPI {
 			FakeSystaWebStatus fsws = fsw.getStatus();
 
 			JsonObject jo = jsonFactory.createObjectBuilder()
-					.add("timeStampString", formatter.format(LocalDateTime.now())).add("connected", fsws.connected)
+					 //.add("timeStampString", formatter.format(LocalDateTime.now()))
+			        .add("timeStampString", formatter.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault())))//, ZoneOffset.UTC)))
+			        .add("connected", fsws.connected)
 					.add("running", fsws.running).add("lastDataReceivedAt", fsws.lastTimestamp)
 					.add("packetsReceived", fsws.dataPacketsReceived).add("paradigmaListenerIP", fsws.localAddress)
 					.add("paradigmaListenerPort", fsws.localPort)
@@ -156,7 +196,7 @@ public class SystaRESTAPI {
 	/**
 	 * Get the last values received by the FakeSystaWeb, without any conversion or
 	 * interpretation
-	 * 
+	 *
 	 * @return JsonObject holding the values of the last received data
 	 */
 	@GET
@@ -197,7 +237,7 @@ public class SystaRESTAPI {
 	 * returns a JsonObject holding the fields of an <a href=
 	 * "https://developers.home-assistant.io/docs/core/entity/water-heater/">Home
 	 * Assistant Water Heater Entity</a>
-	 * 
+	 *
 	 * @return the Water Heater Entity
 	 */
 	@GET
@@ -230,7 +270,7 @@ public class SystaRESTAPI {
 	/**
 	 * returns a JsonObject holding the status of the connected Paradigma
 	 * SystaComfort II. The status is all known fields.
-	 * 
+	 *
 	 * @return the status
 	 */
 	@GET
@@ -242,66 +282,76 @@ public class SystaRESTAPI {
 			return jsonFactory.createObjectBuilder().build();
 		}
 		JsonObject jo = jsonFactory.createObjectBuilder().add("outsideTemp", ps.outsideTemp)
-				.add("circuit1FlowTemp", ps.circuit1FlowTemp).add("circuit1ReturnTemp", ps.circuit1ReturnTemp)
-				.add("hotWaterTemp", ps.hotWaterTemp).add("bufferTempTop", ps.bufferTempTop)
-				.add("bufferTempBottom", ps.bufferTempBottom).add("circulationTemp", ps.circulationTemp)
-				.add("circuit2FlowTemp", ps.circuit2FlowTemp).add("circuit2ReturnTemp", ps.circuit2ReturnTemp)
-				.add("roomTempActual1", ps.roomTempActual1).add("roomTempActual2", ps.roomTempActual2)
-				.add("collectorTempActual", ps.collectorTempActual).add("boilerFlowTemp", ps.boilerFlowTemp)
-				.add("boilerReturnTemp", ps.boilerReturnTemp).add("stoveFlowTemp", ps.stoveFlowTemp)
-				.add("stoveReturnTemp", ps.stoveReturnTemp).add("woodBoilerBufferTempTop", ps.woodBoilerBufferTempTop)
-				.add("swimmingpoolTemp", ps.swimmingpoolTemp).add("swimmingpoolFlowTeamp", ps.swimmingpoolFlowTeamp)
-				.add("swimmingpoolReturnTemp", ps.swimmingpoolReturnTemp).add("hotWaterTempSet", ps.hotWaterTempSet)
-				.add("roomTempSet1", ps.roomTempSet1).add("circuit1FlowTempSet", ps.circuit1FlowTempSet)
-				.add("circuit2FlowTempSet", ps.circuit2FlowTempSet).add("roomTempSet2", ps.roomTempSet2)
-				.add("bufferTempSet", ps.bufferTempSet).add("boilerTempSet", ps.boilerTempSet)
 				.add("operationMode", ps.operationMode).add("operationModeName", ps.operationModes[ps.operationMode])
-				.add("roomTempSetNormal", ps.roomTempSetNormal).add("roomTempSetComfort", ps.roomTempSetComfort)
-				.add("roomTempSetLowering", ps.roomTempSetLowering).add("heatingOperationMode", ps.heatingOperationMode)
-				.add("heatingOperationModeName", ps.heatingOperationModes[ps.heatingOperationMode])
-				.add("controlledBy", ps.controlledBy).add("controlMethodName", ps.controlMethods[ps.controlledBy])
-				.add("heatingCurveBasePoint", ps.heatingCurveBasePoint)
-				.add("heatingCurveGradient", ps.heatingCurveGradient).add("maxFlowTemp", ps.maxFlowTemp)
-				.add("heatingLimitTemp", ps.heatingLimitTemp)
-				.add("heatingLimitTeampLowering", ps.heatingLimitTeampLowering)
-				.add("antiFreezeOutsideTemp", ps.antiFreezeOutsideTemp).add("heatUpTime", ps.heatUpTime)
-				.add("roomImpact", ps.roomImpact).add("boilerSuperelevation", ps.boilerSuperelevation)
-				.add("spreadingHeatingCircuit", ps.spreadingHeatingCircuit)
-				.add("heatingMinSpeedPump", ps.heatingMinSpeedPump).add("mixerRuntime", ps.mixerRuntime)
-				.add("roomTempCorrection", ps.roomTempCorrection)
-				.add("underfloorHeatingBasePoint", ps.underfloorHeatingBasePoint)
-				.add("underfloorHeatingGradient", ps.underfloorHeatingGradient)
+				.add("circuit1FlowTemp", ps.circuit1FlowTemp).add("circuit1ReturnTemp", ps.circuit1ReturnTemp)
+				.add("circuit1FlowTempSet", ps.circuit1FlowTempSet).add("circuit1LeadTime", ps.circuit1LeadTime)
+				.add("hotWaterTemp", ps.hotWaterTemp).add("hotWaterTempSet", ps.hotWaterTempSet)
 				.add("hotWaterTempNormal", ps.hotWaterTempNormal).add("hotWaterTempComfort", ps.hotWaterTempComfort)
-				.add("hotWaterOperationMode", ps.hotWaterOperationMode)
+				.add("hotWaterTempMax", ps.hotWaterTempMax).add("hotWaterOperationMode", ps.hotWaterOperationMode)
 				.add("hotWaterOperationModeName", ps.hotWaterOperationModes[ps.hotWaterOperationMode])
-				.add("hotWaterHysteresis", ps.hotWaterHysteresis).add("hotWaterTempMax", ps.hotWaterTempMax)
-				.add("pumpOverrun", ps.pumpOverrun).add("bufferTempMax", ps.bufferTempMax)
-				.add("bufferTempMin", ps.bufferTempMin).add("boilerHysteresis", ps.boilerHysteresis)
-				.add("boilerOperationTime", ps.boilerOperationTime).add("boilerShutdownTemp", ps.boilerShutdownTemp)
-				.add("boilerMinSpeedPump", ps.boilerMinSpeedPump)
+				.add("hotWaterHysteresis", ps.hotWaterHysteresis).add("bufferTempTop", ps.bufferTempTop)
+				.add("bufferTempBottom", ps.bufferTempBottom).add("bufferTempSet", ps.bufferTempSet)
+				.add("logBoilerFlowTemp", ps.logBoilerFlowTemp).add("logBoilerReturnTemp", ps.logBoilerReturnTemp)
+				.add("logBoilerBufferTempTop", ps.logBoilerBufferTempTop)
+				.add("logBoilerBufferTempMin", ps.logBoilerBufferTempMin).add("logBoilerTempMin", ps.logBoilerTempMin)
+				.add("logBoilerSpreadingMin", ps.logBoilerSpreadingMin)
+				.add("logBoilerPumpSpeedMin", ps.logBoilerPumpSpeedMin)
+				.add("logBoilerPumpSpeedActual", ps.logBoilerPumpSpeedActual)
+				.add("logBoilerSettings", ps.logBoilerSettings).add("boilerOperationMode", ps.boilerOperationMode)
+				.add("boilerOperationModeName", ps.boilerOperationModes[ps.boilerOperationMode])
+				.add("boilerFlowTemp", ps.boilerFlowTemp).add("boilerReturnTemp", ps.boilerReturnTemp)
+				.add("boilerTempSet", ps.boilerTempSet).add("boilerSuperelevation", ps.boilerSuperelevation)
+				.add("boilerHysteresis", ps.boilerHysteresis).add("boilerOperationTime", ps.boilerOperationTime)
+				.add("boilerShutdownTemp", ps.boilerShutdownTemp).add("boilerPumpSpeedMin", ps.boilerPumpSpeedMin)
+				.add("circulationTemp", ps.circulationTemp).add("circulationPumpIsOn", ps.circulationPumpIsOn)
 				.add("circulationPumpOverrun", ps.circulationPumpOverrun)
-				.add("circulationHysteresis", ps.circulationHysteresis).add("adjustRoomTempBy", ps.adjustRoomTempBy)
+				.add("circulationHysteresis", ps.circulationHysteresis).add("circuit2FlowTemp", ps.circuit2FlowTemp)
+				.add("circuit2ReturnTemp", ps.circuit2ReturnTemp).add("circuit2FlowTempSet", ps.circuit2FlowTempSet)
+				.add("roomTempActual1", ps.roomTempActual1).add("roomTempSet1", ps.roomTempSet1)
+				.add("roomTempActual2", ps.roomTempActual2).add("roomTempSet2", ps.roomTempSet2)
+				.add("roomTempSetNormal", ps.roomTempSetNormal)
+				.add("roomTempSetComfort", ps.roomTempSetComfort).add("roomTempSetLowering", ps.roomTempSetLowering)
+				.add("roomImpact", ps.roomImpact)
+				.add("roomTempCorrection", ps.roomTempCorrection).add("collectorTempActual", ps.collectorTempActual)
+				.add("swimmingpoolFlowTemp", ps.swimmingpoolFlowTemp).add("swimmingpoolFlowTeamp", ps.swimmingpoolFlowTeamp)
+				.add("swimmingpoolReturnTemp", ps.swimmingpoolReturnTemp)
+				.add("heatingOperationMode", ps.heatingOperationMode)
+				.add("heatingOperationModeName", ps.heatingOperationModes[ps.heatingOperationMode])
+				.add("heatingCurveBasePoint", ps.heatingCurveBasePoint)
+				.add("heatingCurveGradient", ps.heatingCurveGradient).add("heatingLimitTemp", ps.heatingLimitTemp)
+				.add("heatingLimitTeampLowering", ps.heatingLimitTeampLowering)
+				.add("heatingPumpSpeedActual", ps.heatingPumpSpeedActual)
+				.add("heatingPumpOverrun", ps.heatingPumpOverrun).add("heatingPumpIsOn", ps.heatingPumpIsOn)
+				.add("heatingCircuitSpreading", ps.heatingCircuitSpreading)
+				.add("heatingPumpSpeedMin", ps.heatingPumpSpeedMin).add("controlledBy", ps.controlledBy)
+				.add("controlMethodName", ps.controlMethods[ps.controlledBy]).add("maxFlowTemp", ps.maxFlowTemp)
+				.add("antiFreezeOutsideTemp", ps.antiFreezeOutsideTemp).add("heatUpTime", ps.heatUpTime)
+				.add("mixerRuntime", ps.mixerRuntime)
+				.add("mixer1IsOnWarm", ps.mixer1IsOnWarm).add("mixer1IsOnCool", ps.mixer1IsOnCool)
+				.add("mixer1State", ps.mixer1State).add("mixer1StateName", ps.mixerStateNames[ps.mixer1State])
+				.add("underfloorHeatingBasePoint", ps.underfloorHeatingBasePoint)
+				.add("underfloorHeatingGradient", ps.underfloorHeatingGradient).add("bufferTempMax", ps.bufferTempMax)
+				.add("bufferTempMin", ps.bufferTempMin).add("adjustRoomTempBy", ps.adjustRoomTempBy)
+				.add("solarPowerActual", ps.solarPowerActual).add("solarGainDay", ps.solarGainDay)
+				.add("solarGainTotal", ps.solarGainTotal).add("relay", ps.relay)
+				.add("chargePumpIsOn", ps.chargePumpIsOn).add("boilerIsOn", ps.boilerIsOn)
+				.add("burnerIsOn", ps.burnerIsOn)
+				.add("systemNumberOfStarts", ps.systemNumberOfStarts)
+				.add("burnerNumberOfStarts", ps.burnerNumberOfStarts)
 				.add("boilerOperationTimeHours", ps.boilerOperationTimeHours)
 				.add("boilerOperationTimeMinutes", ps.boilerOperationTimeMinutes)
-				.add("numberBurnerStarts", ps.numberBurnerStarts).add("solarPowerActual", ps.solarPowerActual)
-				.add("solarGainDay", ps.solarGainDay).add("solarGainTotal", ps.solarGainTotal)
-				.add("countdown", ps.countdown).add("relay", ps.relay).add("heatingPumpIsOn", ps.heatingPumpIsOn)
-				.add("chargePumpIsOn", ps.chargePumpIsOn).add("circulationPumpIsOn", ps.circulationPumpIsOn)
-				.add("boilerIsOn", ps.boilerIsOn).add("burnerIsOn", ps.burnerIsOn)
 				.add("unknowRelayState1IsOn", ps.unknowRelayState1IsOn)
 				.add("unknowRelayState2IsOn", ps.unknowRelayState2IsOn)
-				.add("unknowRelayState3IsOn", ps.unknowRelayState3IsOn)
-				.add("unknowRelayState4IsOn", ps.unknowRelayState4IsOn)
 				.add("unknowRelayState5IsOn", ps.unknowRelayState5IsOn).add("error", ps.error)
 				.add("operationModeX", ps.operationModeX).add("heatingOperationModeX", ps.heatingOperationModeX)
-				.add("stovePumpSpeedActual", ps.stovePumpSpeedActual).add("timestamp", ps.timestamp)
-				.add("timestampString", ps.timestampString).build();
+				.add("timestamp", ps.timestamp).add("timestampString", ps.timestampString).build();
 		return jo;
+
 	}
 
 	/**
 	 * enables the logging of each received data element to a log file
-	 * 
+	 *
 	 * @param filePrefix     the prefix for the created log files. Following the
 	 *                       prefix a running number is added to the file names
 	 *                       defaults to {@code paradigma}
