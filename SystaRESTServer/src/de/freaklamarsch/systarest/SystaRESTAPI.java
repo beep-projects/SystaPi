@@ -59,8 +59,6 @@ public class SystaRESTAPI {
 	private static Thread t = null;
 	private final Map<String, Object> config = new HashMap<>();
 	private final JsonBuilderFactory jsonFactory = Json.createBuilderFactory(config);
-	//private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
-	private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;//ofPattern("E-dd.MM.yy-HH:mm:ss");
 
 	/**
 	 * Create SystaRESTAPI object which provides the Jersey REST API resource for
@@ -183,10 +181,9 @@ public class SystaRESTAPI {
 		// System.out.println("Service Status called");
 		try {
 			FakeSystaWebStatus fsws = fsw.getStatus();
-
+			
 			JsonObject jo = jsonFactory.createObjectBuilder()
-					 //.add("timeStampString", formatter.format(LocalDateTime.now()))
-			        .add("timeStampString", formatter.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault())))//, ZoneOffset.UTC)))
+			        .add("timeStampString", DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault())))
 			        .add("connected", fsws.connected)
 					.add("running", fsws.running).add("lastDataReceivedAt", fsws.lastTimestamp)
 					.add("packetsReceived", fsws.dataPacketsReceived).add("paradigmaListenerIP", fsws.localAddress)
@@ -324,7 +321,7 @@ public class SystaRESTAPI {
 				.add("roomTempSetComfort", ps.roomTempSetComfort).add("roomTempSetLowering", ps.roomTempSetLowering)
 				.add("roomImpact", ps.roomImpact)
 				.add("roomTempCorrection", ps.roomTempCorrection).add("collectorTempActual", ps.collectorTempActual)
-				.add("swimmingpoolFlowTemp", ps.swimmingpoolFlowTemp).add("swimmingpoolFlowTeamp", ps.swimmingpoolFlowTeamp)
+				.add("swimmingpoolTemp", ps.swimmingpoolTemp).add("swimmingpoolFlowTemp", ps.swimmingpoolFlowTemp)
 				.add("swimmingpoolReturnTemp", ps.swimmingpoolReturnTemp)
 				.add("heatingOperationMode", ps.heatingOperationMode)
 				.add("heatingOperationModeName", ps.heatingOperationModes[ps.heatingOperationMode])
