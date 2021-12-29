@@ -1,12 +1,13 @@
-![banner](resources/banner.png)
 
-[![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/blob/main/LICENSE) [![JUnit](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml) [![shellcheck](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml) [![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub forks](https://img.shields.io/github/forks/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/network) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) ![GitHub repo size](https://img.shields.io/github/repo-size/beep-projects/SystaPi)
+
+[![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/blob/main/LICENSE) [![JUnit](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml) [![shellcheck](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml) [![Pylint](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml) [![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub forks](https://img.shields.io/github/forks/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/network) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) ![GitHub repo size](https://img.shields.io/github/repo-size/beep-projects/SystaPi)
 
 # SystaPi and SystaREST
 
-SystaPi adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The intention of this is to make the system compatible with every home automation system that supports REST APIs. The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST ([Javadoc](http://beep-projects.github.io/SystaPi)). 
-Because the communication protocol is not publicly available, the server has a rudimentary logging functionality integrated. You can set triggers on value changes with your home automation system and start logging of values for analysis.
-
+**SystaPi** adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs.
+The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST, see the documentation for details of the supported fields [Javadoc: SystaStatus](https://beep-projects.github.io/SystaPi/de/freaklamarsch/systarest/SystaStatus.html).  
+**Note:** The communication protocol is not publicly available, everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. So please contribute information from your system.  
+To support you in reverse engineering, the server has a rudimentary logging functionality integrated. You can use this to set triggers on value changes with your home automation system and start logging of values for analysis.  
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).
 
 Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort.
@@ -50,6 +51,8 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
     │   ├── lib                 # .jar files required for running the server
     │   └── src                 # src files of the server, for everyone who wants to improve this
     ├── docs                    # Javadoc for SystaREST Java classes available at http://beep-projects.github.io/SystaPi
+    ├── helpers                 # collection of ressources that are helpful for reverse engineering the SystaComfort protocol
+    │                           # or setting up systapi
     ├── resources               # folder for images or other files linked with README.md
     ├── install_systapi.sh      # Script for automatically downloading, flashing and configuring 
     │                           # a Micro SD card for running the SystaREST server
@@ -66,13 +69,13 @@ This is what I am using for this project, but any Raspberry Pi with at least one
 * Micro SD card >256MB
 * Micro USB Powersupply 5V / 1A
 
-Of course you also need a Paradigma SystaComfort or Paradigmy SystaComfort II. The following are the paradigma software versions that I succesfully used with **SystaPi**
+Of course you also need a Paradigma SystaComfort or Paradigmy SystaComfort II. The following are the paradigma software versions that I succesfully used with **SystaPi** (#1, #2) or that where reported to work (#3)
 
-|                  |   |        #1        |   |       #2          |
-|------------------|---|------------------|---|-------------------|
-| **SystaComfort** |   | `V1.14  8.08.14` |   | `V1.26  10.02.20` |
-| **System**       |   | `V2.09.2`        |   | `V2.16.1`         |
-| **Basis**        |   | `V0.23`          |   | `V0.34`           |
+|                  |   |        #1        |   |       #2          |   |       #3          |
+|------------------|---|------------------|---|-------------------|---|-------------------|
+| **SystaComfort** |   | `V1.14  8.08.14` |   | `V1.26  10.02.20` |   | `V1.12  20.05.14` |
+| **System**       |   | `V2.09.2`        |   | `V2.16.1`         |   | `V2.09.1`         |
+| **Basis**        |   | `V0.23`          |   | `V0.34`           |   | `V0.23`           |
 
 ## Installation
 
@@ -102,7 +105,8 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 2. Open `SystaPi-main/SystaPi_files/firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
    Most probably you want to generate your `WPA_PASSPHRASE` via `wpa_passphrase MY_WIFI passphrase` , or  use the [WPA PSK (Raw Key) Generator](https://www.wireshark.org/tools/wpa-psk.html), and add the credentials to the file.
-
+   If you use the network `192.168.1.x` for your local network, you should change the `IP_PREFIX` to another IP range, to avoid network collisions
+   
    ```bash
    #-------------------------------------------------------------------------------
    #----------------------- START OF CONFIGURATION --------------------------------
@@ -116,6 +120,9 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    # but you also can enter your passphrase as plain text, if you accept the potential insecurity of that approach
    SSID=MY_WIFI
    WPA_PASSPHRASE=3755b1112a687d1d37973547f94d218e6673f99f73346967a6a11f4ce386e41e
+   # define the network to use for communication between systapi and Systa Comfort
+   # change if you use the same network range on your wifi network
+   IP_PREFIX="192.168.1"
    # configure your timezone and key board settings
    TIMEZONE="Europe/Berlin"
    COUNTRY="DE"
@@ -130,7 +137,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    #------------------------ END OF CONFIGURATION ---------------------------------
    #-------------------------------------------------------------------------------
    ```
-
+   
 3. Insert the Micro SD card that you want to get prepared as SystaPi into your computing device
 
 4. Continue in the shell
@@ -147,6 +154,13 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 7. Power up the Raspberry Pi
 
 8. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+    For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and whatch the installation process
+
+   ```bash
+   ssh -x pi@systapi.local
+   tail -f /boot/secondrun.log
+   ```
+    The password for the ```pi``` user is not changed from the default, so you should change it
 
 ### Windows / manual installation
 
@@ -160,8 +174,8 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 4. Change into the `SystaPi_files` subfolder of the extracted archive
 
 5. Open `firstrun.sh` with a text editor and configure everything in the marked section to your liking.
-
    Most probably you want to use something like [WPA PSK (Raw Key) Generator](https://www.wireshark.org/tools/wpa-psk.html) and add the generated credentials to the file.
+   If you use the network `192.168.1.x` for your local network, you should change the `IP_PREFIX` to another IP range, to avoid network collisions
 
    ```bash
    #-------------------------------------------------------------------------------
@@ -176,6 +190,9 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    # but you also can enter your passphrase as plain text, if you accept the potential insecurity of that approach
    SSID=MY_WIFI
    WPA_PASSPHRASE=3755b1112a687d1d37973547f94d218e6673f99f73346967a6a11f4ce386e41e
+   # define the network to use for communication between systapi and Systa Comfort
+   # change if you use the same network range on your wifi network
+   IP_PREFIX="192.168.1"
    # configure your timezone and key board settings
    TIMEZONE="Europe/Berlin"
    COUNTRY="DE"
@@ -193,23 +210,33 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 6. Make sure that the `boot`-partition of the Micro SD card is accessible via file explorer
 
-7. Copy all files from the `SystaPi_files` subfolder to `boot`-partition of the Micro SD card
+7. Open `cmdline.txt` from the Micro SD card and copy the `root=PARTUUID=`-Number over into the `cmdline.txt` in the `SystaPi_files` subfolder. If you do not do this step, your pi will not boot!
 
-8. Copy the `SystaRESTServer` folder and all of its content to the `boot`-partition.
+8. Copy all files from the `SystaPi_files` subfolder to `boot`-partition of the Micro SD card
 
-9. Eject the Micro SD card and insert it into your Raspberry Pi
+9. Copy the `SystaRESTServer` folder and all of its content to the `boot`-partition.
 
-10. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
+10. Eject the Micro SD card and insert it into your Raspberry Pi
 
-11. Power up the Raspberry Pi
+11. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
 
-12. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+12. Power up the Raspberry Pi
+
+13. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and whatch the installation process
+
+    ```bash
+    ssh -x pi@systapi.local
+    tail -f /boot/secondrun.log
+    ```
+The password for the ```pi``` user is not changed from the default, so you should change it
 
 ### Troubleshooting the installation
 
-1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong
-2. If you do not know where the install script died on the Raspberry Pi, have a look into the `/boot` folder via `ls /boot/*.sh`. 
-The files `firstrun.sh`, `secondrun.sh` and `thirdrun.sh`  are stored there and run one after each other. After a successful run, each of the files removes itself. So the first file not deleted, is the one that failed
+1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong.
+2. If the pi does not boot, check if you did step 7 in case of a manual installation.
+3. If you do not know where the install script died on the Raspberry Pi, have a look into the `/boot` folder via `ls /boot/*.sh`. 
+Each script creates a log file, so check `firstrun.log`, `secondrun.log` and `thirdrun.log`, to see where the script failed.
 4. SystaRESTServer is installed as a service on the raspberry pi. 
 `systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
 
@@ -243,6 +270,9 @@ curl -X POST http://systapi:1337/SystaREST/stop
 `GET` `/SystaREST/servicestatus`
 [http://systapi:1337/SystaREST/servicestatus](http://systapi:1337/SystaREST/servicestatus)
 Returns the status of the SystaREST server
+```bash
+curl "http://systapi:1337/SystaREST/servicestatus"
+```
 
 ```json
 {
@@ -269,6 +299,9 @@ Returns the status of the SystaREST server
 `GET` `/SystaREST/rawdata`
 [http://systapi:1337/SystaREST/rawdata](http://systapi:1337/SystaREST/rawdata)
 Returns the raw data received from the Paradigma Systa Comfort with added timestamp information.
+```bash
+curl "http://systapi:1337/SystaREST/rawdata"
+```
 
 ```json
 {
@@ -297,7 +330,11 @@ Returns the raw data received from the Paradigma Systa Comfort with added timest
 
 `GET` `/SystaREST/waterheater`
 [http://systapi:1337/SystaREST/waterheater](http://systapi:1337/SystaREST/waterheater)
-Returns the information for a Home Assistant [Water Heater](https://developers.home-assistant.io/docs/core/entity/water-heater/) 
+Returns the information for a Home Assistant [Water Heater](https://developers.home-assistant.io/docs/core/entity/water-heater/)
+
+```bash
+curl "http://systapi:1337/SystaREST/waterheater"
+```
 
 ```json
 {
@@ -328,99 +365,114 @@ Returns the information for a Home Assistant [Water Heater](https://developers.h
 `GET` `/SystaREST/status`
 [http://systapi:1337/SystaREST/status](http://systapi:1337/SystaREST/status)
 Returns all known fields from the received data.
+```bash
+curl "http://systapi:1337/SystaREST/status"
+```
 
 ```json
 {
-    "outsideTemp":16.2,
-    "circuit1FlowTemp":26.9,
-    "circuit1ReturnTemp":27.7,
-    "hotWaterTemp":66.6,
-    "bufferTempTop":66.0,
-    "bufferTempBottom":63.6,
+    "outsideTemp":7.9,
+    "operationMode":0,
+    "operationModeName":"Auto Prog. 1",
+    "circuit1FlowTemp":42.9,
+    "circuit1ReturnTemp":29.8,
+    "circuit1FlowTempSet":44.2,
+    "circuit1LeadTime":0,
+    "hotWaterTemp":59.3,
+    "hotWaterTempSet":50.0,
+    "hotWaterTempNormal":50.0,
+    "hotWaterTempComfort":60.0,
+    "hotWaterTempMax":85.0,
+    "hotWaterOperationMode":1,
+    "hotWaterOperationModeName":"normal",
+    "hotWaterHysteresis":5.0,
+    "bufferTempTop":54.6,
+    "bufferTempBottom":34.0,
+    "bufferTempSet":44.2,
+    "logBoilerFlowTemp":21.3,
+    "logBoilerReturnTemp":17.9,
+    "logBoilerBufferTempTop":-30.2,
+    "logBoilerBufferTempMin":30.0,
+    "logBoilerTempMin":65.0,
+    "logBoilerSpreadingMin":100.0,
+    "logBoilerPumpSpeedMin":60,
+    "logBoilerPumpSpeedActual":0,
+    "logBoilerSettings":19,
+    "boilerOperationMode":0,
+    "boilerOperationModeName":"off",
+    "boilerFlowTemp":37.6,
+    "boilerReturnTemp":37.6,
+    "boilerTempSet":0.0,
+    "boilerSuperelevation":0,
+    "boilerHysteresis":5.0,
+    "boilerOperationTime":5,
+    "boilerShutdownTemp":40.0,
+    "boilerPumpSpeedMin":25,
     "circulationTemp":-30.0,
+    "circulationPumpIsOn":false,
+    "circulationPumpOverrun":3,
+    "circulationHysteresis":5.0,
     "circuit2FlowTemp":-30.0,
     "circuit2ReturnTemp":-30.0,
+    "circuit2FlowTempSet":44.2,
     "roomTempActual1":0.0,
+    "roomTempSet1":20.0,
     "roomTempActual2":0.0,
+    "roomTempSet2":0.0,
+    "roomTempSetNormal":20.0,
+    "roomTempSetComfort":22.0,
+    "roomTempSetLowering":15.0,
+    "roomImpact":0.0,
+    "roomTempCorrection":0.0,
     "collectorTempActual":0.0,
-    "boilerFlowTemp":24.8,
-    "boilerReturnTemp":24.8,
-    "stoveFlowTemp":22.7,
-    "stoveReturnTemp":32.3,
-    "woodBoilerBufferTempTop":-30.2,
-    "swimmingpoolTemp":0.0,
+    "swimmingpoolFlowTemp":0.0,
     "swimmingpoolFlowTeamp":0.0,
     "swimmingpoolReturnTemp":0.0,
-    "hotWaterTempSet":0.0,
-    "roomTempSet1":0.0,
-    "circuit1FlowTempSet":0.0,
-    "circuit2FlowTempSet":0.0,
-    "roomTempSet2":0.0
-    "bufferTempSet":0.0
-    "boilerTempSet":0.0
-    "operationMode":7
-    "operationModeName":"Off"
-    "roomTempSetNormal":21.0
-    "roomTempSetComfort":24.0
-    "roomTempSetLowering":18.0
-    "heatingOperationMode":0
-    "heatingOperationModeName":"off"
-    "controlledBy":0
-    "controlMethodName":"external temp"
-    "heatingCurveBasePoint":34.0
-    "heatingCurveGradient":0.4
-    "maxFlowTemp":60.0
-    "heatingLimitTemp":15.0
-    "heatingLimitTeampLowering":15.0
-    "antiFreezeOutsideTemp":2.0
-    "heatUpTime":30
-    "roomImpact":0.0
-    "boilerSuperelevation":0
-    "spreadingHeatingCircuit":20.0
-    "heatingMinSpeedPump":100
-    "mixerRuntime":2
-    "roomTempCorrection":0.0
-    "underfloorHeatingBasePoint":35.0
-    "underfloorHeatingGradient":1.3
-    "hotWaterTempNormal":55.0
-    "hotWaterTempComfort":60.0
-    "hotWaterOperationMode":3
-    "hotWaterOperationModeName":"locked"
-    "hotWaterHysteresis":5.0
-    "hotWaterTempMax":65.0
-    "pumpOverrun":10
-    "bufferTempMax":85.0
-    "bufferTempMin":1.0
-    "boilerHysteresis":5.0
-    "boilerOperationTime":5
-    "boilerShutdownTemp":25.0
-    "boilerMinSpeedPump":25
-    "circulationPumpOverrun":3
-    "circulationHysteresis":5.0
-    "adjustRoomTempBy":0.0
-    "boilerOperationTimeHours":3885
-    "boilerOperationTimeMinutes":48
-    "numberBurnerStarts":2414
-    "solarPowerActual":0.0
-    "solarGainDay":0.0
-    "solarGainTotal":0.0,"countdown":0
-    "relay":2048
-    "heatingPumpIsOn":false
-    "chargePumpIsOn":false
-    "circulationPumpIsOn":false
-    "boilerIsOn":false
-    "burnerIsOn":false
-    "unknowRelayState1IsOn":false
-    "unknowRelayState2IsOn":false
-    "unknowRelayState3IsOn":false
-    "unknowRelayState4IsOn":false
-    "unknowRelayState5IsOn":true
-    "error":65535
-    "operationModeX":7
-    "heatingOperationModeX":0
-    "stovePumpSpeedActual":0
-    "timestamp":1625268469,
-    "timestampString":"Fri-02.07.21-23:27:49"
+    "heatingOperationMode":1,
+    "heatingOperationModeName":"normal",
+    "heatingCurveBasePoint":35.0,
+    "heatingCurveGradient":1.3,
+    "heatingLimitTemp":20.0,
+    "heatingLimitTeampLowering":10.0,
+    "heatingPumpSpeedActual":100,
+    "heatingPumpOverrun":10,
+    "heatingPumpIsOn":true,
+    "heatingCircuitSpreading":20.0,
+    "heatingPumpSpeedMin":100,
+    "controlledBy":0,
+    "controlMethodName":"external temp",
+    "maxFlowTemp":70.0,
+    "antiFreezeOutsideTemp":2.0,
+    "heatUpTime":120,
+    "mixerRuntime":2,
+    "mixer1IsOnWarm":false,
+    "mixer1IsOnCool":false,
+    "mixer1State":0,
+    "mixer1StateName":"off",
+    "underfloorHeatingBasePoint":35.0,
+    "underfloorHeatingGradient":1.3,
+    "bufferTempMax":95.0,
+    "bufferTempMin":0.0,
+    "adjustRoomTempBy":0.0,
+    "solarPowerActual":0.0,
+    "solarGainDay":0.0,
+    "solarGainTotal":0.0,
+    "relay":2049,
+    "chargePumpIsOn":false,
+    "boilerIsOn":false,
+    "burnerIsOn":false,
+    "systemNumberOfStarts":26,
+    "burnerNumberOfStarts":394,
+    "boilerOperationTimeHours":234,
+    "boilerOperationTimeMinutes":58,
+    "unknowRelayState1IsOn":false,
+    "unknowRelayState2IsOn":true,
+    "unknowRelayState5IsOn":true,
+    "error":65535,
+    "operationModeX":0,
+    "heatingOperationModeX":1,
+    "timestamp":1640345997,
+    "timestampString":"Fri-24.12.21-11:39:57"
 }
 ```
 
@@ -447,8 +499,6 @@ stop the logging of received data packets. This writes all currently stored data
 ```bash
 curl -X PUT http://systapi:1337/SystaREST/disblelogging
 ```
-
-
 
 ## Known Issues
 

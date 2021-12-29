@@ -2,12 +2,24 @@
 * Copyright (c) 2021, The beep-projects contributors
 * this file originated from https://github.com/beep-projects
 * Do not remove the lines above.
-* The rest of this source code is subject to the terms of the Mozilla Public License.
-* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/
+*
 */
 package de.freaklamarsch.systarest.tests;
 
 import static org.junit.Assert.assertEquals;
+
 import java.lang.reflect.Field;
 
 import org.junit.Test;
@@ -19,7 +31,7 @@ public class CircularBufferTest {
 	CircularBuffer<Integer> cb;// = new CircularBuffer<Integer>(testCapacity);
 
 	public CircularBufferTest() {
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 	}
 
 	@Test
@@ -32,7 +44,7 @@ public class CircularBufferTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 		assertEquals(testCapacity, cb.capacity());
 		assertEquals(0, cb.size());
 		assertEquals(true, cb.isEmpty());
@@ -41,7 +53,7 @@ public class CircularBufferTest {
 		assertEquals(null, cb.remove());
 		// test constructor with negative capacity
 		// this should create a buffer with DEFAULT_CAPACITY
-		cb = new CircularBuffer<Integer>(-1);
+		cb = new CircularBuffer<>(-1);
 		assertEquals(defaultCapacity, cb.capacity());
 		assertEquals(0, cb.size());
 		assertEquals(true, cb.isEmpty());
@@ -49,7 +61,7 @@ public class CircularBufferTest {
 		assertEquals(null, cb.peek());
 		assertEquals(null, cb.remove());
 		// test constructor with 0 capacity
-		cb = new CircularBuffer<Integer>(0);
+		cb = new CircularBuffer<>(0);
 		assertEquals(defaultCapacity, cb.capacity());
 		assertEquals(0, cb.size());
 		assertEquals(true, cb.isEmpty());
@@ -60,7 +72,7 @@ public class CircularBufferTest {
 
 	@Test
 	public void testAdd() {
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 		cb.setOverwrite(false);
 		int i = 0;
 		// fill the buffer to testCapacity-1 elements
@@ -121,7 +133,7 @@ public class CircularBufferTest {
 
 	@Test
 	public void testAddWithOverwrite() {
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 		cb.setOverwrite(true);
 		int i = 0;
 		// fill the buffer to testCapacity-1 elements
@@ -175,7 +187,7 @@ public class CircularBufferTest {
 
 	@Test
 	public void testRemove() {
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 		int i = 0;
 		// fill the buffer
 		while (!cb.isFull()) {
@@ -207,7 +219,7 @@ public class CircularBufferTest {
 
 	@Test
 	public void testClear() {
-		cb = new CircularBuffer<Integer>(testCapacity);
+		cb = new CircularBuffer<>(testCapacity);
 		int i = 0;
 		// fill the buffer
 		while (!cb.isFull()) {

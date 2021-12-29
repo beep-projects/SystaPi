@@ -2,8 +2,19 @@
 * Copyright (c) 2021, The beep-projects contributors
 * this file originated from https://github.com/beep-projects
 * Do not remove the lines above.
-* The rest of this source code is subject to the terms of the Mozilla Public License.
-* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/
+*
 */
 package de.freaklamarsch.systarest;
 
@@ -13,11 +24,16 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import de.freaklamarsch.systarest.DataLogger.DataLoggerStatus;
+import de.freaklamarsch.systarest.DeviceTouchSearch.DeviceTouchDeviceInfo;
 import de.freaklamarsch.systarest.SystaWaterHeaterStatus.tempUnit;
 
 /**
@@ -70,6 +86,53 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
+	/**
+	 * Inner class for representing the info about a SystaComfort unit
+	 */
+	public class SystaComfortInfo {
+		public final String systawebIp;
+		public final int systawebPort;
+		public final String systaBcastIp;
+		public final int systaBcastPort;
+		public final String scInfoString;
+		public final String unitIp;
+		public final int unitStouchPort;
+		public final String unitName;
+		public final String unitId;
+		public final int unitApp;
+		public final int unitPlatform;
+		public final String unitScFullVersion;
+		public final int unitScVersion;
+		public final int unitScMinor;
+		public final String unitPassword;
+		public final String unitBaseVersion;
+		public final String unitMac;
+
+		public SystaComfortInfo(String systawebIp, int systawebPort, String systaBcastIp, int systaBcastPort,
+				String scInfoString, String unitIp, int unitStouchPort, String unitName, String unitId, int unitApp,
+				int unitPlatform, String unitScFullVersion, int unitScVersion, int unitScMinor, String unitPassword,
+				String unitBaseVersion, String unitMac) {
+			this.systawebIp = systawebIp;
+			this.systawebPort = systawebPort;
+			this.systaBcastIp = systaBcastIp;
+			this.systaBcastPort = systaBcastPort;
+			this.scInfoString = scInfoString;
+			this.unitIp = unitIp;
+			this.unitStouchPort = unitStouchPort;
+			this.unitName = unitName;
+			this.unitId = unitId;
+			this.unitApp = unitApp;
+			this.unitPlatform = unitPlatform;
+			this.unitScFullVersion = unitScFullVersion;
+			this.unitScVersion = unitScVersion;
+			this.unitScMinor = unitScMinor;
+			this.unitPassword = unitPassword;
+			this.unitBaseVersion = unitBaseVersion;
+			this.unitMac = unitMac;
+
+		}
+	}
+
 	private InetAddress remoteAddress;
 	private int remotePort;
 	private final int PORT = 22460;
@@ -98,9 +161,9 @@ public class FakeSystaWeb implements Runnable {
 	private final String[] WATER_HEATER_OPERATION_MODES = { "off", "normal", "comfort", "locked" };
 
 	private int WRITER_MAX_DATA = 60;
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
-	private DataLogger<Integer> logInt = new DataLogger<Integer>("data", WRITER_MAX_DATA);
-	private DataLogger<Byte> logRaw = new DataLogger<Byte>("raw", WRITER_MAX_DATA);
+	private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;//ofPattern("E-dd.MM.yy-HH:mm:ss");
+	private DataLogger<Integer> logInt = new DataLogger<>("data", WRITER_MAX_DATA);
+	private DataLogger<Byte> logRaw = new DataLogger<>("raw", WRITER_MAX_DATA);
 
 	// constructor
 	public FakeSystaWeb() {
@@ -122,6 +185,10 @@ public class FakeSystaWeb implements Runnable {
 				dls.bufferedEntries);
 	}
 
+	public DeviceTouchDeviceInfo findSystaComfort() {
+		return DeviceTouchSearch.search();
+	}
+
 	/**
 	 * @return the inetAddress
 	 */
@@ -138,7 +205,7 @@ public class FakeSystaWeb implements Runnable {
 
 	/**
 	 * get the timestamp for the current measurement
-	 * 
+	 *
 	 * @return the timestamp in seconds from the epoch of 1970-01-01T00:00:00Z.
 	 *         Which is UTC.
 	 */
@@ -148,13 +215,15 @@ public class FakeSystaWeb implements Runnable {
 
 	/**
 	 * get the timestamp for the current measurement as human readable string
-	 * 
+	 *
 	 * @return the timestamp as a LocalDateTime string, which is a date-time without
 	 *         a time-zone in the ISO-8601 calendar system
 	 */
 	public String getTimestampString() {
 		return (readIndex < 0) ? "never"
-				: formatter.format(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC));
+				: formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+		//: formatter.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(timestamp[readIndex]), ZoneOffset.UTC));
+		//: formatter.format(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC));
 	}
 
 	/**
@@ -195,7 +264,9 @@ public class FakeSystaWeb implements Runnable {
 		status.supportedFeatures = new String[] {}; // TODO check what supported features are
 		status.is_away_mode_on = false; // TODO match with ferien mode if possible
 		status.timestamp = timestamp[i];
-		status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
+		//status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
+		status.timestampString = formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+		//formatter.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault()))
 		return status;
 	}
 
@@ -203,7 +274,7 @@ public class FakeSystaWeb implements Runnable {
 		SystaStatus status = new SystaStatus();
 		int i = readIndex; // save readIndex, so we do not read inconsistent data if it gets updated
 		if (i < 0 || timestamp[i] <= 0) {
-			System.out.println("i: "+i+", timestamp: "+timestamp[i]);
+			System.out.println("i: " + i + ", timestamp: " + timestamp[i]);
 			return null;
 		}
 		status.outsideTemp = intData[i][SystaIndex.OUTSIDE_TEMP] / 10.0;
@@ -220,10 +291,10 @@ public class FakeSystaWeb implements Runnable {
 		status.collectorTempActual = intData[i][SystaIndex.COLLECTOR_TEMP_ACTUAL] / 10.0;
 		status.boilerFlowTemp = intData[i][SystaIndex.BOILER_FLOW_TEMP] / 10.0;
 		status.boilerReturnTemp = intData[i][SystaIndex.BOILER_RETURN_TEMP] / 10.0;
-		status.stoveFlowTemp = intData[i][SystaIndex.STOVE_FLOW_TEMP] / 10.0;
-		status.stoveReturnTemp = intData[i][SystaIndex.STOVE_RETURN_TEMP] / 10.0;
-		status.woodBoilerBufferTempTop = intData[i][SystaIndex.WOOD_BOILER_BUFFER_TEMP_TOP] / 10.0;
-		status.swimmingpoolTemp = intData[i][SystaIndex.SWIMMINGPOOL_TEMP] / 10.0;
+		status.logBoilerFlowTemp = intData[i][SystaIndex.LOG_BOILER_FLOW_TEMP] / 10.0;
+		status.logBoilerReturnTemp = intData[i][SystaIndex.LOG_BOILER_RETURN_TEMP] / 10.0;
+		status.logBoilerBufferTempTop = intData[i][SystaIndex.LOG_BOILER_BUFFER_TEMP_TOP] / 10.0;
+		status.swimmingpoolFlowTemp = intData[i][SystaIndex.SWIMMINGPOOL_TEMP] / 10.0;
 		status.swimmingpoolFlowTeamp = intData[i][SystaIndex.SWIMMINGPOOL_FLOW_TEMP] / 10.0;
 		status.swimmingpoolReturnTemp = intData[i][SystaIndex.SWIMMINGPOOL_RETURN_TEMP] / 10.0;
 		status.hotWaterTempSet = intData[i][SystaIndex.HOT_WATER_TEMP_SET] / 10.0;
@@ -248,8 +319,8 @@ public class FakeSystaWeb implements Runnable {
 		status.heatUpTime = intData[i][SystaIndex.HEAT_UP_TIME]; // in minutes
 		status.roomImpact = intData[i][SystaIndex.ROOM_IMPACT] / 10.0;
 		status.boilerSuperelevation = intData[i][SystaIndex.BOILER_SUPERELEVATION];
-		status.spreadingHeatingCircuit = intData[i][SystaIndex.SPREADING_HEATING_CIRCUIT] / 10.0;
-		status.heatingMinSpeedPump = intData[i][SystaIndex.HEATING_MIN_SPEED_PUMP]; // in %
+		status.heatingCircuitSpreading = intData[i][SystaIndex.HEATING_CIRCUIT_SPREADING] / 10.0;
+		status.heatingPumpSpeedMin = intData[i][SystaIndex.HEATING_PUMP_SPEED_MIN]; // in %
 		status.mixerRuntime = intData[i][SystaIndex.MIXER_RUNTIME]; // in minutes
 		status.roomTempCorrection = intData[i][SystaIndex.ROOM_TEMP_CORRECTION] / 10.0;
 		status.underfloorHeatingBasePoint = intData[i][SystaIndex.UNDERFLOOR_HEATING_BASE_POINT] / 10.0;
@@ -259,40 +330,61 @@ public class FakeSystaWeb implements Runnable {
 		status.hotWaterOperationMode = intData[i][SystaIndex.HOT_WATER_OPERATION_MODE];
 		status.hotWaterHysteresis = intData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0;
 		status.hotWaterTempMax = intData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
-		status.pumpOverrun = intData[i][SystaIndex.PUMP_OVERRUN];
+		status.heatingPumpOverrun = intData[i][SystaIndex.PUMP_OVERRUN];
+		status.heatingPumpSpeedActual = intData[i][SystaIndex.HEATING_PUMP_SPEED_ACTUAL] * 5;
 		status.bufferTempMax = intData[i][SystaIndex.BUFFER_TEMP_MAX] / 10.0;
 		status.bufferTempMin = intData[i][SystaIndex.BUFFER_TEMP_MIN] / 10.0;
 		status.boilerHysteresis = intData[i][SystaIndex.BOILER_HYSTERESIS] / 10.0;
 		status.boilerOperationTime = intData[i][SystaIndex.BOILER_RUNTIME_MIN];
 		status.boilerShutdownTemp = intData[i][SystaIndex.BOILER_SHUTDOWN_TEMP] / 10.0;
-		status.boilerMinSpeedPump = intData[i][SystaIndex.BOILER_MIN_SPEED_PUMP];
+		status.boilerPumpSpeedMin = intData[i][SystaIndex.BOILER_PUMP_SPEED_MIN];
+		status.boilerOperationMode = intData[i][SystaIndex.BOILER_STATUS];
 		status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN];
 		status.circulationHysteresis = intData[i][SystaIndex.CIRCULATION_HYSTERESIS] / 10.0;
 		status.adjustRoomTempBy = intData[i][SystaIndex.ADJUST_ROOM_TEMP_BY] / 10.0;
 		status.boilerOperationTimeHours = intData[i][SystaIndex.BOILER_OPERATION_TIME_HOURS];
 		status.boilerOperationTimeMinutes = intData[i][SystaIndex.BOILER_OPERATION_TIME_MINUTES];
-		status.numberBurnerStarts = intData[i][SystaIndex.BURNER_NUMBER_STARTS];
+		status.burnerNumberOfStarts = intData[i][SystaIndex.BURNER_NUMBER_OF_STARTS];
 		status.solarPowerActual = intData[i][SystaIndex.SOLAR_POWER_ACTUAL] / 10.0;
 		status.solarGainDay = intData[i][SystaIndex.SOLAR_GAIN_DAY] / 10.0;
 		status.solarGainTotal = intData[i][SystaIndex.SOLAR_GAIN_TOTAL] / 10.0;
-		status.countdown = intData[i][SystaIndex.COUNTDOWN];
+		status.systemNumberOfStarts = intData[i][SystaIndex.SYSTEM_NUMBER_OF_STARTS];
+		status.circuit1LeadTime = intData[i][SystaIndex.CIRCUIT_1_LEAD_TIME];
+		status.circuit2LeadTime = intData[i][SystaIndex.CIRCUIT_2_LEAD_TIME];
+		status.circuit3LeadTime = intData[i][SystaIndex.CIRCUIT_3_LEAD_TIME];
 		status.relay = intData[i][SystaIndex.RELAY];
 		status.heatingPumpIsOn = (status.relay & SystaStatus.HEATING_PUMP_MASK) != 0;
 		status.chargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_MASK) != 0;
+		status.logBoilderChargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_LOG_BOILER_MASK) != 0;
 		status.circulationPumpIsOn = (status.relay & SystaStatus.CIRCULATION_PUMP_MASK) != 0;
-		status.boilerIsOn = (status.relay & SystaStatus.BOILER_MASK) != 0;
-		status.burnerIsOn = status.boilerIsOn && ((status.boilerFlowTemp - status.boilerReturnTemp) > 0.2);
+		status.boilerIsOn = ((status.relay & SystaStatus.BOILER_MASK) != 0)
+				|| (List.of(1, 2, 3, 8, 9, 11, 12).contains(status.boilerOperationMode));
+		status.burnerIsOn = (status.boilerIsOn && ((status.boilerFlowTemp - status.boilerReturnTemp) > 0.2))
+				|| ((status.relay & SystaStatus.BURNER_MASK) != 0); // TODO verify this assumption
+		status.ledBoilerIsOn = (status.relay & SystaStatus.LED_BOILER_MASK) != 0; // TODO verify this assumption
 		status.unknowRelayState1IsOn = (status.relay & SystaStatus.UNKNOWN_1_MASK) != 0;
 		status.unknowRelayState2IsOn = (status.relay & SystaStatus.UNKNOWN_2_MASK) != 0;
-		status.unknowRelayState3IsOn = (status.relay & SystaStatus.UNKNOWN_3_MASK) != 0;
-		status.unknowRelayState4IsOn = (status.relay & SystaStatus.UNKNOWN_4_MASK) != 0;
+		status.mixer1IsOnWarm = (status.relay & SystaStatus.MIXER_WARM_MASK) != 0;
+		status.mixer1IsOnCool = (status.relay & SystaStatus.MIXER_COLD_MASK) != 0;
+		status.mixer1State = (!status.mixer1IsOnWarm && !status.mixer1IsOnCool) ? 0
+				: ((status.mixer1IsOnWarm && !status.mixer1IsOnCool) ? 1
+						: ((!status.mixer1IsOnWarm && status.mixer1IsOnCool) ? 2 : 3));
 		status.unknowRelayState5IsOn = (status.relay & SystaStatus.UNKNOWN_5_MASK) != 0;
 		status.error = intData[i][SystaIndex.ERROR];
 		status.operationModeX = intData[i][SystaIndex.OPERATION_MODE_X];
 		status.heatingOperationModeX = intData[i][SystaIndex.HEATING_OPERATION_MODE_X];
-		status.stovePumpSpeedActual = intData[i][SystaIndex.STOVE_PUMP_SPEED_ACTUAL];
+		status.logBoilerBufferTempMin = intData[i][SystaIndex.LOG_BOILER_BUFFER_TEMP_MIN] / 10.0;
+		status.logBoilerTempMin = intData[i][SystaIndex.LOG_BOILER_TEMP_MIN] / 10.0;
+		status.logBoilerSpreadingMin = intData[i][SystaIndex.LOG_BOILER_SPREADING_MIN];
+		status.logBoilerPumpSpeedMin = intData[i][SystaIndex.LOG_BOILER_PUMP_SPEED_MIN];// it is already in %
+		status.logBoilerPumpSpeedActual = intData[i][SystaIndex.LOG_BOILER_PUMP_SPEED_ACTUAL] * 5;// 0=0%, 20=100%
+		status.logBoilerSettings = intData[i][SystaIndex.LOG_BOILER_SETTINGS];
+		status.logBoilerParallelOperation = (status.logBoilerSettings
+				& SystaStatus.LOG_BOILER_PARALLEL_OPERATION_MASK) != 0;
+		status.boilerHeatsBuffer = (status.logBoilerSettings & SystaStatus.BOILER_HEATS_BUFFER_MASK) != 0;
 		status.timestamp = timestamp[i];
-		status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
+		//status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
+		status.timestampString = formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
 		return status;
 	}
 
@@ -401,7 +493,7 @@ public class FakeSystaWeb implements Runnable {
 	/**
 	 * function to reply the messages received from a Paradigma SystaComfort II, for
 	 * keeping the communication alive
-	 * 
+	 *
 	 * @param socket        local socket used for communication with the Paradigma
 	 *                      SystaComfort II
 	 * @param data          ByteBuffer holding the message for which the reply is
@@ -446,7 +538,7 @@ public class FakeSystaWeb implements Runnable {
 	/**
 	 * process UPD packets from Paradigma SystaComfort II with type field set to
 	 * 0x00
-	 * 
+	 *
 	 * @param data ByteBuffer that holds the received data
 	 */
 	private void processType0(ByteBuffer data) {
@@ -458,7 +550,7 @@ public class FakeSystaWeb implements Runnable {
 	/**
 	 * process UPD packets from Paradigma SystaComfort II with type field set to
 	 * 0x01
-	 * 
+	 *
 	 * @param data ByteBuffer that holds the received data
 	 */
 	private void processType1(ByteBuffer data) {
@@ -472,7 +564,7 @@ public class FakeSystaWeb implements Runnable {
 	/**
 	 * process UDP packets from Paradigma SystaComfort II with type field set to
 	 * 0x02
-	 * 
+	 *
 	 * @param data ByteBuffer that holds the received data
 	 */
 	private void processType2(ByteBuffer data) {

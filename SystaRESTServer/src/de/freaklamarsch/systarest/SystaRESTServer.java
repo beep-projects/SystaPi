@@ -2,22 +2,29 @@
 * Copyright (c) 2021, The beep-projects contributors
 * this file originated from https://github.com/beep-projects
 * Do not remove the lines above.
-* The rest of this source code is subject to the terms of the Mozilla Public License.
-* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/
+*
 */
 package de.freaklamarsch.systarest;
 
-import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -105,7 +112,7 @@ public class SystaRESTServer {
 
 	/**
 	 * Helper function to get the IPv4 address for a given interface name
-	 * 
+	 *
 	 * @param interfaceName
 	 * @return the configured IPv4 address as {@code String}, e.g. "127.0.0.1", or
 	 *         null if no configured IPv4 address was found
@@ -132,10 +139,10 @@ public class SystaRESTServer {
 
 	/**
 	 * Helper function to print information about a given {@link NetworkInterface}
-	 * 
+	 *
 	 * @param netint the {@link NetworkInterface} for which the information should
 	 *               be print
-	 * 
+	 *
 	 */
 	private static void displayInterfaceInformation(NetworkInterface netint) throws SocketException {
 		System.out.printf("Display name: %s\n", netint.getDisplayName());

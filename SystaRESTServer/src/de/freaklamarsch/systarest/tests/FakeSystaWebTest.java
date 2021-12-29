@@ -2,12 +2,26 @@
 * Copyright (c) 2021, The beep-projects contributors
 * this file originated from https://github.com/beep-projects
 * Do not remove the lines above.
-* The rest of this source code is subject to the terms of the Mozilla Public License.
-* You can obtain a copy of the MPL at <https://www.mozilla.org/MPL/2.0/>.
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/
+*
 */
 package de.freaklamarsch.systarest.tests;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -25,15 +39,21 @@ class FakeSystaWebTest {
 	ByteBuffer data = ByteBuffer.allocate(1021).order(ByteOrder.LITTLE_ENDIAN);
 
 	@Test
+	void findSC() {
+		FakeSystaWeb fsw = new FakeSystaWeb();
+		fsw.findSystaComfort();
+	}
+
+	@Test
 	void testProcessType1() {
 		initializeData();
 		FakeSystaWeb fsw = new FakeSystaWeb();
 		Method method = null;
-		;
+
 		try {
-			//processType1 is only called from run(), so we have to set some
-			//variables first which usually get set by run()
-			//make the fields accessible
+			// processType1 is only called from run(), so we have to set some
+			// variables first which usually get set by run()
+			// make the fields accessible
 			Field RING_BUFFER_SIZE = FakeSystaWeb.class.getDeclaredField("RING_BUFFER_SIZE");
 			RING_BUFFER_SIZE.setAccessible(true);
 			Field readIndex = FakeSystaWeb.class.getDeclaredField("readIndex");
@@ -42,13 +62,13 @@ class FakeSystaWebTest {
 			writeIndex.setAccessible(true);
 			Field timestamp = FakeSystaWeb.class.getDeclaredField("timestamp");
 			timestamp.setAccessible(true);
-			//set the write index
+			// set the write index
 			writeIndex.setInt(fsw, (readIndex.getInt(fsw) + 1) % RING_BUFFER_SIZE.getInt(fsw));
-			//set the timestamp
-			long[] tmpTimestamp = (long[])timestamp.get(fsw);
+			// set the timestamp
+			long[] tmpTimestamp = (long[]) timestamp.get(fsw);
 			tmpTimestamp[writeIndex.getInt(fsw)] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 			timestamp.set(fsw, tmpTimestamp);
-			//now we can invoke processType1
+			// now we can invoke processType1
 			method = FakeSystaWeb.class.getDeclaredMethod("processType1", ByteBuffer.class);
 			method.setAccessible(true);
 			method.invoke(fsw, data);
@@ -71,10 +91,10 @@ class FakeSystaWebTest {
 		assertEquals(0, status.collectorTempActual);
 		assertEquals(28.7, status.boilerFlowTemp);
 		assertEquals(28.7, status.boilerReturnTemp);
-		assertEquals(26.3, status.stoveFlowTemp);
-		assertEquals(36.8, status.stoveReturnTemp);
-		assertEquals(-30.2, status.woodBoilerBufferTempTop);
-		assertEquals(0, status.swimmingpoolTemp);
+		assertEquals(26.3, status.logBoilerFlowTemp);
+		assertEquals(36.8, status.logBoilerReturnTemp);
+		assertEquals(-30.2, status.logBoilerBufferTempTop);
+		assertEquals(0, status.swimmingpoolFlowTemp);
 		assertEquals(0, status.swimmingpoolFlowTeamp);
 		assertEquals(0, status.swimmingpoolReturnTemp);
 		assertEquals(0, status.hotWaterTempSet);
@@ -99,8 +119,8 @@ class FakeSystaWebTest {
 		assertEquals(30, status.heatUpTime);
 		assertEquals(0, status.roomImpact);
 		assertEquals(0, status.boilerSuperelevation);
-		assertEquals(20, status.spreadingHeatingCircuit);
-		assertEquals(100, status.heatingMinSpeedPump);
+		assertEquals(20, status.heatingCircuitSpreading);
+		assertEquals(100, status.heatingPumpSpeedMin);
 		assertEquals(2, status.mixerRuntime);
 		assertEquals(0, status.roomTempCorrection);
 		assertEquals(35, status.underfloorHeatingBasePoint);
@@ -110,23 +130,23 @@ class FakeSystaWebTest {
 		assertEquals(3, status.hotWaterOperationMode);
 		assertEquals(5, status.hotWaterHysteresis);
 		assertEquals(65, status.hotWaterTempMax);
-		assertEquals(10, status.pumpOverrun);
+		assertEquals(10, status.heatingPumpOverrun);
 		assertEquals(85, status.bufferTempMax);
 		assertEquals(1, status.bufferTempMin);
 		assertEquals(5, status.boilerHysteresis);
 		assertEquals(5, status.boilerOperationTime);
 		assertEquals(25, status.boilerShutdownTemp);
-		assertEquals(25, status.boilerMinSpeedPump);
+		assertEquals(25, status.boilerPumpSpeedMin);
 		assertEquals(3, status.circulationPumpOverrun);
 		assertEquals(5, status.circulationHysteresis);
 		assertEquals(0, status.adjustRoomTempBy);
 		assertEquals(3885, status.boilerOperationTimeHours);
 		assertEquals(48, status.boilerOperationTimeMinutes);
-		assertEquals(2414, status.numberBurnerStarts);
+		assertEquals(2414, status.burnerNumberOfStarts);
 		assertEquals(0, status.solarPowerActual);
 		assertEquals(0, status.solarGainDay);
 		assertEquals(0, status.solarGainTotal);
-		assertEquals(0, status.countdown);
+		assertEquals(0, status.circuit1LeadTime);
 		assertEquals(2048, status.relay);
 		assertFalse(status.heatingPumpIsOn);
 		assertFalse(status.chargePumpIsOn);
@@ -135,13 +155,13 @@ class FakeSystaWebTest {
 		assertFalse(status.burnerIsOn);
 		assertFalse(status.unknowRelayState1IsOn);
 		assertFalse(status.unknowRelayState2IsOn);
-		assertFalse(status.unknowRelayState3IsOn);
-		assertFalse(status.unknowRelayState4IsOn);
+		assertFalse(status.mixer1IsOnWarm);
+		assertFalse(status.mixer1IsOnCool);
 		assertTrue(status.unknowRelayState5IsOn);
 		assertEquals(65535, status.error);
 		assertEquals(7, status.operationModeX);
 		assertEquals(0, status.heatingOperationModeX);
-		assertEquals(0, status.stovePumpSpeedActual);
+		assertEquals(0, status.logBoilerPumpSpeedActual);
 		/*
 		 * timestamp is generated with each data paket it cannot be tested statically
 		 * status.timestamp; status.timestampString;
@@ -153,7 +173,7 @@ class FakeSystaWebTest {
 		initializeData();
 		FakeSystaWeb fsw = new FakeSystaWeb();
 		Method method = null;
-		;
+
 		try {
 			method = FakeSystaWeb.class.getDeclaredMethod("createReply", ByteBuffer.class);
 			method.setAccessible(true);
