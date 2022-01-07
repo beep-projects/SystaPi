@@ -7,6 +7,7 @@
 **SystaPi** adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs.
 The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST, see the documentation for details of the supported fields [Javadoc: SystaStatus](https://beep-projects.github.io/SystaPi/de/freaklamarsch/systarest/SystaStatus.html).  
 **Note:** The communication protocol is not publicly available, everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. So please contribute information from your system.  
+
 <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;" align="right"/> 
 To support you in reverse engineering, the server has a rudimentary [logging](#enablelogging) functionality integrated. You can use this to set triggers on value changes with your home automation system and start logging of values for analysis.   
 You can also use [helpers/rawData.html](helpers/rawData.html) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system. If you want to report new fields, simply open a new issue or discussion.  
