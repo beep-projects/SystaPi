@@ -15,7 +15,7 @@ This project is inspired by this post on the VDR portal [Heizungssteuerung: Date
 
 Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort.
 
-<img src="resources/SystaPi.jpg" alt="SystaPi" width="30%"></img> <img src="resources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" width="30%"></img> <img src="resources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" width="30%"></img> 
+<img src="resources/SystaPi.jpg" alt="SystaPi" width="45%"></img> <img src="resources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" width="30%"></img> <img src="resources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" width="30%"></img> 
 
 ## Content
 
