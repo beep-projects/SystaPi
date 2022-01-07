@@ -9,7 +9,7 @@ The project contains an installation script to setup a Raspberry Pi as SystaPi f
 **Note:** The communication protocol is not publicly available, everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. So please contribute information from your system.  
 To support you in reverse engineering, the server has a rudimentary [logging](#enablelogging) functionality integrated. You can use this to set triggers on value changes with your home automation system and start logging of values for analysis.   
 
-<img src="/home/freak/git/SystaPi/resources/rawData_react_html.jpg" alt="rawData_react_html" style="zoom:20%;" align="right"/> You can also use [helpers/rawData.html](helpers/rawData.html) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system. If you want to report new fields, simply open a new issue or discussion. 
+<img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="zoom:20%;" align="right"/> You can also use [helpers/rawData.html](helpers/rawData.html) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system. If you want to report new fields, simply open a new issue or discussion. 
 
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).
 
@@ -26,6 +26,7 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
   - [Windows / manual installation](#windows--manual-installation)
   - [Troubleshooting the installation](#troubleshooting-the-installation)
 - [The SystaREST API](#the-systarest-api)
+  - [findsystacomfort](#findsystacomfort)
   - [start](#start)
   - [stop](#stop)
   - [servicestatus](#servicestatus)
@@ -251,6 +252,38 @@ The path and method names on the REST server are implemented case insensitive.
 The root path is: `systarest`, or `SystaREST`, or any variation you like.
 So you should be able to access the server via `http://systapi:1337/SystaREST/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the URL assigned by your router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 If a command is called which should retrieve data from the SystaREST, but the communication is not running, `start` is automatically called, but the reply will be empty until the first data packet is received from the Paradigma SystaComfort. Data packets are sent every minute.
+
+#### findsystacomfort
+
+`GET` `/SystaREST/findsystacomfort`
+[http://systapi:1337/SystaREST/findsystacomfort](http://systapi:1337/SystaREST/findsystacomfort)
+Searched the available interfaces for any attached SystaComfort unit.
+```bash
+curl "http://systapi:1337/SystaREST/findsystacomfort"
+```
+
+```json
+{
+    "SystaWebIP":"192.168.11.1",
+    "SystaWebPort":22460,
+    "DeviceTouchBcastIP":"192.168.11.255",
+    "DeviceTouchBcastPort":8001,
+    "deviceTouchInfoString":"SC2 1 192.168.11.23 255.255.255.0 192.168.11.1 SystaComfort-II\u00000 0809720001 0 V0.34 V1.00 2CBE9700BEE9",
+    "unitIP":"192.168.11.23",
+    "unitName":"SystaComfort-II",
+    "unitId":"0809720001",
+    "unitApp":8,
+    "unitPlatform":9,
+    "unitVersion":"1.14.1",
+    "unitMajor":114,
+    "unitMinor":1,
+    "unitBaseVersion":"V0.34",
+    "unitMac":"2CBE9700BEE9",
+    "STouchAppSupported":false,
+    "DeviceTouchPort":-1,
+    "DeviceTouchPassword":"null"
+}
+```
 
 #### start
 
