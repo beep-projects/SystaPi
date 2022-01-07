@@ -700,6 +700,12 @@ public class SystaStatus {
 	 */
 	public double circulationHysteresis;
 	/**
+	 * Zirkulation Sperrzeit Taster<br/>
+	 * <br/>
+	 * Circulation lockout time push button
+	 */
+	public int circulationLockoutTimePushButton;
+	/**
 	 * Raumtemperatur ändern um<br/>
 	 * <br/>
 	 * Adjust room temperature by

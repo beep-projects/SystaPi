@@ -18,6 +18,7 @@
 */
 package de.freaklamarsch.systarest;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -313,7 +314,9 @@ public class SystaRESTAPI {
 				.add("boilerShutdownTemp", ps.boilerShutdownTemp).add("boilerPumpSpeedMin", ps.boilerPumpSpeedMin)
 				.add("circulationTemp", ps.circulationTemp).add("circulationPumpIsOn", ps.circulationPumpIsOn)
 				.add("circulationPumpOverrun", ps.circulationPumpOverrun)
+				.add("circulationLockoutTimePushButton", ps.circulationLockoutTimePushButton)
 				.add("circulationHysteresis", ps.circulationHysteresis).add("circuit2FlowTemp", ps.circuit2FlowTemp)
+				.add("circuit2FlowTemp", ps.circuit2FlowTemp)
 				.add("circuit2ReturnTemp", ps.circuit2ReturnTemp).add("circuit2FlowTempSet", ps.circuit2FlowTempSet)
 				.add("roomTempActual1", ps.roomTempActual1).add("roomTempSet1", ps.roomTempSet1)
 				.add("roomTempActual2", ps.roomTempActual2).add("roomTempSet2", ps.roomTempSet2)

@@ -392,15 +392,16 @@ public class FakeSystaWeb implements Runnable {
     status.hotWaterHysteresis = intData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0;
     status.hotWaterTempMax = intData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
     status.heatingPumpOverrun = intData[i][SystaIndex.PUMP_OVERRUN];
-    status.heatingPumpSpeedActual = intData[i][SystaIndex.HEATING_PUMP_SPEED_ACTUAL] * 5;
+    status.heatingPumpSpeedActual = intData[i][SystaIndex.HEATING_PUMP_SPEED_ACTUAL] * 5; // in %
     status.bufferTempMax = intData[i][SystaIndex.BUFFER_TEMP_MAX] / 10.0;
     status.bufferTempMin = intData[i][SystaIndex.BUFFER_TEMP_MIN] / 10.0;
     status.boilerHysteresis = intData[i][SystaIndex.BOILER_HYSTERESIS] / 10.0;
-    status.boilerOperationTime = intData[i][SystaIndex.BOILER_RUNTIME_MIN];
+    status.boilerOperationTime = intData[i][SystaIndex.BOILER_RUNTIME_MIN]; // in min
     status.boilerShutdownTemp = intData[i][SystaIndex.BOILER_SHUTDOWN_TEMP] / 10.0;
-    status.boilerPumpSpeedMin = intData[i][SystaIndex.BOILER_PUMP_SPEED_MIN];
+    status.boilerPumpSpeedMin = intData[i][SystaIndex.BOILER_PUMP_SPEED_MIN]; // in %
     status.boilerOperationMode = intData[i][SystaIndex.BOILER_STATUS];
-    status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN];
+    status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN]; // in min
+    status.circulationLockoutTimePushButton = intData[i][SystaIndex.CIRCULATION_LOCKOUT_TIME_PUSH_BUTTON]; // in min
     status.circulationHysteresis = intData[i][SystaIndex.CIRCULATION_HYSTERESIS] / 10.0;
     status.adjustRoomTempBy = intData[i][SystaIndex.ADJUST_ROOM_TEMP_BY] / 10.0;
     status.boilerOperationTimeHours = intData[i][SystaIndex.BOILER_OPERATION_TIME_HOURS];
@@ -410,9 +411,9 @@ public class FakeSystaWeb implements Runnable {
     status.solarGainDay = intData[i][SystaIndex.SOLAR_GAIN_DAY] / 10.0;
     status.solarGainTotal = intData[i][SystaIndex.SOLAR_GAIN_TOTAL] / 10.0;
     status.systemNumberOfStarts = intData[i][SystaIndex.SYSTEM_NUMBER_OF_STARTS];
-    status.circuit1LeadTime = intData[i][SystaIndex.CIRCUIT_1_LEAD_TIME];
-    status.circuit2LeadTime = intData[i][SystaIndex.CIRCUIT_2_LEAD_TIME];
-    status.circuit3LeadTime = intData[i][SystaIndex.CIRCUIT_3_LEAD_TIME];
+    status.circuit1LeadTime = intData[i][SystaIndex.CIRCUIT_1_LEAD_TIME]; // in min
+    status.circuit2LeadTime = intData[i][SystaIndex.CIRCUIT_2_LEAD_TIME]; // in min
+    status.circuit3LeadTime = intData[i][SystaIndex.CIRCUIT_3_LEAD_TIME]; // in min
     status.relay = intData[i][SystaIndex.RELAY];
     status.heatingPumpIsOn = (status.relay & SystaStatus.HEATING_PUMP_MASK) != 0;
     status.chargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_MASK) != 0;
@@ -436,7 +437,7 @@ public class FakeSystaWeb implements Runnable {
     status.heatingOperationModeX = intData[i][SystaIndex.HEATING_OPERATION_MODE_X];
     status.logBoilerBufferTempMin = intData[i][SystaIndex.LOG_BOILER_BUFFER_TEMP_MIN] / 10.0;
     status.logBoilerTempMin = intData[i][SystaIndex.LOG_BOILER_TEMP_MIN] / 10.0;
-    status.logBoilerSpreadingMin = intData[i][SystaIndex.LOG_BOILER_SPREADING_MIN];
+    status.logBoilerSpreadingMin = intData[i][SystaIndex.LOG_BOILER_SPREADING_MIN] / 10.0;
     status.logBoilerPumpSpeedMin = intData[i][SystaIndex.LOG_BOILER_PUMP_SPEED_MIN];// it is already in %
     status.logBoilerPumpSpeedActual = intData[i][SystaIndex.LOG_BOILER_PUMP_SPEED_ACTUAL] * 5;// 0=0%, 20=100%
     status.logBoilerSettings = intData[i][SystaIndex.LOG_BOILER_SETTINGS];

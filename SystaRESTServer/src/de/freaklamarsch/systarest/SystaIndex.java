@@ -225,7 +225,7 @@ public final class SystaIndex {
 	/**
 	 * Steilheit
 	 */
-	final static int HEATING_CURVE_GRADIENT = 50;
+	final static int HEATING_CURVE_GRADIENT = 50; // K/K
 	/**
 	 * Heizkurvenoptimierung?
 	 */
@@ -253,15 +253,15 @@ public final class SystaIndex {
 	/**
 	 * Raumeinfluss
 	 */
-	final static int ROOM_IMPACT = 57;
+	final static int ROOM_IMPACT = 57; //in K/K
 	/**
 	 * Ueberhoehung Kessel
 	 */
-	final static int BOILER_SUPERELEVATION = 58;
+	final static int BOILER_SUPERELEVATION = 58; // in K
 	/**
 	 * Spreizung Heizkreis
 	 */
-	final static int HEATING_CIRCUIT_SPREADING = 59;
+	final static int HEATING_CIRCUIT_SPREADING = 59; // in K
 	/**
 	 * Minimale Drehzahl Pumpe PHK %
 	 */
@@ -433,7 +433,10 @@ public final class SystaIndex {
 	 * (Nachlaufzeit Pumpe PZ)
 	 */
 	final static int CIRCULATION_PUMP_OVERRUN = 169;
-	// final static int = 170
+	/**
+	 * (Sperrzeit Taster)
+	 */
+	final static int CIRCULATION_LOCKOUT_TIME_PUSH_BUTTON = 170; // in min
 	/**
 	 * (Zirkulation Schaltdifferenz)
 	 */

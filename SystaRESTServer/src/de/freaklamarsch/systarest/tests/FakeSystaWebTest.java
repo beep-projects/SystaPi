@@ -168,6 +168,7 @@ class FakeSystaWebTest {
 		 */
 	}
 
+	/* TODO add new tests for messages sent to SystaComfort, once the rework of this part is finished
 	@Test
 	void testCreateReply() {
 		initializeData();
@@ -210,7 +211,7 @@ class FakeSystaWebTest {
 			e.printStackTrace();
 			fail("Exception thrown");
 		}
-	}
+	}*/
 
 	private void initializeData() {
 		// load a captured packet
