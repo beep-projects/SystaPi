@@ -256,8 +256,8 @@ If a command is called which should retrieve data from the SystaREST, but the co
 #### findsystacomfort
 
 `GET` `/SystaREST/findsystacomfort`
-[http://systapi:1337/SystaREST/findsystacomfort](http://systapi:1337/SystaREST/findsystacomfort)
-Searched the available interfaces for any attached SystaComfort unit.
+[http://systapi:1337/SystaREST/findsystacomfort](http://systapi:1337/SystaREST/findsystacomfort)  
+Searches the available interfaces for any attached SystaComfort unit.
 ```bash
 curl "http://systapi:1337/SystaREST/findsystacomfort"
 ```
@@ -287,7 +287,8 @@ curl "http://systapi:1337/SystaREST/findsystacomfort"
 
 #### start
 
-`POST` `/SystaREST/start` start communication with the connected Paradigma SystaComfort
+`POST` `/SystaREST/start`  
+start communication with the connected Paradigma SystaComfort
 
 ````bash
 curl -X POST http://systapi:1337/SystaREST/start
@@ -295,7 +296,8 @@ curl -X POST http://systapi:1337/SystaREST/start
 
 #### stop
 
-`POST` `/SystaREST/stop`  stop communication with the connected Paradigma SystaComfort
+`POST` `/SystaREST/stop`  
+stop communication with the connected Paradigma SystaComfort
 
 ````bash
 curl -X POST http://systapi:1337/SystaREST/stop
@@ -303,8 +305,8 @@ curl -X POST http://systapi:1337/SystaREST/stop
 
 #### servicestatus
 
-`GET` `/SystaREST/servicestatus`
-[http://systapi:1337/SystaREST/servicestatus](http://systapi:1337/SystaREST/servicestatus)
+`GET` `/SystaREST/servicestatus`  
+[http://systapi:1337/SystaREST/servicestatus](http://systapi:1337/SystaREST/servicestatus)  
 Returns the status of the SystaREST server
 ```bash
 curl "http://systapi:1337/SystaREST/servicestatus"
@@ -332,8 +334,8 @@ curl "http://systapi:1337/SystaREST/servicestatus"
 
 #### rawdata
 
-`GET` `/SystaREST/rawdata`
-[http://systapi:1337/SystaREST/rawdata](http://systapi:1337/SystaREST/rawdata)
+`GET` `/SystaREST/rawdata` 
+[http://systapi:1337/SystaREST/rawdata](http://systapi:1337/SystaREST/rawdata)  
 Returns the raw data received from the Paradigma Systa Comfort with added timestamp information.
 ```bash
 curl "http://systapi:1337/SystaREST/rawdata"
@@ -364,8 +366,8 @@ curl "http://systapi:1337/SystaREST/rawdata"
 
 #### waterheater
 
-`GET` `/SystaREST/waterheater`
-[http://systapi:1337/SystaREST/waterheater](http://systapi:1337/SystaREST/waterheater)
+`GET` `/SystaREST/waterheater`  
+[http://systapi:1337/SystaREST/waterheater](http://systapi:1337/SystaREST/waterheater)  
 Returns the information for a Home Assistant [Water Heater](https://developers.home-assistant.io/docs/core/entity/water-heater/)
 
 ```bash
@@ -398,8 +400,8 @@ curl "http://systapi:1337/SystaREST/waterheater"
 
 #### status
 
-`GET` `/SystaREST/status`
-[http://systapi:1337/SystaREST/status](http://systapi:1337/SystaREST/status)
+`GET` `/SystaREST/status`  
+[http://systapi:1337/SystaREST/status](http://systapi:1337/SystaREST/status)  
 Returns all known fields from the received data.
 ```bash
 curl "http://systapi:1337/SystaREST/status"
@@ -447,6 +449,7 @@ curl "http://systapi:1337/SystaREST/status"
     "circulationTemp":-30.0,
     "circulationPumpIsOn":false,
     "circulationPumpOverrun":3,
+    "circulationLockoutTimePushButton":15,
     "circulationHysteresis":5.0,
     "circuit2FlowTemp":-30.0,
     "circuit2ReturnTemp":-30.0,
@@ -514,10 +517,10 @@ curl "http://systapi:1337/SystaREST/status"
 
 #### enablelogging
 
-`PUT` `/SystaREST/enablelogging`
-enables the logging of each received data element to a delimited log file. To reduce the number of file writes, this function stores `entriesPerFile` data segments in memory and then writes them into a single file. If logging is not enabled, SystaREST still stores the last `entriesPerFile` data segments in memory and saves them to the disc as soon as logging gets enabled. This feature shall help to implement triggers for value changes of interest, by also saving data that has been received before the interesting event happened.
+`PUT` `/SystaREST/enablelogging`  
+enables the logging of each received data element to a delimited log file. To reduce the number of file writes, this function stores `entriesPerFile` data segments in memory and then writes them into a single file. If logging is not enabled, SystaREST still stores the last `entriesPerFile` data segments in memory and saves them to the disc as soon as logging gets enabled. This feature shall help to implement triggers for value changes of interest, by also saving data that has been received before the interesting event happened.  
 
-Optional parameters:
+Optional parameters:  
 
 * `filePrefix` default `SystaREST`
 * `logEntryDelimiter` default `;`
@@ -529,7 +532,7 @@ curl -X PUT "http://systapi:1337/SystaREST/enablelogging?filePrefix=SystaREST&lo
 
 #### disablelogging
 
-`PUT` `/SystaREST/disablelogging`
+`PUT` `/SystaREST/disablelogging`  
 stop the logging of received data packets. This writes all currently stored data segments to a file and stops the writing to disc.
 
 ```bash
