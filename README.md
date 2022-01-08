@@ -22,6 +22,7 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
 - [Directory Structure of this Project](#directory-structure-of-this-project)
 - [Parts List](#parts-list)
 - [Installation](#installation)
+  - [SystaComfort](#systacomfort)
   - [Linux](#linux)
   - [Windows / manual installation](#windows--manual-installation)
   - [Troubleshooting the installation](#troubleshooting-the-installation)
@@ -95,6 +96,10 @@ Once the Micro SD card is prepared as described in the next sections, the script
 * install OpenJDK 11 from [https://www.azul.com/downloads/?package=jdk#download-openjdk](https://www.azul.com/downloads/?package=jdk#download-openjdk)\
   (this is the most current one you can get for the ARMv6 of the Raspberry Pi Zero)
 * install the `systemd` service unit `SytsaRESTServer.service` for automatically starting the SystaRESTServer
+
+### SystaComfort
+You have to make sure that your Paradigma SystaComfort unit is sending unencrypted data to [paradigma.remoteportal.de](http://paradigma.remoteportal.de/). If you are one of the unlucky ones, that got a SystaComfort installed with encryption enabled, or the remote portal being disable, you have to get hold of the SystaService software. You can ask Paradigma for that, or your system installer. See also the instructions for setting up the SystaComfortPrometheusExporter
+ [english](https://github.com/xgcssch/SystaComfortPrometheusExporter#configure-systacomfort-controller)/[german](https://github.com/xgcssch/SystaComfortPrometheusExporter/blob/main/README_de.md#voraussetzungen)
 
 ### Linux
 
