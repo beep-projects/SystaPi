@@ -1,5 +1,3 @@
-
-
 [![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/blob/main/LICENSE) [![JUnit](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml) [![shellcheck](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml) [![Pylint](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml) [![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub forks](https://img.shields.io/github/forks/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/network) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) ![GitHub repo size](https://img.shields.io/github/repo-size/beep-projects/SystaPi)
 
 # SystaPi and SystaREST
@@ -8,9 +6,11 @@
 The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST, see the documentation for details of the supported fields [Javadoc: SystaStatus](https://beep-projects.github.io/SystaPi/de/freaklamarsch/systarest/SystaStatus.html).  
 
 <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;" align="right"/>**Note:** The communication protocol is not publicly available, everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. **Please contribute information from your system!**  
- 
+
 To support you in reverse engineering, the server has a rudimentary [logging](#enablelogging) functionality integrated. You can use this to set triggers on value changes with your home automation system and start logging of values for analysis.   
-You can also use [helpers/rawData.html](helpers/rawData.html) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system. If you want to report new fields, simply open a new issue or discussion.  
+You can also use [helpers/rawData.html](helpers/rawData.html) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system (see also [monitorrawdata](#monitorrawdata)).  
+
+If you want to report new fields, simply open a new issue or discussion.  
 
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).  
 
@@ -32,6 +32,7 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
   - [stop](#stop)
   - [servicestatus](#servicestatus)
   - [rawdata](#rawdata)
+  - [monitorrawdata](#monitorrawdata)
   - [waterheater](#waterheater)
   - [status](#status)
   - [enablelogging](#enablelogging)
@@ -342,6 +343,7 @@ curl "http://systapi:1337/SystaREST/servicestatus"
 `GET` `/SystaREST/rawdata` 
 [http://systapi:1337/SystaREST/rawdata](http://systapi:1337/SystaREST/rawdata)  
 Returns the raw data received from the Paradigma Systa Comfort with added timestamp information.
+
 ```bash
 curl "http://systapi:1337/SystaREST/rawdata"
 ```
@@ -368,6 +370,14 @@ curl "http://systapi:1337/SystaREST/rawdata"
     ]
 }
 ```
+
+#### monitorrawdata
+
+`GET` `/SystaREST/monitorrawdata` 
+[http://systapi:1337/SystaREST/monitorrawdata](http://systapi:1337/SystaREST/monitorrawdata)  
+Returns a React-based HTML page for monitoring of the raw data received from the Paradigma Systa Comfort. The content of the page should automatically refresh, but be aware that the SystaComfort sends its data every minute, so parameter changes on the unit will be displayed with some lag. Call this function from your browser, to see something like:
+
+<img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:100%;"/>
 
 #### waterheater
 

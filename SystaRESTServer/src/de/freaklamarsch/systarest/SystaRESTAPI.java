@@ -18,7 +18,11 @@
 */
 package de.freaklamarsch.systarest;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -389,6 +393,28 @@ public class SystaRESTAPI {
 		fsw.stopLoggingRawData();
 	}
 
+	/**
+	 * Returns the MonitorRawData.html file for monitoring raw data in the browser.
+	 * @return the InputStream of the file, or null, if something went wrong in the file handling
+	 */
+	@GET
+	@Produces({MediaType.TEXT_HTML})
+    @Path("{monitorrawdata : (?i)monitorrawdata}")
+	public InputStream getMonitorRawDataHTML() {
+		String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+		String monitorHTML = rootPath + "MonitorRawData.html";
+		
+		File f = new File(monitorHTML);
+		try {
+			return new FileInputStream(f);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	
+	
 	/**
 	 * set the operation mode of the Systa Comfort
 	 * 
