@@ -8,6 +8,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
         grid-gap: 10px;
+        font-family: “Playfair Display”, “Didot”, "Times New Roman", Times, serif;
       }
 
       .systaentry-card {
@@ -15,7 +16,7 @@
         grid-template-columns: 1fr 1fr;
         word-wrap: break-word;
         word-break: break-all;
-        padding: .75rem 1.25rem;
+        padding: .5rem 1.0rem;
         background-color: #ffffff;
         background-clip: border-box;
         border: 1px solid rgba(26,54,126,0.125);
@@ -28,7 +29,7 @@
         grid-template-columns: 1fr 1fr;
         word-wrap: break-word;
         word-break: break-all;
-        padding: .75rem 1.25rem;
+        padding: .5rem 1.0rem;
         background-color: #ffffff;
         background-clip: border-box;
         border: 1px solid rgba(26,54,126,1.0);
@@ -39,9 +40,10 @@
       .systaentry-value {
         opacity: 1.0;
         font-size: 2rem;
-        font-weight: bold;
+        font-weight: 700;
+        word-break: normal;
         color: #3ac47d !important;
-        text-align: center;
+        text-align: right;
         vertical-align: middle;
         align-self: center;
         justify-self: right;
@@ -59,8 +61,9 @@
       .systaentry-dwordnum {
         opacity: .5;
         font-size: 0.8rem;
-        font-weight: bold;
-        word-wrap: break-word;
+        font-weight: 400;
+        font-family: Roboto, "Arial black", Arial, Helvetica, sans-serif;
+        text-align: left;
         padding: 0rem;
         grid-column-start: 1;
         grid-column-end: 2;
@@ -71,8 +74,9 @@
       .systaentry-name {
         opacity: .8;
         font-size: 0.8rem;
-        font-weight: bold;
-        word-wrap: break-word;
+        font-weight: 500;
+        font-family: Roboto, "Arial black", Arial, Helvetica, sans-serif;
+        text-align: left;
         padding: 0rem;
         grid-column-start: 1;
         grid-column-end: 2;
