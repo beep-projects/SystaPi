@@ -8,7 +8,7 @@ The project contains an installation script to setup a Raspberry Pi as SystaPi f
 <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;" align="right"/>**Note:** The communication protocol is not publicly available, everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. **Please contribute information from your system!**  
 
 To support you in reverse engineering, the server has a rudimentary [logging](#enablelogging) functionality integrated. You can use this to set triggers on value changes with your home automation system and start logging of values for analysis.   
-You can also use [helpers/rawData.html](helpers/rawData.html) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system (see also [monitorrawdata](#monitorrawdata)).  
+You can also use [helpers/rawData.html](helpers/rawData.html) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system (see also [monitorrawdata](#monitorrawdata)). That page is created using [React](https://reactjs.org/), so you also can use it as starting point for creating a dashboard.  
 
 If you want to report new fields, simply open a new issue or discussion.  
 
