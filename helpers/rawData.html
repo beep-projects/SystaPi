@@ -13,7 +13,7 @@
 
       .systaentry-card {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1.1fr;
         word-wrap: break-word;
         word-break: break-all;
         padding: .5rem 1.0rem;
@@ -26,7 +26,7 @@
 
       .systaentry-card-known {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1.1fr;
         word-wrap: break-word;
         word-break: break-all;
         padding: .5rem 1.0rem;
@@ -138,6 +138,16 @@ class SystaPiRawData extends React.Component {
     return (React.createElement("div", {className: "systapi-rawdata-container"}, this.createElements()));
   }
 
+  createElements() {
+      var elems = [];
+      var entry;
+      for(let i=0; i<this.elements.length; i++) {
+        entry = this.elements[i];
+        elems.push(React.createElement(SystaEntry, {key: entry.i, dwordnum: entry.i, name: entry.name, known: entry.known, conversion: entry.conversion, getvalue: this.getValue.bind(this)}, null));
+      }
+      return elems;
+  }
+  
   componentDidMount() {
     this.updateEntries();
     //set a timer to periodically update the component
@@ -185,16 +195,6 @@ class SystaPiRawData extends React.Component {
     } else {
       return "?";
     } 
-  }
-  
-  createElements() {
-      var elems = [];
-      var entry;
-      for(let i=0; i<this.elements.length; i++) {
-        entry = this.elements[i];
-        elems.push(React.createElement(SystaEntry, {key: entry.i, dwordnum: entry.i, name: entry.name, known: entry.known, conversion: entry.conversion, getvalue: this.getValue.bind(this)}, null));
-      }
-      return elems;
   }
   
   createElementsArray() {
@@ -257,7 +257,7 @@ class SystaPiRawData extends React.Component {
     e[151] = {"i": 151, "name": "HOT_WATER_OPERATION_MODE", "known": true, conversion: "x/10.0 +\" \xB0C\""};
     e[155] = {"i": 155, "name": "HOT_WATER_HYSTERESIS", "known": true, conversion: "x/10.0 +\" \xB0C\""};
     e[156] = {"i": 156, "name": "HOT_WATER_TEMP_MAX", "known": true, conversion: "x/10.0 +\" \xB0C\""};
-    e[158] = {"i": 158, "name": "PUMP_OVERRUN", "known": true, conversion: "x +\"min \""};
+    e[158] = {"i": 158, "name": "PUMP_OVERRUN", "known": true, conversion: "x +\" min \""};
     e[159] = {"i": 159, "name": "BUFFER_TEMP_MAX", "known": true, conversion: "x/10.0 +\" \xB0C\""};
     e[160] = {"i": 160, "name": "BUFFER_TEMP_MIN", "known": true, conversion: "x/10.0 +\" \xB0C\""};
     e[161] = {"i": 161, "name": "BOILER_HYSTERESIS", "known": true, conversion: "x/10.0 +\" \xB0C\""};
