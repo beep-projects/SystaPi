@@ -78,8 +78,12 @@ done
 cd ~ || exit
 
 # remove existing downloads
-rm "${branch}.zip"
-rm -r "SystaPi-${branch}"
+if [[ -f "${branch}.zip" ]]; then
+  rm "${branch}.zip"
+fi
+if [[ -d "SystaPi-${branch}" ]]; then
+  rm -r "SystaPi-${branch}"
+fi
 
 # get lates version from github
 wget "https://github.com/beep-projects/SystaPi/archive/refs/heads/${branch}.zip"
@@ -96,6 +100,9 @@ sudo systemctl stop SystaRESTServer.service
 # remove old binaries and install new ones
 rm -r /home/pi/SystaRESTServer/
 cp -r "/home/pi/SystaPi-${branch}/SystaRESTServer/" /home/pi/
+# remove created files
+rm "${branch}.zip"
+rm -r "SystaPi-${branch}"
 
 # restart the SystaRESTServer.service
 sudo systemctl start SystaRESTServer.service 
