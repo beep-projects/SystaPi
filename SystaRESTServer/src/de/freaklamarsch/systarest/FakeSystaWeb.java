@@ -150,6 +150,7 @@ public class FakeSystaWeb implements Runnable {
   private final int MAX_DATA_LENGTH = 1048;
   private final int MAX_NUMBER_ENTRIES = 256;
   private final int COUNTER_OFFSET_REPLY = 0x3FBF;
+  private final int COUNTER_OFFSET_REPLY_2 = 0x3FC0;
   private final int COUNTER_OFFSET_PWD = 0x10F9;
   private final int COUNTER_OFFSET_CHANGE = 0x3FBF;
   private final int MAC_OFFSET_REPLY = 0x8E82;
@@ -657,6 +658,10 @@ public class FakeSystaWeb implements Runnable {
     int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) 
     		+ COUNTER_OFFSET_REPLY) & 0xFFFF;
     reply[14] = (byte) (n & 0xFF);
+    if((reply[5]+reply[4]) == 313) {//TODO this is just a hack to support a specific unit. Make it generic
+    	n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) 
+        		+ COUNTER_OFFSET_REPLY_2) & 0xFFFF;
+    }
     reply[15] = (byte) (n >> 8);
     send(reply);
   }
