@@ -57,7 +57,7 @@ while :; do
         branch=$2
         shift
       else
-        echo 'ERROR: "--branch" requires a non-empty option argument.'
+        printf 'ERROR: "--branch" requires a non-empty option argument.'
         exit
       fi
       ;;
@@ -66,7 +66,7 @@ while :; do
       break
       ;;
     -?*)
-      echo 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+      printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
       ;;
     *) # Default case: No more options, so break out of the loop.
       break
