@@ -46,6 +46,11 @@ cat <<ENDE
 ENDE
 }
 
+function error {
+    printf "${1}\n" >&2 ## Send message to stderr.
+    exit "${2-1}" ## Return a code specified by $2, or 1 by default.
+}
+
 while :; do
   case $1 in
     -h|-\?|--help)
@@ -75,7 +80,7 @@ while :; do
 done
 
 # make sure we are in the home directory
-cd ~ || exit
+cd ~ || error "Cannot cd into ~"
 
 # remove existing downloads
 if [[ -f "${branch}.zip" ]]; then
@@ -90,9 +95,10 @@ wget "https://github.com/beep-projects/SystaPi/archive/refs/heads/${branch}.zip"
 unzip "${branch}.zip" 
 
 # build new version
-cd "SystaPi-${branch}/SystaRESTServer/" || exit
-./build.sh 
-cd ~ || exit
+cd "SystaPi-${branch}/SystaRESTServer/" || error "Cannot cd into SystaPi-${branch}/SystaRESTServer/"
+sudo chmod 755 ./build.sh
+./build.sh 2>&1
+cd ~ || error "Cannot cd into ~"
 
 # stop the SystaRESTServer.service
 sudo systemctl stop SystaRESTServer.service 
