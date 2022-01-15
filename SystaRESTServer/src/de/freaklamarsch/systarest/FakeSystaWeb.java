@@ -72,11 +72,12 @@ public class FakeSystaWeb implements Runnable {
     public final String loggerFileRootPath;
     public final int loggerFileCount;
     public final int loggerBufferedEntries;
+    public final String commitDate;
 
     public FakeSystaWebStatus(boolean running, boolean connected, long dataPacketsReceived, String timestamp,
         String localAddress, int localPort, InetAddress remoteAddress, int remotePort, boolean saveLoggedData,
         int capacity, String logFilePrefix, String logEntryDelimiter, String logFileRootPath,
-        int writerFileCount, int bufferedEntries) {
+        int writerFileCount, int bufferedEntries, String commitDate) {
 
       this.running = running;
       this.connected = connected;
@@ -93,6 +94,7 @@ public class FakeSystaWeb implements Runnable {
       this.loggerFileRootPath = logFileRootPath;
       this.loggerFileCount = writerFileCount;
       this.loggerBufferedEntries = bufferedEntries;
+      this.commitDate = commitDate;
     }
   }
 
@@ -143,7 +145,7 @@ public class FakeSystaWeb implements Runnable {
     }
   }
 
-  private final String commitDate = "2022-01-15T23:17:45+01:00";
+  private final String commitDate = "2022-01-15T23:48:45+01:00";
   private MessageType typeOfLastReceivedMessage = MessageType.NONE;
   private InetAddress remoteAddress;
   private int remotePort;
@@ -205,7 +207,7 @@ public class FakeSystaWeb implements Runnable {
     return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.getTimestampString(),
         this.inetAddress, this.PORT, this.remoteAddress, this.remotePort, dls.saveLoggedData, dls.capacity,
         dls.logFilePrefix, dls.logEntryDelimiter, dls.logFileRootPath, dls.writerFileCount,
-        dls.bufferedEntries);
+        dls.bufferedEntries, this.commitDate);
   }
 
   public DeviceTouchDeviceInfo findSystaComfort() {
