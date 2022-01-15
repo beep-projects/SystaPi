@@ -143,6 +143,7 @@ public class FakeSystaWeb implements Runnable {
     }
   }
 
+  private final String commitDate = "2022-01-15T23:17:45+01:00";
   private MessageType typeOfLastReceivedMessage = MessageType.NONE;
   private InetAddress remoteAddress;
   private int remotePort;
