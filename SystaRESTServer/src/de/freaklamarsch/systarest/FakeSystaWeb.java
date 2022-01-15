@@ -94,7 +94,7 @@ public class FakeSystaWeb implements Runnable {
       this.loggerFileRootPath = logFileRootPath;
       this.loggerFileCount = writerFileCount;
       this.loggerBufferedEntries = bufferedEntries;
-      this.commitDate = commitDate;
+      this.commitDate = "2022-01-15T23:52:04+01:00";
     }
   }
 
@@ -145,7 +145,7 @@ public class FakeSystaWeb implements Runnable {
     }
   }
 
-  private final String commitDate = "2022-01-15T23:48:45+01:00";
+  private final String commitDate = "2022-01-15T23:52:04+01:00";
   private MessageType typeOfLastReceivedMessage = MessageType.NONE;
   private InetAddress remoteAddress;
   private int remotePort;
