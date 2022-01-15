@@ -198,6 +198,7 @@ public class SystaRESTAPI {
 					.add("logFileSize", fsws.packetsPerFile).add("logFilePrefix", fsws.loggerFilePrefix)
 					.add("logFileDelimiter", fsws.loggerEntryDelimiter).add("logFileRootPath", fsws.loggerFileRootPath)
 					.add("logFilesWritten", fsws.loggerFileCount).add("logBufferedEntries", fsws.loggerBufferedEntries)
+					.add("commitDate", fsws.commitDate)
 					.build();
 			return jo;
 		} catch (Exception e) {
