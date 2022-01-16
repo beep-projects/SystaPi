@@ -10,7 +10,7 @@ The S-Touch app is providing a canvas on which the SystaComfort is drawing the u
 
 ### Search for SystaComfort units
 
-The most interesting finding in the protocol was a way to search for SystaComfort units on the network. I have used that information for [http://systapi:1337/SystaREST/findsystacomfort](http://systapi:1337/SystaREST/findsystacomfort) and [systa_test.py](../helpers/systa_test.py ) which is a helper script that you can use to evaluate your setup.
+The most interesting finding in the protocol was a way to search for SystaComfort units on the network. I have used that information for the [findsystacomfort](https://github.com/beep-projects/SystaPi#findsystacomfort) command and for [systa_test.py](../helpers/systa_test.py ) which is a helper script that you can use to evaluate your setup.
 
 ```bash
 pi@systapi:~ $ python3 systa_test.py 
