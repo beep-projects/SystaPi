@@ -94,7 +94,7 @@ public class FakeSystaWeb implements Runnable {
       this.loggerFileRootPath = logFileRootPath;
       this.loggerFileCount = writerFileCount;
       this.loggerBufferedEntries = bufferedEntries;
-      this.commitDate = "2022-01-16T08:36:00+00:00";
+      this.commitDate = "2022-01-16T12:39:01+00:00";
     }
   }
 
@@ -145,7 +145,7 @@ public class FakeSystaWeb implements Runnable {
     }
   }
 
-  private final String commitDate = "2022-01-16T08:36:00+00:00";
+  private final String commitDate = "2022-01-16T12:39:01+00:00";
   private MessageType typeOfLastReceivedMessage = MessageType.NONE;
   private InetAddress remoteAddress;
   private int remotePort;
@@ -660,10 +660,11 @@ public class FakeSystaWeb implements Runnable {
     // Generate reply counter with offset:
     int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) 
     		+ COUNTER_OFFSET_REPLY) & 0xFFFF;
-    System.out.println("maccount: "+((int)reply[5]+(int)reply[4]));
-    if(((int)reply[5]+(int)reply[4]) == 313) {//TODO this is just a hack to support a specific unit. Make it generic
+    //System.out.println("maccount: "+((int)reply[5]+(int)reply[4]));
+    if(((int)reply[5]+(int)reply[4]) == 57 || ((int)reply[5]+(int)reply[4]) == 313) {//TODO this is just a hack to support a specific unit. Make it generic
     	n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) 
         	+ COUNTER_OFFSET_REPLY_2) & 0xFFFF;
+    	//System.out.println("SpecialSysta");
     }
     reply[14] = (byte) (n & 0xFF);
     reply[15] = (byte) (n >> 8);
