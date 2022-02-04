@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>SystaPi raw data</title>
+    <style>
+
+    </style>
+    <!-- Load React. -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <!-- Load Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.js" integrity="sha512-uLlukEfSLB7gWRBvzpDnLGvzNUluF19IDEdUoyGAtaO0MVSBsQ+g3qhLRL3GTVoEzKpc24rVT6X1Pr5fmsShBg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  </head>
+  <body>
+    <!-- add the React components into this -->
+    <div id="systapirawdata"></div>
+    <canvas id="myChart" width="400" height="200"></canvas>
+    <!-- Load the SystaPi component. -->
+    <script>
+/**
+ * Class to represent one entry from the raw data packets sent by the SystaComfort
+ */
+class SystaPlot extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: [],
+    };
+    this.timestamp = 0;
+    this.ctx = document.getElementById("myChart").getContext("2d");
+    this.chart = new Chart(this.ctx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [{
+          label: ["Outside Temperature"],
+          data: [],
+          fill: true,
+          borderColor: [
+            "rgba(255, 99, 132, 1)"
+          ],
+          borderWidth: 1,
+          tension: 0.1
+        },
+        {
+          label: ["Hot Water Temperature"],
+          data: [],
+          fill: true,
+          borderColor: [
+            "rgba(255, 99, 132, 1)"
+          ],
+          borderWidth: 1,
+          tension: 0.1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+  
+  addData(timestamp, outsideTemp, hotWaterTemp) {
+    this.chart.data.labels.push(timestamp);
+    this.chart.data.datasets[0].data.push(outsideTemp);
+    this.chart.data.datasets[1].data.push(hotWaterTemp);
+    this.chart.update();
+  }
+  //function called to render this component in the browser
+  render() {
+    return null;
+  }
+  
+  componentDidMount() {
+    this.updateEntries();
+    //set a timer to periodically update the component
+    //the SystaComfort sends new values each minute, so scheduling it with a few seconds should be good enough
+    this.timer = setInterval(() => this.updateEntries(), 5000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    this.timer = null;
+  }  
+  
+  fetchRawData() {
+    fetch("http://systapi:1337/SystaREST/rawdata")
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw response;
+        }
+      })
+      .then(result => {
+        //put it into state, as it should trigger an update of the 
+        //whole component
+        if(this.timestamp != result.timestamp) {
+          this.addData(result.timestamp, result.rawData[0]/10.0, result.rawData[3]/10.0);
+          this.timestamp = result.timestamp;
+          this.setState({data: result.rawData})
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching data: ", error);
+      })
+      .finally(() => {
+        //cleanup?;
+      })
+  }
+  
+  updateEntries() {
+    this.fetchRawData();
+    //nothing else to do
+    //update of the components is treiggered by setting
+    //setState({data: ...}) inside fetchRawData()
+  }
+  
+}
+
+
+const domContainer = document.querySelector('#systapirawdata');
+ReactDOM.render(React.createElement(SystaPlot), domContainer);
+
+    </script>
+  </body>
+</html>

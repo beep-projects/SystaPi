@@ -247,7 +247,7 @@ public final class SystaIndex {
 	 */
 	final static int ANTI_FREEZE_OUTSIDE_TEMP = 55;
 	/**
-	 * Vorhaltezeit Aufheizen minuten
+	 * Vorhaltezeit Aufnormal minuten
 	 */
 	final static int HEAT_UP_TIME = 56; // in minutes
 	/**
@@ -271,8 +271,8 @@ public final class SystaIndex {
 	 * Mischer Laufzeit (minuten)
 	 */
 	final static int MIXER_RUNTIME = 62; // in minutes
-	// final static int = 63
-	// final static int = 64
+	// final static int = 63 //(proportionalbereich?)
+	// final static int = 64 //(nachstellzeit?)
 	/**
 	 * (Raumtemperatur Abgleich (* 10, neg. Werte sind um 1 zu hoch, 0 und -1 werden
 	 * beide als 0 geliefert))
