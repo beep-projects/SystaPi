@@ -242,6 +242,9 @@ echo
 echo "copy SystaRESTServer to ${RPI_PATH}"
 echo "cp -r SystaRESTServer ${RPI_PATH}"
 cp -r SystaRESTServer "${RPI_PATH}"
+echo "copy helpers to ${RPI_PATH}"
+echo "cp -r helpers ${RPI_PATH}"
+cp -r helpers "${RPI_PATH}"
 
 echo "press any key to continue..."
 read -rn 1 -s
