@@ -198,6 +198,7 @@ public class SystaRESTAPI {
 					.add("logFileSize", fsws.packetsPerFile).add("logFilePrefix", fsws.loggerFilePrefix)
 					.add("logFileDelimiter", fsws.loggerEntryDelimiter).add("logFileRootPath", fsws.loggerFileRootPath)
 					.add("logFilesWritten", fsws.loggerFileCount).add("logBufferedEntries", fsws.loggerBufferedEntries)
+					.add("commitDate", fsws.commitDate)
 					.build();
 			return jo;
 		} catch (Exception e) {
@@ -394,15 +395,22 @@ public class SystaRESTAPI {
 	}
 
 	/**
-	 * Returns the MonitorRawData.html file for monitoring raw data in the browser.
+	 * Returns the a .html file for monitoring raw data in the browser.
+	 * @param theme parameter to define which page .html file to load. Possible values are systarest or systaweb
 	 * @return the InputStream of the file, or null, if something went wrong in the file handling
 	 */
 	@GET
 	@Produces({MediaType.TEXT_HTML})
     @Path("{monitorrawdata : (?i)monitorrawdata}")
-	public InputStream getMonitorRawDataHTML() {
+	public InputStream getMonitorRawDataHTML(@DefaultValue("systarest") @QueryParam("theme") String theme) {
 		String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-		String monitorHTML = rootPath + "MonitorRawData.html";
+		String monitorHTML = rootPath;
+		if(theme.equalsIgnoreCase("systaweb")) {
+			monitorHTML += "fakeremoteportal.html";
+		} else {
+			//default page to load
+			monitorHTML += "rawdatamonitor.html";
+		}
 		
 		File f = new File(monitorHTML);
 		try {

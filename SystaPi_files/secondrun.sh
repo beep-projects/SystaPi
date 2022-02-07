@@ -118,7 +118,7 @@ sudo rm zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz
 sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf/bin/java 1
 sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf/bin/javac 1
 
-#copy SystaRESTServer to the pi homefolder for easy access
+#copy SystaRESTServer to the pi home folder for easy access
 echo "copy SystaRESTServer from /boot to /home/pi"
 cp -R /boot/SystaRESTServer /home/pi/
 
@@ -127,6 +127,13 @@ echo "build SystaRESTServer from source files"
 
 #make sure all the files belong to the user pi
 sudo chown -R pi:pi /home/pi/SystaRESTServer
+
+#copy helpers to the pi home folder for easy access
+echo "copy helpers from /boot to /home/pi"
+cp -R /boot/helpers /home/pi/
+
+#make sure all the files belong to the user pi
+sudo chown -R pi:pi /home/pi/helpers
 
 #create service file
 echo "create service file /etc/systemd/system/SystaRESTServer.service"

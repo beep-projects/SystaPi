@@ -72,11 +72,12 @@ public class FakeSystaWeb implements Runnable {
     public final String loggerFileRootPath;
     public final int loggerFileCount;
     public final int loggerBufferedEntries;
+    public final String commitDate;
 
     public FakeSystaWebStatus(boolean running, boolean connected, long dataPacketsReceived, String timestamp,
         String localAddress, int localPort, InetAddress remoteAddress, int remotePort, boolean saveLoggedData,
         int capacity, String logFilePrefix, String logEntryDelimiter, String logFileRootPath,
-        int writerFileCount, int bufferedEntries) {
+        int writerFileCount, int bufferedEntries, String commitDate) {
 
       this.running = running;
       this.connected = connected;
@@ -93,6 +94,7 @@ public class FakeSystaWeb implements Runnable {
       this.loggerFileRootPath = logFileRootPath;
       this.loggerFileCount = writerFileCount;
       this.loggerBufferedEntries = bufferedEntries;
+      this.commitDate = "2022-02-06T09:35:47+00:00";
     }
   }
 
@@ -143,6 +145,7 @@ public class FakeSystaWeb implements Runnable {
     }
   }
 
+  private final String commitDate = "2022-02-06T09:35:47+00:00";
   private MessageType typeOfLastReceivedMessage = MessageType.NONE;
   private InetAddress remoteAddress;
   private int remotePort;
@@ -150,6 +153,7 @@ public class FakeSystaWeb implements Runnable {
   private final int MAX_DATA_LENGTH = 1048;
   private final int MAX_NUMBER_ENTRIES = 256;
   private final int COUNTER_OFFSET_REPLY = 0x3FBF;
+  private final int COUNTER_OFFSET_REPLY_2 = 0x3FC0;
   private final int COUNTER_OFFSET_PWD = 0x10F9;
   private final int COUNTER_OFFSET_CHANGE = 0x3FBF;
   private final int MAC_OFFSET_REPLY = 0x8E82;
@@ -203,7 +207,7 @@ public class FakeSystaWeb implements Runnable {
     return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.getTimestampString(),
         this.inetAddress, this.PORT, this.remoteAddress, this.remotePort, dls.saveLoggedData, dls.capacity,
         dls.logFilePrefix, dls.logEntryDelimiter, dls.logFileRootPath, dls.writerFileCount,
-        dls.bufferedEntries);
+        dls.bufferedEntries, this.commitDate);
   }
 
   public DeviceTouchDeviceInfo findSystaComfort() {
@@ -534,11 +538,11 @@ public class FakeSystaWeb implements Runnable {
         readIndex = writeIndex;
         //sendPassword();
         //System.out.println("WI: "+writeIndex);
-        if(writeIndex==1) {
-          sendPassword();
-        } else {
+        //if(writeIndex==1) {
+        //  sendPassword();
+        //} else {
           sendDataReply(writeIndex);
-        }
+        //}
         logInt.addData(intData[readIndex], timestamp[readIndex]);
       } else if (type == 0x02) {
         // processType2(data, currentWriteBuffer);
@@ -656,6 +660,12 @@ public class FakeSystaWeb implements Runnable {
     // Generate reply counter with offset:
     int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) 
     		+ COUNTER_OFFSET_REPLY) & 0xFFFF;
+    //System.out.println("maccount: "+((int)reply[5]+(int)reply[4]));
+    if(((int)reply[5]+(int)reply[4]) == 57 || ((int)reply[5]+(int)reply[4]) == 313) {//TODO this is just a hack to support a specific unit. Make it generic
+    	n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) 
+        	+ COUNTER_OFFSET_REPLY_2) & 0xFFFF;
+    	//System.out.println("SpecialSysta");
+    }
     reply[14] = (byte) (n & 0xFF);
     reply[15] = (byte) (n >> 8);
     send(reply);
