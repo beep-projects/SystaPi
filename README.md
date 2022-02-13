@@ -375,9 +375,15 @@ curl "http://systapi:1337/SystaREST/rawdata"
 
 `GET` `/SystaREST/monitorrawdata` 
 [http://systapi:1337/SystaREST/monitorrawdata](http://systapi:1337/SystaREST/monitorrawdata)  
-Returns a React-based HTML page for monitoring of the raw data received from the Paradigma Systa Comfort. The content of the page should automatically refresh, but be aware that the SystaComfort sends its data every minute, so parameter changes on the unit will be displayed with some lag. Call this function from your browser, to see something like:
 
-<img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:100%;"/>
+Optional parameters:  
+
+* `theme` default `SystaREST` other possible value `systaweb` 
+
+Returns a React-based HTML page for monitoring of the raw data received from the Paradigma Systa Comfort. The content of the page should automatically refresh, but be aware that the SystaComfort sends its data only every minute, so parameter changes on the unit will be displayed with some lag. Call this function from your browser, to see something like:
+
+| [http://systapi:1337/SystaREST/monitorrawdata](http://systapi:1337/SystaREST/monitorrawdata)  <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:48%;"/> | [http://systapi:1337/SystaREST/monitorrawdata?theme=systaweb](http://systapi:1337/SystaREST/monitorrawdata?theme=systaweb)   <img src="resources/systaWeb_react_html.jpg" alt="rawData_react_html" style="width:48%;"/> |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
 
 #### waterheater
 
