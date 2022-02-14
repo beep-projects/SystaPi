@@ -384,7 +384,7 @@ Returns a React-based HTML page for monitoring of the raw data received from the
 
 | [http://systapi:1337/SystaREST/monitorrawdata](http://systapi:1337/SystaREST/monitorrawdata) |   | [http://systapi:1337/SystaREST/monitorrawdata?theme=systaweb](http://systapi:1337/SystaREST/monitorrawdata?theme=systaweb) |
 |----------------------------------------------------------------------------------------------|---|----------------------------------------------------------------------------------------------------------------------------|
-| <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:48%;"/>    |   | <img src="resources/systaWeb_react_html.jpg" alt="rawData_react_html" style="width:48%;"/>                                 |
+| <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:100%;"/>    |   | <img src="resources/systaWeb_react_html.jpg" alt="rawData_react_html" style="width:100%;"/>                                 |
 
 #### waterheater
 
