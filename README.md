@@ -9,7 +9,7 @@ The project contains an installation script to setup a Raspberry Pi as SystaPi f
 <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;" align="right"/>**Note:** The communication protocol is not publicly available, everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. **Please contribute information from your system!**  
 
 To support you in reverse engineering, the server has a rudimentary [logging](#enablelogging) functionality integrated. You can use this to set triggers on value changes with your home automation system and start logging of values for analysis.   
-You can also use [helpers/rawData.html](helpers/rawData.html) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system (see also [monitorrawdata](#monitorrawdata)). That page is created using [React](https://reactjs.org/), so you also can use it as starting point for creating a dashboard.  
+You can also use [helpers/rawdatamonitor.html](helpers/rawdatamonitor.html) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system (see also [monitorrawdata](#monitorrawdata)). That page is created using [React](https://reactjs.org/), so you also can use it as starting point for creating a dashboard.  
 
 If you want to report new fields, simply open a new issue or discussion.  
 
@@ -45,26 +45,28 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
 ## Directory Structure of this Project
 
 ```
-    ├── SystaPi_files           # files required for configuring a Raspberry Pi OS image to run the SystaRESTAPI server
-    │   ├── cmdline.txt         # file to be placed under /boot/cmdline.txt on the pi. Triggers the execution of firstrun.sh
-    │   │                       # on first boot (actually the second one, after resizing the image)
-    │   ├── firstrun.sh         # script for configuring WiFi, keyboard and timezone. You have to configure a few things in here!
-    │   ├── secondrun.sh        # called after a reboot. Should have network running. Does a full-upgrade of the system, 
-    │   │                       # installs required packages (dnsmasq, OpenJDK) and the SystaRESTAPI.service
-    │   └── thirdrun.sh         # called after a reboot. Cleans up after the installation and reboots into the final system
-    ├── SystaRESTServer         # Java based server for providing a REST API for a Paradigma SystaComfort unit
-    │   ├── bin                 # precompiled .class files for running the SystaRESTAPI server
-    │   ├── doc                 # JavaDoc for the server files
-    │   ├── lib                 # .jar files required for running the server
-    │   └── src                 # src files of the server, for everyone who wants to improve this
-    ├── docs                    # Javadoc for SystaREST Java classes available at http://beep-projects.github.io/SystaPi
-    ├── helpers                 # collection of ressources that are helpful for reverse engineering the SystaComfort protocol
-    │                           # or setting up systapi
-    ├── resources               # folder for images or other files linked with README.md
-    ├── install_systapi.sh      # Script for automatically downloading, flashing and configuring 
-    │                           # a Micro SD card for running the SystaREST server
-    ├── LICENSE                 # License for using and editing this software
-    └── README.md               # This file
+SystaPi
+├── docs                 # JavaDoc for the SystaRESTServer, best accessed via https://beep-projects.github.io/SystaPi/
+├── helpers              # collection of resources that are helpful for reverse engineering the SystaComfort protocol
+│                        # or setting up systapi
+├── install_systapi.sh   # Script for automatically downloading, flashing and configuring 
+│                        # a Micro SD card for running the SystaREST server
+├── LICENSE              # License for using and editing this software
+├── README.md            # This file
+├── resources            # folder for images or other files linked with README.md
+├── SystaPi_files        # files required for configuring a Raspberry Pi OS image to run the SystaRESTAPI server
+│   ├── cmdline.txt      # file to be placed under /boot/cmdline.txt on the pi. Triggers the execution of firstrun.sh
+│   │                    # on first boot (actually the second one, after resizing the image)
+│   ├── firstrun.sh      # script for configuring WiFi, keyboard and timezone. You have to configure a few things in here!
+│   ├── secondrun.sh     # called after a reboot. Should have network running. Does a full-upgrade of the system, 
+│   │                    # installs required packages (dnsmasq, OpenJDK) and the SystaRESTAPI.service
+│   └── thirdrun.sh      # called after a reboot. Cleans up after the installation and reboots into the final system
+└── SystaRESTServer      # Java based server for providing a REST API for a Paradigma SystaComfort unit
+    ├── bin              # precompiled .class files for running the SystaRESTAPI server
+    ├── build.sh         # build file for compiling SystaRESTServer
+    ├── build_test.sh    # build file for building the JUnit test run at each commit
+    ├── lib              # .jar files required for running the server
+    └── src              # src files of the server, for everyone who wants to improve this
 ```
 
 ## Parts List
