@@ -24,6 +24,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -94,7 +96,7 @@ public class FakeSystaWeb implements Runnable {
       this.loggerFileRootPath = logFileRootPath;
       this.loggerFileCount = writerFileCount;
       this.loggerBufferedEntries = bufferedEntries;
-      this.commitDate = "2022-02-13T23:23:50+00:00";
+      this.commitDate = "2022-03-13T09:08:07+00:00";
     }
   }
 
@@ -145,7 +147,7 @@ public class FakeSystaWeb implements Runnable {
     }
   }
 
-  private final String commitDate = "2022-02-13T23:23:50+00:00";
+  private final String commitDate = "2022-03-13T09:08:07+00:00";
   private MessageType typeOfLastReceivedMessage = MessageType.NONE;
   private InetAddress remoteAddress;
   private int remotePort;
@@ -186,7 +188,6 @@ public class FakeSystaWeb implements Runnable {
   private final String[] WATER_HEATER_OPERATION_MODES = { "off", "normal", "comfort", "locked" };
 
   private int WRITER_MAX_DATA = 60;
-  //private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
   private DataLogger<Integer> logInt = new DataLogger<>("data", WRITER_MAX_DATA);
   private DataLogger<Byte> logRaw = new DataLogger<>("raw", WRITER_MAX_DATA);
 
@@ -201,9 +202,12 @@ public class FakeSystaWeb implements Runnable {
     DataLoggerStatus dls = logRaw.getStatus();
     // if we have received data within the last 120 seconds, we are considered being
     // connected
+    //boolean connected = (readIndex < 0) ? false
+    //        : (timestamp[readIndex] > 0
+    //            && (LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - timestamp[readIndex] < 120));
     boolean connected = (readIndex < 0) ? false
-        : (timestamp[readIndex] > 0
-            && (LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - timestamp[readIndex] < 120));
+            : (timestamp[readIndex] > 0
+                && (Instant.now().getEpochSecond() - timestamp[readIndex] < 120));
     return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.getTimestampString(),
         this.inetAddress, this.PORT, this.remoteAddress, this.remotePort, dls.saveLoggedData, dls.capacity,
         dls.logFilePrefix, dls.logEntryDelimiter, dls.logFileRootPath, dls.writerFileCount,
@@ -291,7 +295,8 @@ public class FakeSystaWeb implements Runnable {
    *         e.g. 2021-12-24T14:49:27+01:00
    */
   public String getFormattedTimeString(long timestamp) {
-    return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+    //return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+    return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp, 0, OffsetDateTime.now().getOffset()), ZoneId.systemDefault()));
   }
   /**
    * @return the intData of the current measurement, or null if no measurement has
@@ -331,7 +336,7 @@ public class FakeSystaWeb implements Runnable {
     status.supportedFeatures = new String[] {}; // TODO check what supported features are
     status.is_away_mode_on = false; // TODO match with ferien mode if possible
     status.timestamp = timestamp[i];
-    status.timestampString = getFormattedTimeString(timestamp[readIndex]);//formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+    status.timestampString = getFormattedTimeString(timestamp[readIndex]);
     return status;
   }
 
@@ -345,6 +350,7 @@ public class FakeSystaWeb implements Runnable {
     status.outsideTemp = intData[i][SystaIndex.OUTSIDE_TEMP] / 10.0;
     status.circuit1FlowTemp = intData[i][SystaIndex.CIRCUIT_1_FLOW_TEMP] / 10.0;
     status.circuit1ReturnTemp = intData[i][SystaIndex.CIRCUIT_1_RETURN_TEMP] / 10.0;
+    status.circuit1OperationMode = intData[i][SystaIndex.CIRCUIT_1_OPERATION_MODE];
     status.hotWaterTemp = intData[i][SystaIndex.HOT_WATER_TEMP] / 10.0;
     status.bufferTempTop = intData[i][SystaIndex.BUFFER_TEMP_TOP] / 10.0;
     status.bufferTempBottom = intData[i][SystaIndex.BUFFER_TEMP_BOTTOM] / 10.0;
@@ -403,7 +409,8 @@ public class FakeSystaWeb implements Runnable {
     status.boilerOperationTime = intData[i][SystaIndex.BOILER_RUNTIME_MIN]; // in min
     status.boilerShutdownTemp = intData[i][SystaIndex.BOILER_SHUTDOWN_TEMP] / 10.0;
     status.boilerPumpSpeedMin = intData[i][SystaIndex.BOILER_PUMP_SPEED_MIN]; // in %
-    status.boilerOperationMode = intData[i][SystaIndex.BOILER_STATUS];
+    status.boilerPumpSpeedActual = intData[i][SystaIndex.BOILER_PUMP_SPEED_ACTUAL] * 5;// 0=0%, 20=100%
+    status.boilerOperationMode = intData[i][SystaIndex.BOILER_OPERATION_MODE];
     status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN]; // in min
     status.circulationLockoutTimePushButton = intData[i][SystaIndex.CIRCULATION_LOCKOUT_TIME_PUSH_BUTTON]; // in min
     status.circulationHysteresis = intData[i][SystaIndex.CIRCULATION_HYSTERESIS] / 10.0;
@@ -425,9 +432,8 @@ public class FakeSystaWeb implements Runnable {
     status.circulationPumpIsOn = (status.relay & SystaStatus.CIRCULATION_PUMP_MASK) != 0;
     status.boilerIsOn = ((status.relay & SystaStatus.BOILER_MASK) != 0)
         || (List.of(1, 2, 3, 8, 9, 11, 12).contains(status.boilerOperationMode));
-    status.burnerIsOn = (status.boilerIsOn && ((status.boilerFlowTemp - status.boilerReturnTemp) > 0.2))
-        || ((status.relay & SystaStatus.BURNER_MASK) != 0); // TODO verify this assumption
-    status.ledBoilerIsOn = (status.relay & SystaStatus.LED_BOILER_MASK) != 0; // TODO verify this assumption
+    status.burnerIsOn = ((status.relay & SystaStatus.BURNER_MASK) != 0);
+    status.ledBoilerIsOn = (status.relay & SystaStatus.LED_BOILER_MASK) != 0;
     status.unknowRelayState1IsOn = (status.relay & SystaStatus.UNKNOWN_1_MASK) != 0;
     status.unknowRelayState2IsOn = (status.relay & SystaStatus.UNKNOWN_2_MASK) != 0;
     status.mixer1IsOnWarm = (status.relay & SystaStatus.MIXER_WARM_MASK) != 0;
@@ -447,9 +453,11 @@ public class FakeSystaWeb implements Runnable {
     status.logBoilerSettings = intData[i][SystaIndex.LOG_BOILER_SETTINGS];
     status.logBoilerParallelOperation = (status.logBoilerSettings
         & SystaStatus.LOG_BOILER_PARALLEL_OPERATION_MASK) != 0;
+    status.logBoilerOperationMode = intData[i][SystaIndex.LOG_BOILER_OPERATION_MODE];
     status.boilerHeatsBuffer = (status.logBoilerSettings & SystaStatus.BOILER_HEATS_BUFFER_MASK) != 0;
+    status.bufferType = intData[i][SystaIndex.BUFFER_TYPE];
     status.timestamp = timestamp[i];
-    status.timestampString = getFormattedTimeString(timestamp[readIndex]);//formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+    status.timestampString = getFormattedTimeString(timestamp[readIndex]);
     return status;
   }
 
@@ -504,7 +512,8 @@ public class FakeSystaWeb implements Runnable {
       }
       // calculate the buffer id for writing
       writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
-      timestamp[writeIndex] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+      //timestamp[writeIndex] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+      timestamp[writeIndex] = Instant.now().getEpochSecond();
       remoteAddress = receivePacket.getAddress();
       remotePort = receivePacket.getPort();
       logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);

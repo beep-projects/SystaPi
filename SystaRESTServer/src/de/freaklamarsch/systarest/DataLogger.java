@@ -24,7 +24,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
@@ -213,7 +216,8 @@ public class DataLogger<T> {
 	public synchronized void addData(T[] data, long timestamp) {
 		// access to dataBuffer and timestampBuffer has to be synchronized
 		// make sure that there is new data to write
-		String newTimestamp = formatter.format(LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC));
+		//String newTimestamp = formatter.format(LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC));
+		String newTimestamp = formatter.format(LocalDateTime.ofEpochSecond(timestamp, 0, OffsetDateTime.now().getOffset()));
 		String lastTimestamp = timestampBuffer.peek();
 		if (lastTimestamp != null && newTimestamp.equals(lastTimestamp)) {
 			// check if there is already data in the buffer (lastTimestamp!=null)
