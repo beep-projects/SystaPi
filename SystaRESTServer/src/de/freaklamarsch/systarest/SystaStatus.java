@@ -860,7 +860,7 @@ public class SystaStatus {
 	 * Ein - Der Speicher ist voll, kein Holz mehr nachlegen.
 	 * Aus - Der Speicher kann Wärme aufnehmen.
 	 */
-	public boolean ledBoilerIsOn;
+	public boolean boilerLedIsOn;
 	/**
 	 * Circulation Pump = Relay &amp; 0x0100
 	 */

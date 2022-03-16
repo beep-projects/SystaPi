@@ -22,54 +22,50 @@
   <meta charset="UTF-8" />
   <title>SystaPi Dashboard</title>
   <style>
-    /* Color palette used */
+    /* Color palette and fonts used */
     :root {
-      --main-grey: rgba(151, 151, 151, 1.0);
+      --main-grey: rgba(151, 151, 151, 1.0);/*#979797*/
       --main-grey-50: rgba(151, 151, 151, 0.5);
       --main-grey-25: rgba(151, 151, 151, 0.25);
-      --main-yellow: rgba(255, 226, 0, 1.0);
+      --main-grey-10: rgba(151, 151, 151, 0.1);
+      --main-yellow: rgba(255, 226, 0, 1.0); /*#ffe200*/
       --main-yellow-50: rgba(255, 226, 0, 0.5);
       --main-yellow-25: rgba(255, 226, 0, 0.25);
+      --main-yellow-10: rgba(255, 226, 0, 0.1);
       --main-bg: rgba(151, 151, 151, 1.0);
       /*--main-bg: #303030;*/
       --main-fg: rgba(255, 226, 0, 1.0);
-      --secondary-01: rgba(169, 161, 139, 1.0);
-      --secondary-02: rgba(185, 171, 126, 1.0);
-      --secondary-03: rgba(200, 182, 111, 1.0);
-      --secondary-04: rgba(215, 193, 96, 1.0);
-      --secondary-05: rgba(229, 204, 78, 1.0);
-      --secondary-06: rgba(242, 215, 54, 1.0);
-      --secondary-bg: rgba(78, 78, 86, 1.0);
-      --bar-01: rgba(151, 88, 148, 1.0);
-      --bar-02: rgba(155, 78, 159, 1.0);
-      --bar-03: rgba(156, 68, 172, 1.0);
-      --bar-04: rgba(155, 57, 186, 1.0);
-      --bar-05: rgba(151, 46, 202, 1.0);
-      --bar-06: rgba(143, 36, 218, 1.0);
-      --bar-07: rgba(130, 26, 236, 1.0);
-      --bar-08: rgba(108, 20, 255, 1.0);
-      --bar-09: rgba(133, 13, 255, 1.0);
-      --bar-10: rgba(155, 5, 255, 1.0);
-      --bar-11: rgba(174, 0, 255, 1.0);
-      --bar-12: rgba(192, 0, 255, 1.0);
-      --bar-13: rgba(209, 0, 255, 1.0);
-      --bar-14: rgba(225, 0, 255, 1.0);
-      --bar-15: rgba(240, 0, 255, 1.0);
-      --bar-01-05: rgba(151, 88, 148, 0.05);
-      --bar-02-05: rgba(155, 78, 159, 0.05);
-      --bar-03-05: rgba(156, 68, 172, 0.05);
-      --bar-04-05: rgba(155, 57, 186, 0.05);
-      --bar-05-05: rgba(151, 46, 202, 0.05);
-      --bar-06-05: rgba(143, 36, 218, 0.05);
-      --bar-07-05: rgba(130, 26, 236, 0.05);
-      --bar-08-05: rgba(108, 20, 255, 0.05);
-      --bar-09-05: rgba(133, 13, 255, 0.05);
-      --bar-10-05: rgba(155, 5, 255, 0.05);
-      --bar-11-05: rgba(174, 0, 255, 0.05);
-      --bar-12-05: rgba(192, 0, 255, 0.05);
-      --bar-13-05: rgba(209, 0, 255, 0.05);
-      --bar-14-05: rgba(225, 0, 255, 0.05);
-      --bar-15-05: rgba(240, 0, 255, 0.05);
+      --secondary-00: rgba(78, 78, 86, 1.0); /*#4e4e56*/
+      --secondary-01: rgba(105, 105, 112, 1.0); /*#696970*/
+      --secondary-02: rgba(133, 133, 139, 1.0); /*#85858b*/
+      --secondary-03: rgba(162, 162, 166, 1.0); /*#a2a2a6*/
+      --secondary-04: rgba(192, 192, 195, 1.0); /*#c0c0c3*/
+      --secondary-05: rgba(223, 223, 225, 1.0); /*#dfdfe1*/
+      --secondary-06: rgba(255, 255, 255, 1.0); /*#ffffff*/
+      --secondary-07: rgba(255, 250, 221, 1.0); /*#fffadd*/
+      --secondary-08: rgba(255, 245, 188, 1.0); /*#fff5bc*/
+      --secondary-09: rgba(255, 240, 153, 1.0); /*#fff099*/
+      --secondary-10: rgba(255, 235, 118, 1.0); /*#ffeb76*/
+      --secondary-11: rgba(255, 230, 77), 1.0; /*#ffe64d*/
+      --secondary-12: rgba(255, 226, 0, 1.0); /*#ffe200*/
+      --secondary-bg: rgba(78, 78, 86, 1.0); /*#4e4e56*/
+      --secondary-00-01: rgba(78, 78, 86, 0.1); /*#4e4e56*/
+      --secondary-01-01: rgba(105, 105, 112, 0.1); /*#696970*/
+      --secondary-02-01: rgba(133, 133, 139, 0.1); /*#85858b*/
+      --secondary-03-01: rgba(162, 162, 166, 0.1); /*#a2a2a6*/
+      --secondary-04-01: rgba(192, 192, 195, 0.1); /*#c0c0c3*/
+      --secondary-05-01: rgba(223, 223, 225, 0.1); /*#dfdfe1*/
+      --secondary-06-01: rgba(255, 255, 255, 0.1); /*#ffffff*/
+      --secondary-07-01: rgba(255, 250, 221, 0.1); /*#fffadd*/
+      --secondary-08-01: rgba(255, 245, 188, 0.1); /*#fff5bc*/
+      --secondary-09-01: rgba(255, 240, 153, 0.1); /*#fff099*/
+      --secondary-10-01: rgba(255, 235, 118, 0.1); /*#ffeb76*/
+      --secondary-11-01: rgba(255, 230, 77, 0.1); /*#ffe64d*/
+      --secondary-12-01: rgba(255, 226, 0, 0.1); /*#ffe200*/
+      --font-size: 14px;
+      --font-size-minimal: 10px;
+      --font-size-title: 60px;
+      --font-size-subtitle: 20px;
     }
 
     body {
@@ -98,25 +94,33 @@
       /*padding: 10px;*/
       background: var(--main-bg);
       color: var(--main-fg);
-      font-weight: bolder;
-      font-size: 60px;
       text-align: center;
       justify-content: center;
       display: grid;
-      grid-template-columns: 100px 100px 100px 100px 100px auto auto auto 800px;
+      align-items: center;
+      grid-template-columns: 100px 100px 100px 100px 100px auto auto auto 600px;
       grid-column-gap: 10px;
       grid-template-rows: 100px;
       grid-template-areas:
-        "outsidegauge hotwatergauge logpumpgauge boilerpumpgauge heatingpumpgauge logo1 title logo2 relay";
+        "outsidegauge hotwatergauge logpumpgauge boilerpumpgauge heatingpumpgauge logo1 title logo2 relaybar";
     }
 
     .title {
-      vertical-align: middle;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-align: center;
+      font-weight: bolder;
+      font-size: var(--font-size-title);
       padding: 0px;
       margin: 0px;
-      border-radius: 10px;
-      box-shadow: 0 5px 5px 0 rgba(0, 0, 0, .25);
+      /*border-radius: 10px;
+      box-shadow: 0 5px 5px 0 rgba(0, 0, 0, .25);*/
+    }
+
+    .title .subtitle{
+      font-weight: bolder;
+      font-size: var(--font-size-subtitle);
     }
 
     .dashboard {
@@ -124,11 +128,11 @@
       display: grid;
       grid-gap: 5px;
       grid-template-rows: 0.3fr 1fr 1fr;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       grid-template-areas:
-        "outside   outside"
-        "logboiler circuit"
-        "buffer    hotwater";
+        "outside   outside   outside"
+        "logboiler circuit   relay"
+        "buffer    hotwater  status";
       background: var(--main-bg);
       padding: 10px;
     }
@@ -136,18 +140,19 @@
     .minichart {
       padding: 0px;
       margin: 0px;
-      border-radius: 10px;
-      /*box-shadow: 0 5px 5px 0 rgba(0, 0, 0, .25);*/
+      /*border-radius: 10px;
+      box-shadow: 0 5px 5px 0 rgba(0, 0, 0, .25);*/
     }
 
     img {
       padding: 0px;
       margin: 0px;
-      border-radius: 10px;
-      box-shadow: 0 5px 5px 0 rgba(0, 0, 0, .25);
+      /*border-radius: 10px;
+      box-shadow: 0 5px 5px 0 rgba(0, 0, 0, .25);*/
     }
 
     .chart {
+      font-size: var(--font-size);
       display: grid;
       grid-template-rows: 20px auto;
       grid-template-columns: 1fr;
@@ -168,6 +173,13 @@
     .chartCanvas {
       grid-area: 2 / 1 / 3 / 1;
       border-top: 1px solid rgba(255, 255, 255, .12);
+    }
+
+    .statustable td{
+      padding-top: 2px;
+      padding-bottom: 2px;
+      padding-left: 10px;
+      padding-right: 10px;
     }
 
     /* BEGIN charts to be placed on the dashboard */
@@ -196,6 +208,10 @@
       grid-area: logboiler;
     }
 
+    #status {
+      grid-area: status;
+    }
+
     #outsidegauge {
       grid-area: outsidegauge;
     }
@@ -216,8 +232,8 @@
       grid-area: heatingpumpgauge;
     }
 
-    #relay {
-      grid-area: relay;
+    #relaybar {
+      grid-area: relaybar;
     }
 
     /* END charts to be placed on the dashboard */
@@ -275,52 +291,51 @@
     var colorMainGrey = getComputedStyle(document.body).getPropertyValue('--main-grey');
     var colorMainGrey50 = getComputedStyle(document.body).getPropertyValue('--main-grey-50');
     var colorMainGrey25 = getComputedStyle(document.body).getPropertyValue('--main-grey-25');
+    var colorMainGrey10 = getComputedStyle(document.body).getPropertyValue('--main-grey-10');
     var colorMainYellow = getComputedStyle(document.body).getPropertyValue('--main-yellow');
     var colorMainYellow50 = getComputedStyle(document.body).getPropertyValue('--main-yellow-50');
     var colorMainYellow25 = getComputedStyle(document.body).getPropertyValue('--main-yellow-25');
+    var colorMainYellow10 = getComputedStyle(document.body).getPropertyValue('--main-yellow-10');
     var colorMainBg = getComputedStyle(document.body).getPropertyValue('--main-bg');
     var colorMainFg = getComputedStyle(document.body).getPropertyValue('--main-fg');
+    var colorSecondary00 = getComputedStyle(document.body).getPropertyValue('--secondary-00');
     var colorSecondary01 = getComputedStyle(document.body).getPropertyValue('--secondary-01');
     var colorSecondary02 = getComputedStyle(document.body).getPropertyValue('--secondary-02');
     var colorSecondary03 = getComputedStyle(document.body).getPropertyValue('--secondary-03');
     var colorSecondary04 = getComputedStyle(document.body).getPropertyValue('--secondary-04');
     var colorSecondary05 = getComputedStyle(document.body).getPropertyValue('--secondary-05');
     var colorSecondary06 = getComputedStyle(document.body).getPropertyValue('--secondary-06');
+    var colorSecondary07 = getComputedStyle(document.body).getPropertyValue('--secondary-07');
+    var colorSecondary08 = getComputedStyle(document.body).getPropertyValue('--secondary-08');
+    var colorSecondary09 = getComputedStyle(document.body).getPropertyValue('--secondary-09');
+    var colorSecondary10 = getComputedStyle(document.body).getPropertyValue('--secondary-10');
+    var colorSecondary11 = getComputedStyle(document.body).getPropertyValue('--secondary-11');
+    var colorSecondary12 = getComputedStyle(document.body).getPropertyValue('--secondary-12');
     var colorSecondaryBg = getComputedStyle(document.body).getPropertyValue('--secondary-bg');
-    var colorBar01 = getComputedStyle(document.body).getPropertyValue('--bar-01');
-    var colorBar02 = getComputedStyle(document.body).getPropertyValue('--bar-02');
-    var colorBar03 = getComputedStyle(document.body).getPropertyValue('--bar-03');
-    var colorBar04 = getComputedStyle(document.body).getPropertyValue('--bar-04');
-    var colorBar05 = getComputedStyle(document.body).getPropertyValue('--bar-05');
-    var colorBar06 = getComputedStyle(document.body).getPropertyValue('--bar-06');
-    var colorBar07 = getComputedStyle(document.body).getPropertyValue('--bar-07');
-    var colorBar08 = getComputedStyle(document.body).getPropertyValue('--bar-08');
-    var colorBar09 = getComputedStyle(document.body).getPropertyValue('--bar-09');
-    var colorBar10 = getComputedStyle(document.body).getPropertyValue('--bar-10');
-    var colorBar11 = getComputedStyle(document.body).getPropertyValue('--bar-11');
-    var colorBar12 = getComputedStyle(document.body).getPropertyValue('--bar-12');
-    var colorBar13 = getComputedStyle(document.body).getPropertyValue('--bar-13');
-    var colorBar14 = getComputedStyle(document.body).getPropertyValue('--bar-14');
-    var colorBar15 = getComputedStyle(document.body).getPropertyValue('--bar-15');
-    var colorBar0105 = getComputedStyle(document.body).getPropertyValue('--bar-01-05');
-    var colorBar0205 = getComputedStyle(document.body).getPropertyValue('--bar-02-05');
-    var colorBar0305 = getComputedStyle(document.body).getPropertyValue('--bar-03-05');
-    var colorBar0405 = getComputedStyle(document.body).getPropertyValue('--bar-04-05');
-    var colorBar0505 = getComputedStyle(document.body).getPropertyValue('--bar-05-05');
-    var colorBar0605 = getComputedStyle(document.body).getPropertyValue('--bar-06-05');
-    var colorBar0705 = getComputedStyle(document.body).getPropertyValue('--bar-07-05');
-    var colorBar0805 = getComputedStyle(document.body).getPropertyValue('--bar-08-05');
-    var colorBar0905 = getComputedStyle(document.body).getPropertyValue('--bar-09-05');
-    var colorBar1005 = getComputedStyle(document.body).getPropertyValue('--bar-10-05');
-    var colorBar1105 = getComputedStyle(document.body).getPropertyValue('--bar-11-05');
-    var colorBar1205 = getComputedStyle(document.body).getPropertyValue('--bar-12-05');
-    var colorBar1305 = getComputedStyle(document.body).getPropertyValue('--bar-13-05');
-    var colorBar1405 = getComputedStyle(document.body).getPropertyValue('--bar-14-05');
-    var colorBar1505 = getComputedStyle(document.body).getPropertyValue('--bar-15-05');
+    var colorSecondary0001 = getComputedStyle(document.body).getPropertyValue('--secondary-00-01');
+    var colorSecondary0101 = getComputedStyle(document.body).getPropertyValue('--secondary-01-01');
+    var colorSecondary0201 = getComputedStyle(document.body).getPropertyValue('--secondary-02-01');
+    var colorSecondary0301 = getComputedStyle(document.body).getPropertyValue('--secondary-03-01');
+    var colorSecondary0401 = getComputedStyle(document.body).getPropertyValue('--secondary-04-01');
+    var colorSecondary0501 = getComputedStyle(document.body).getPropertyValue('--secondary-05-01');
+    var colorSecondary0601 = getComputedStyle(document.body).getPropertyValue('--secondary-06-01');
+    var colorSecondary0701 = getComputedStyle(document.body).getPropertyValue('--secondary-07-01');
+    var colorSecondary0801 = getComputedStyle(document.body).getPropertyValue('--secondary-08-01');
+    var colorSecondary0901 = getComputedStyle(document.body).getPropertyValue('--secondary-09-01');
+    var colorSecondary1001 = getComputedStyle(document.body).getPropertyValue('--secondary-10-01');
+    var colorSecondary1101 = getComputedStyle(document.body).getPropertyValue('--secondary-11-01');
+    var colorSecondary1201 = getComputedStyle(document.body).getPropertyValue('--secondary-12-01');
+
     //base64 encoded image https://www.base64-image.de/
     var systaPiLogo = "data:image/png;base64,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";
+    
+    // global variables and functions //
+    var reactKey = 0; //key used as unique key prop for react elements
+    var fontSize = getComputedStyle(document.body).getPropertyValue('--font-size');
+    var fontSizeMinimal = getComputedStyle(document.body).getPropertyValue('--font-size-minimal');
+    var fontSizeTitle = getComputedStyle(document.body).getPropertyValue('--font-size-title');
+    var fontSizeSubtitle = getComputedStyle(document.body).getPropertyValue('--font-size-subtitle');
 
-    // global functions //
     function arrayAddMaxSize(array, e, maxSize) {
         if (array.length >= maxSize) {
           return [...(array.slice(1)), e];
@@ -339,6 +354,7 @@
           logBoilerPumpSpeedActual: undefined,
           boilerPumpSpeedActual: undefined,
           heatingPumpSpeedActual: undefined,
+          heatingPumpSpeedActualList: [],
           outsideTemp: undefined,
           outsideTempList: [],
           heatingLimitTempList: [],
@@ -351,17 +367,6 @@
           circuit1FlowTempList: [],
           circuit1ReturnTempList: [],
           circuit1FlowTempSetList: [],
-          heatingPumpList: [],
-          chargePumpList: [],
-          circulationPumpList: [],
-          boilerList: [],
-          burnerList: [],
-          mixerWarmList: [],
-          mixerColdList: [],
-          logDiverterValveList: [],
-          ledBoilerList: [],
-          x0800List: [],
-          x0002List: [],
           hotWaterTemp: undefined,
           hotWaterTempList: [],
           hotWaterTempSetList: [],
@@ -371,6 +376,24 @@
           logBoilerFlowTempList: [],
           logBoilerReturnTempList: [],
           logBoilerPumpSpeedActualList: [],
+          circulationPumpIsOnList: [],
+          heatingPumpIsOnList: [],
+          mixer1IsOnWarmList: [],
+          mixer1IsOnCoolList: [],
+          chargePumpIsOnList: [],
+          boilerIsOnList: [],
+          burnerIsOnList: [],
+          logBoilderChargePumpIsOnList: [],
+          ledBoilerIsOnList: [],
+          operationModeName: "",
+          circuit1OperationModeName: "",
+          hotWaterOperationModeName: "",
+          logBoilerOperationModeName: "",
+          boilerOperationModeName: "",
+          mixer1StateName: "",
+          systemNumberOfStarts: "",
+          burnerNumberOfStarts: "",
+          boilerOperationTime: "",
         };
       }
 
@@ -397,6 +420,7 @@
                 logBoilerPumpSpeedActual: result.logBoilerPumpSpeedActual,
                 boilerPumpSpeedActual: result.boilerPumpSpeedActual,
                 heatingPumpSpeedActual: result.heatingPumpSpeedActual,
+                heatingPumpSpeedActualList: arrayAddMaxSize(prevState.heatingPumpSpeedActualList, result.heatingPumpSpeedActual, this.props.maxEntries),
                 outsideTemp: result.outsideTemp,
                 outsideTempList: arrayAddMaxSize(prevState.outsideTempList, result.outsideTemp, this.props.maxEntries),
                 heatingLimitTempList: arrayAddMaxSize(prevState.heatingLimitTempList, result.heatingLimitTemp, this.props.maxEntries),
@@ -409,17 +433,6 @@
                 circuit1FlowTempList: arrayAddMaxSize(prevState.circuit1FlowTempList, result.circuit1FlowTemp, this.props.maxEntries),
                 circuit1ReturnTempList: arrayAddMaxSize(prevState.circuit1ReturnTempList, result.circuit1ReturnTemp, this.props.maxEntries),
                 circuit1FlowTempSetList: arrayAddMaxSize(prevState.circuit1FlowTempSetList, result.circuit1FlowTempSet, this.props.maxEntries),
-                heatingPumpList: arrayAddMaxSize(prevState.heatingPumpList, result.heatingPump, this.props.maxEntries),
-                chargePumpList: arrayAddMaxSize(prevState.chargePumpList, result.chargePump, this.props.maxEntries),
-                circulationPumpList: arrayAddMaxSize(prevState.circulationPumpList, result.circulationPump, this.props.maxEntries),
-                boilerList: arrayAddMaxSize(prevState.boilerList, result.boiler, this.props.maxEntries),
-                burnerList: arrayAddMaxSize(prevState.burnerList, result.burner, this.props.maxEntries),
-                mixerWarmList: arrayAddMaxSize(prevState.mixerWarmList, result.mixerWarm, this.props.maxEntries),
-                mixerColdList: arrayAddMaxSize(prevState.mixerColdList, result.mixerCold, this.props.maxEntries),
-                logDiverterValveList: arrayAddMaxSize(prevState.logDiverterValveList, result.logDiverterValve, this.props.maxEntries),
-                ledBoilerList: arrayAddMaxSize(prevState.ledBoilerList, result.ledBoiler, this.props.maxEntries),
-                x0800List: arrayAddMaxSize(prevState.x0800List, result.x0800, this.props.maxEntries),
-                x0002List: arrayAddMaxSize(prevState.x0002List, result.x0002, this.props.maxEntries),
                 hotWaterTemp: result.hotWaterTemp,
                 hotWaterTempList: arrayAddMaxSize(prevState.hotWaterTempList, result.hotWaterTemp, this.props.maxEntries),
                 hotWaterTempSetList: arrayAddMaxSize(prevState.hotWaterTempSetList, result.hotWaterTempSet, this.props.maxEntries),
@@ -429,6 +442,25 @@
                 logBoilerFlowTempList: arrayAddMaxSize(prevState.logBoilerFlowTempList, result.logBoilerFlowTemp, this.props.maxEntries),
                 logBoilerReturnTempList: arrayAddMaxSize(prevState.logBoilerReturnTempList, result.logBoilerReturnTemp, this.props.maxEntries),
                 logBoilerPumpSpeedActualList: arrayAddMaxSize(prevState.logBoilerPumpSpeedActualList, result.logBoilerPumpSpeedActual, this.props.maxEntries),
+                circulationPumpIsOnList: arrayAddMaxSize(prevState.circulationPumpIsOnList, (result.circulationPumpIsOn)?1:0, this.props.maxEntries),
+                heatingPumpIsOnList: arrayAddMaxSize(prevState.heatingPumpIsOnList, (result.heatingPumpIsOn)?1:0, this.props.maxEntries),
+                mixer1IsOnWarmList: arrayAddMaxSize(prevState.mixer1IsOnWarmList, (result.mixer1IsOnWarm)?1:0, this.props.maxEntries),
+                mixer1IsOnCoolList: arrayAddMaxSize(prevState.mixer1IsOnCoolList, (result.mixer1IsOnCool)?1:0, this.props.maxEntries),
+                chargePumpIsOnList: arrayAddMaxSize(prevState.chargePumpIsOnList, (result.chargePumpIsOn)?1:0, this.props.maxEntries),
+                boilerIsOnList: arrayAddMaxSize(prevState.boilerIsOnList, (result.boilerIsOn)?1:0, this.props.maxEntries),
+                burnerIsOnList: arrayAddMaxSize(prevState.burnerIsOnList, (result.burnerIsOn)?1:0, this.props.maxEntries),
+                logBoilderChargePumpIsOnList: arrayAddMaxSize(prevState.logBoilderChargePumpIsOnList, (result.logBoilderChargePumpIsOn)?1:0, this.props.maxEntries),
+                ledBoilerIsOnList: arrayAddMaxSize(prevState.ledBoilerIsOnList, (result.ledBoilerIsOn)?1:0, this.props.maxEntries),
+                operationModeName: result.operationModeName,
+                circuit1OperationModeName: result.circuit1OperationModeName,
+                hotWaterOperationModeName: result.hotWaterOperationModeName,
+                logBoilerOperationModeName: result.logBoilerOperationModeName,
+                boilerOperationModeName: result.boilerOperationModeName,
+                mixer1StateName: result.mixer1StateName,
+                systemNumberOfStarts: result.systemNumberOfStarts,
+                burnerNumberOfStarts: result.burnerNumberOfStarts,
+                boilerOperationTime: result.boilerOperationTimeHours + "h " + result.boilerOperationTimeMinutes + "m",
+
               }))
               //console.log(this.state.outsideTemp);
               //console.log(this.state.hotWaterTemp);
@@ -526,11 +558,11 @@
               minimal: true,
               backgroundColor: colorMainBg,
             }, null),
-            React.createElement("img", { className: "logo1", src: systaPiLogo, style: { objectFit: "cover", height: "100%", maxHeight: "100%" } }, null),
+            React.createElement("img", { className: "logo1", src: systaPiLogo, style: { objectFit: "cover", height: "70%", maxHeight: "70%" } }, null),
             React.createElement("div", { className: "title" }, "SYSTA PI"),
-            React.createElement("img", { className: "logo2", src: systaPiLogo, style: { objectFit: "cover", height: "100%", maxHeight: "100%" } }, null),
+            React.createElement("img", { className: "logo2", src: systaPiLogo, style: { objectFit: "cover", height: "70%", maxHeight: "70%" } }, null),
             React.createElement(MixedChart, {
-              id: "relay",
+              id: "relaybar",
               title: "Relay",
               types: ["bar"],
               fill: [undefined],
@@ -540,7 +572,6 @@
               tooltips: ["31", "30", "29", "28", "27", "26", "25", "24", "23", "22", "21", "20", "19", "18", "17", "16", "15", "14", "LED boiler", "pump log boiler", "11", "10", "boiler", "circulation pump", "charge pump", "6", "mixer cold", "mixer warm", "burner", "2", "1", "heating pump"],
               labels: ["31", "30", "29", "28", "27", "26", "25", "24", "23", "22", "21", "20", "19", "18", "17", "16", "15", "14", "13", "12", "11", "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "0"],
               data: [this.state.relay],
-              //data: [[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0]],
               yMin: 0,
               yMax: 1,
               minimal: true,
@@ -554,7 +585,7 @@
               title: "Outside Temperature",
               types: ["line", "line", "line"],
               fill: ["origin", "false", "false"],
-              fillColor: [colorMainYellow50, "", ""],
+              fillColor: [colorMainYellow25, colorSecondary01, colorSecondary02 ],
               lineColor: [colorMainYellow, colorSecondary01, colorSecondary02],
               dataNames: ["Outside Temperature", "Heating Limit normal", "Heating Limit lowering"],
               orders: [0, 1, 2],
@@ -571,7 +602,7 @@
               types: ["line", "line", "line", "line", "line"],
               fill: ["+1", "false", "false", "false", "false"],
               fillColor: [colorMainYellow25, "", "", "", ""],
-              lineColor: [colorMainYellow, colorSecondary04, colorMainGrey, colorSecondary03, colorSecondary01],
+              lineColor: [colorMainYellow, colorSecondary09, colorMainGrey, colorSecondary03, colorSecondary01],
               dataNames: ["Buffer Temp Top", "Buffer Temp Bottom", "Buffer Temp Set", "Buffer Temp Max", "Buffer Temp Min"],
               orders: [1, 2, 0, 3, 4],
               labels: this.state.labels,
@@ -584,14 +615,14 @@
             React.createElement(MixedTimeChart, {
               id: "circuit",
               title: "Heating Circuit Temperatures",
-              types: ["line", "line", "line"],
-              fill: ["false", "false", "false"],
-              fillColor: ["", "", ""],
-              lineColor: [colorMainYellow, colorSecondary04, colorMainGrey],
-              dataNames: ["Flow Temp", "Return Temp", "Flow Temp Set"],
-              orders: [1, 2, 0],
+              types: ["line", "line", "line", "line"],
+              fill: ["false", "false", "false", "origin"],
+              fillColor: [colorSecondary12, colorSecondary09, colorSecondary04, colorMainGrey10],
+              lineColor: [colorSecondary12, colorSecondary09, colorSecondary04, colorMainGrey],
+              dataNames: ["Flow Temp", "Return Temp", "Flow Temp Set", "Pump Speed"],
+              orders: [1, 2, 0, 3],
               labels: this.state.labels,
-              data: [this.state.circuit1FlowTempList, this.state.circuit1ReturnTempList, this.state.circuit1FlowTempSetList],
+              data: [this.state.circuit1FlowTempList, this.state.circuit1ReturnTempList, this.state.circuit1FlowTempSetList, this.state.heatingPumpSpeedActualList],
               yMin: 0,
               yMax: 100,
               backgroundColor: colorSecondaryBg,
@@ -618,8 +649,8 @@
               title: "Log Boiler Information",
               types: ["line", "line", "line"],
               fill: ["false", "false", "origin"],
-              fillColor: ["", "", colorMainGrey25],
-              lineColor: [colorMainYellow, colorSecondary04, colorMainGrey],
+              fillColor: [colorSecondary12, colorSecondary09, colorMainGrey10],
+              lineColor: [colorSecondary12, colorSecondary09, colorMainGrey],
               dataNames: ["Log Boiler Flow Temp", "Log Boiler Return Temp", "Log Boiler Pump Speed"],
               orders: [1, 2, 0],
               labels: this.state.labels,
@@ -629,22 +660,30 @@
               backgroundColor: colorSecondaryBg,
               gridColor: "rgb(255,255,255)"
             }, null),
-            /*React.createElement(MixedChart, {
+            React.createElement(MixedTimeChart, {
               id: "relay",
               title: "Relay Switches",
-              //types: ["bar", "bar", "bar", "bar", "bar", "bar", "bar", "bar", "bar", "bar", "bar"],
-              types: ["line", "line", "line", "line", "line", "line", "line", "line", "line", "line", "line"],
-              fill: ["origin", "origin", "origin", "origin", "origin", "origin", "origin", "origin", "origin", "origin", "origin"],
-              fillColor: [colorBar0105, colorBar0205, colorBar0305, colorBar0405, colorBar0505, colorBar0605, colorBar0705, colorBar0805, colorBar0905, colorBar1005, colorBar1105],
-              lineColor: [colorBar01, colorBar02, colorBar03, colorBar04, colorBar05, colorBar06, colorBar07, colorBar08, colorBar09, colorBar10, colorBar11],
-              dataNames: ["Heating Pump", "Charge Pump", "Circulation Pump", "Boiler", "Burner", "Mixer warm", "Mixer cold", "Log Diverter Valve", "LED Boiler", "0x0800", "0x0002"],
+              types: ["line", "line", "line", "line", "line", "line", "line", "line", "line"],
+              fill: ["origin", "origin", "origin", "origin", "origin", "origin", "origin", "origin", "origin"],
+              fillColor: [colorSecondary0101, colorSecondary0201, colorSecondary0301, colorSecondary0401, colorSecondary0501, colorSecondary0601, colorSecondary0701, colorSecondary1001, colorSecondary1201],
+              lineColor: [colorSecondary01, colorSecondary02, colorSecondary03, colorSecondary04, colorSecondary05, colorSecondary06, colorSecondary07, colorSecondary10, colorSecondary12],
+              dataNames: ["Circulation Pump", "Heating Pump", "Charge Pump", "Boiler Pump", "LED Boiler", "Mixer Warm", "Mixer Cool", "Boiler", "Burner"],
               labels: this.state.labels,
-              data: [this.state.heatingPumpList, this.state.chargePumpList, this.state.circulationPumpList, this.state.boilerList, this.state.burnerList, this.state.mixerWarmList, this.state.mixerColdList, this.state.logDiverterValveList, this.state.ledBoilerList, this.state.x0800List, this.state.x0002List],
+              data: [this.state.circulationPumpIsOnList,this.state.heatingPumpIsOnList,this.state.chargePumpIsOnList,this.state.logBoilderChargePumpIsOnList,this.state.ledBoilerIsOnList,this.state.mixer1IsOnWarmList,this.state.mixer1IsOnCoolList,this.state.boilerIsOnList,this.state.burnerIsOnList],
               yMin: 0,
               yMax: 1,
               backgroundColor: colorSecondaryBg,
               gridColor: "rgb(255,255,255)"
-            }, null),*/
+            }, null),
+            React.createElement(Table, {
+              id: "status",
+              title: "System Status",
+              titleColor: "rgb(255,255,255)",
+              fontColor: colorMainYellow,
+              dataNames: ["Systacomfort", "Circuit 1", "Hot Water", "Log Boiler", "Boiler", "Mixer 1", "System Starts", "Burner Starts", "Boiler Operation Time"],
+              data: [this.state.operationModeName, this.state.circuit1OperationModeName, this.state.hotWaterOperationModeName, this.state.logBoilerOperationModeName, this.state.boilerOperationModeName, this.state.mixer1StateName, this.state.systemNumberOfStarts, this.state.burnerNumberOfStarts, this.state.boilerOperationTime, this.state.boilerOperationTimeMinutes],
+              backgroundColor: colorSecondaryBg,
+            }, null),
           ]),
           React.createElement("div", { className: "footer" },
             "\xA9 2022 ", React.createElement("a", { href: "https://github.com/beep-projects/SystaPi" }, "beep-projects"))
@@ -656,6 +695,7 @@
     class MixedTimeChart extends React.Component {
       constructor(props) {
         super(props);
+        this.key = reactKey++;
         this.chartRef = React.createRef();
       }
 
@@ -679,7 +719,7 @@
             showLine: true,
             order: (this.props.orders != null) ? this.props.orders[i] : 0,
             pointRadius: 0,
-            backgroundColor: this.props.lineColor[i],
+            backgroundColor: this.props.fillColor[i],
             borderColor: this.props.lineColor[i],
             borderWidth: 2,
             borderCapStyle: "round",
@@ -700,7 +740,7 @@
                   //parser: timeFormat,
                   unit: 'minute',
                   //minUnit: 'minute',
-                  stepSize: 30,
+                  stepSize: 1,
                   displayFormats: {
                     'minute': 'HH:mm',
                     'hour': 'HH:mm'
@@ -711,24 +751,26 @@
                   borderDash: [1, 1]
                 },
                 ticks: {
-                  //major: {
-                  //  enabled: true
-                  //  },
+                  minRotation: 0,
+                  maxRotation: 0,
+                  autoSkip: true,
+                  major: {
+                    enabled: true
+                  },
                   //source: "data",
                   //stepSize: 60,
-                  textStrokeColor: "green",
+                  //textStrokeColor: "green",
                   textStrokeWidth: 0,
                   color: "white",
                   font: {
                     family: "Roboto, 'Arial black', Arial, Helvetica, sans-serif",
                     //family: "'Playfair Display', Didot, 'Times New Roman', Times, serif",
                     weight: "normal",
-                    size: 18
+                    size: (this.props.minimal) ? fontSizeMinimal : fontSize
                   }
                 }
               },
               y: {
-                unit: " \u00B0C",
                 min: this.props.yMin,
                 max: this.props.yMax,
                 suggestedMin: this.props.yMin,
@@ -749,7 +791,7 @@
                     family: "Roboto, 'Arial black', Arial, Helvetica, sans-serif",
                     //family: "'Playfair Display', Didot, 'Times New Roman', Times, serif",
                     weight: "normal",
-                    size: 18
+                    size: (this.props.minimal) ? "10px" : "14px"
                   },
                 },
                 afterTickToLabelConversion: function (ax) {
@@ -781,10 +823,10 @@
 
       render() {
         if (this.props.minimal) {
-          return React.createElement("div", { id: this.props.id, className: "minichart", style: { backgroundColor: this.props.backgroundColor } },
+          return React.createElement("div", { key: this.key, id: this.props.id, className: "minichart", style: { backgroundColor: this.props.backgroundColor } },
             React.createElement("canvas", { ref: this.chartRef }));
         } else {
-          return React.createElement("div", { id: this.props.id, className: "chart", style: { backgroundColor: this.props.backgroundColor } }, [
+          return React.createElement("div", { key: this.key, id: this.props.id, className: "chart", style: { backgroundColor: this.props.backgroundColor } }, [
             React.createElement("div", { className: "chartTitle", style: { color: this.props.gridColor } }, this.props.title),
             React.createElement("div", { className: "chartCanvas" },
               React.createElement("canvas", { ref: this.chartRef })
@@ -797,6 +839,7 @@
     class MixedChart extends React.Component {
       constructor(props) {
         super(props);
+        this.key = reactKey++;
         this.chartRef = React.createRef();
       }
 
@@ -819,7 +862,7 @@
             fill: this.props.fill[i],
             showLine: true,
             pointRadius: 0,
-            backgroundColor: this.props.lineColor[i],
+            backgroundColor: this.props.fillColor[i],
             borderColor: this.props.lineColor[i],
             borderWidth: 2,
             borderCapStyle: "round",
@@ -844,7 +887,7 @@
                   mirror: true,
                   //maxRotation: 90,
                   //minRotation: 90,
-                  //padding: 50,
+                  //padding: 7,
                   //align: "end",
                   z: 1,
                   major: {
@@ -860,7 +903,7 @@
                     family: "Roboto, 'Arial black', Arial, Helvetica, sans-serif",
                     //family: "'Playfair Display', Didot, 'Times New Roman', Times, serif",
                     weight: "normal",
-                    size: (this.props.minimal) ? 12 : 18
+                    size: (this.props.minimal) ? fontSizeMinimal : fontSize
                   }
                 }
               },
@@ -887,7 +930,7 @@
                     family: "Roboto, 'Arial black', Arial, Helvetica, sans-serif",
                     //family: "'Playfair Display', Didot, 'Times New Roman', Times, serif",
                     weight: "normal",
-                    size: (this.props.minimal) ? 12 : 18
+                    size: (this.props.minimal) ? fontSizeMinimal : fontSize
                   },
                 },
               }
@@ -953,10 +996,10 @@
 
       render() {
         if (this.props.minimal) {
-          return React.createElement("div", { id: this.props.id, className: "minichart", style: { backgroundColor: this.props.backgroundColor } },
+          return React.createElement("div", { key: this.key, id: this.props.id, className: "minichart", style: { backgroundColor: this.props.backgroundColor } },
             React.createElement("canvas", { ref: this.chartRef }));
         } else {
-          return React.createElement("div", { id: this.props.id, className: "chart", style: { backgroundColor: this.props.backgroundColor } }, [
+          return React.createElement("div", { key: this.key, id: this.props.id, className: "chart", style: { backgroundColor: this.props.backgroundColor } }, [
             React.createElement("div", { className: "chartTitle", style: { color: this.props.gridColor } }, this.props.title),
             React.createElement("div", { className: "chartCanvas" },
               React.createElement("canvas", { ref: this.chartRef })
@@ -969,6 +1012,7 @@
     class Gauge extends React.Component {
       constructor(props) {
         super(props);
+        this.key = reactKey++;
         this.chartRef = React.createRef();
       }
 
@@ -1053,13 +1097,79 @@
 
       render() {
         if (this.props.minimal) {
-          return React.createElement("div", { id: this.props.id, className: "minichart", style: { backgroundColor: this.props.backgroundColor } },
+          return React.createElement("div", { key: this.key, id: this.props.id, className: "minichart", style: { backgroundColor: this.props.backgroundColor } },
             React.createElement("canvas", { ref: this.chartRef }));
         } else {
-          return React.createElement("div", { id: this.props.id, className: "chart", style: { backgroundColor: this.props.backgroundColor } }, [
+          return React.createElement("div", { key: this.key, id: this.props.id, className: "chart", style: { backgroundColor: this.props.backgroundColor } }, [
             React.createElement("div", { className: "chartTitle", style: { color: this.props.gridColor } }, this.props.title),
             React.createElement("div", { className: "chartCanvas" },
               React.createElement("canvas", { ref: this.chartRef })
+            )
+          ]);
+        }
+      }
+    }
+
+    class Table extends React.Component {
+      constructor(props) {
+        super(props);
+        this.key = reactKey++;
+        this.chartRef = React.createRef();
+      }
+
+      componentDidUpdate() {
+        /*//this.myChart.data.plugins.valueLabel.value = this.props.value;
+        let value = this.props.value;
+        this.myChart.options.plugins.valueLabel.value = value;
+        //this.myChart.data.datasets[0].data = (this.props.value >= 0) ? [this.props.minMax, this.props.value, (this.props.minMax-this.props.value)] : [(this.props.minMax+this.props.value), -this.props.value, this.props.minMax];
+        this.myChart.data.datasets[0].data = (value >= 0) ? [this.props.minMax, value, (this.props.minMax - value)] : [(this.props.minMax + value), -value, this.props.minMax];
+        this.myChart.update();*/
+      }
+
+      componentDidMount() {
+        /*let datasetsArray = [];
+        datasetsArray.push({
+          //label: this.props.name,
+          data: [],
+          backgroundColor: [this.props.backgroundColor, this.props.lineColor, this.props.backgroundColor],
+          borderColor: [this.props.backgroundColor, this.props.lineColor, this.props.backgroundColor],
+          borderWidth: 2,
+          //borderCapStyle: "round",
+          //borderJoinStyle: "round",
+        });*/
+
+      }
+
+      renderTableData() {
+        let rows = [];
+        for (let i=0;i<this.props.data.length;i++) {
+          rows.push(
+            React.createElement("tr", null, 
+              React.createElement("td", {style: { color: this.props.titleColor, fontFamily: "Roboto, 'Arial black', Arial, Helvetica, sans-serif", fontWeight: "normal", fontSize: (this.props.minimal) ? fontSizeMinimal : fontSize }}, this.props.dataNames[i]),
+              React.createElement("td", {style: { color: this.props.fontColor, fontFamily: "Roboto, 'Arial black', Arial, Helvetica, sans-serif", fontWeight: "normal", fontSize: (this.props.minimal) ? fontSizeMinimal : fontSize } }, this.props.data[i])
+            )
+          )
+        }
+        return rows;
+      }
+
+      render() {
+        if (this.props.minimal) {
+          return React.createElement("div", { id: this.props.id, className: "minichart", style: { backgroundColor: this.props.backgroundColor } },
+            React.createElement("table", { ref: this.chartRef, className: "statustable" }, 
+              React.createElement("tbody", null, 
+                this.renderTableData()
+              )
+            ));
+        } else {
+          return React.createElement("div", { id: this.props.id, className: "chart", style: { backgroundColor: this.props.backgroundColor } }, [
+            React.createElement("div", { className: "chartTitle", style: { color: this.props.titleColor } }, this.props.title),
+            React.createElement("div", { className: "chartCanvas" },
+              React.createElement("table", { ref: this.chartRef, className: "statustable" }, 
+                React.createElement("tbody", null, 
+                  this.renderTableData()
+                )
+              )
             )
           ]);
         }

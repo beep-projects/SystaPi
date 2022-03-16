@@ -96,7 +96,7 @@ public class FakeSystaWeb implements Runnable {
       this.loggerFileRootPath = logFileRootPath;
       this.loggerFileCount = writerFileCount;
       this.loggerBufferedEntries = bufferedEntries;
-      this.commitDate = "2022-03-13T09:08:07+00:00";
+      this.commitDate = "2022-03-16T08:23:13+00:00";
     }
   }
 
@@ -147,7 +147,7 @@ public class FakeSystaWeb implements Runnable {
     }
   }
 
-  private final String commitDate = "2022-03-13T09:08:07+00:00";
+  private final String commitDate = "2022-03-16T08:23:13+00:00";
   private MessageType typeOfLastReceivedMessage = MessageType.NONE;
   private InetAddress remoteAddress;
   private int remotePort;
@@ -433,7 +433,7 @@ public class FakeSystaWeb implements Runnable {
     status.boilerIsOn = ((status.relay & SystaStatus.BOILER_MASK) != 0)
         || (List.of(1, 2, 3, 8, 9, 11, 12).contains(status.boilerOperationMode));
     status.burnerIsOn = ((status.relay & SystaStatus.BURNER_MASK) != 0);
-    status.ledBoilerIsOn = (status.relay & SystaStatus.LED_BOILER_MASK) != 0;
+    status.boilerLedIsOn = (status.relay & SystaStatus.LED_BOILER_MASK) != 0;
     status.unknowRelayState1IsOn = (status.relay & SystaStatus.UNKNOWN_1_MASK) != 0;
     status.unknowRelayState2IsOn = (status.relay & SystaStatus.UNKNOWN_2_MASK) != 0;
     status.mixer1IsOnWarm = (status.relay & SystaStatus.MIXER_WARM_MASK) != 0;
