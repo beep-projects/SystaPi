@@ -328,6 +328,8 @@ public class SystaRESTAPI {
 				.add("boilerShutdownTemp", ps.boilerShutdownTemp).add("boilerPumpSpeedMin", ps.boilerPumpSpeedMin)
 				.add("boilerPumpSpeedActual", ps.boilerPumpSpeedActual)
 				.add("boilerLedIsOn", ps.boilerLedIsOn)
+				.add("circulationOperationMode", ps.circulationOperationMode)
+				.add("circulationOperationModeName", ps.circulationOperationModeNames[ps.circulationOperationMode])
 				.add("circulationTemp", ps.circulationTemp).add("circulationPumpIsOn", ps.circulationPumpIsOn)
 				.add("circulationPumpOverrun", ps.circulationPumpOverrun)
 				.add("circulationLockoutTimePushButton", ps.circulationLockoutTimePushButton)

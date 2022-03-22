@@ -633,5 +633,15 @@ public final class SystaIndex {
 	 * Status Kessel
 	 */
 	final static int BOILER_OPERATION_MODE = 248;
-	// final static int = 249
+	/**
+	 * Status Zirkulation
+	 * 0="Aus"
+	 * 1="Nachlauf"
+	 * 2="Sperrzeit"
+	 * 3="Gesperrt"
+	 * 4="Aus F\u00fchler TZR"
+	 * 5="Ein"
+	 * 6="Frost"
+	 */
+	final static int CIRCULATION_OPERATION_MODE = 249;
 }

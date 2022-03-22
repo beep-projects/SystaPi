@@ -828,18 +828,18 @@ public class SystaStatus {
 	 * LED Boiler = Relay &amp; 0x2000
 	 */
 	public int relay;
-	public static final int HEATING_PUMP_MASK = 0x0001;
-	public static final int UNKNOWN_1_MASK = 0x0002;
-	public static final int UNKNOWN_2_MASK = 0x0003;
-	public static final int BURNER_MASK = 0x0004;
-	public static final int MIXER_WARM_MASK = 0x0008;
-	public static final int MIXER_COLD_MASK = 0x0010;
-	public static final int CHARGE_PUMP_MASK = 0x0080;
-	public static final int CIRCULATION_PUMP_MASK = 0x0100;
-	public static final int BOILER_MASK = 0x0200;
-	public static final int UNKNOWN_5_MASK = 0x0800;
-	public static final int CHARGE_PUMP_LOG_BOILER_MASK = 0x1000; // TODO verify this assumption
-	public static final int LED_BOILER_MASK = 0x2000; // TODO verify this assumption
+	public static final int HEATING_PUMP_MASK = 0x0001;//bit 0
+	public static final int UNKNOWN_1_MASK = 0x0002;//bit 1
+	public static final int UNKNOWN_2_MASK = 0x0003;//bit 0 & 1
+	public static final int BURNER_MASK = 0x0004;//bit 2
+	public static final int MIXER_WARM_MASK = 0x0008;//bit 3
+	public static final int MIXER_COLD_MASK = 0x0010;//bit 4
+	public static final int CHARGE_PUMP_MASK = 0x0080;//bit 7
+	public static final int CIRCULATION_PUMP_MASK = 0x0100;//bit 8
+	public static final int BOILER_MASK = 0x0200; //bit 9
+	public static final int UNKNOWN_5_MASK = 0x0800; //bit 11
+	public static final int CHARGE_PUMP_LOG_BOILER_MASK = 0x1000; //bit 12 TODO verify this assumption
+	public static final int LED_BOILER_MASK = 0x2000; //bit 13 TODO verify this assumption
 
 	/**
 	 * Heating circuit pump = relay &amp; 0x0001
@@ -1111,6 +1111,28 @@ public class SystaStatus {
 	 */
 	public int circuit1OperationMode;
 	public final String[] circuit1OperationModeNames = {"off","off (heating limit)","off (room temperature)","locked (buffer temp top)","off (yield hot water)","on","anti freeze","cooling","lead time heat up","heating","comfort","lowering","off (temp swimming pool)","locked","normal","raised","hot water","screed heating","cooling mode"};
+
+	/**
+	 * Status Zirkulation
+	 * 0="Aus"
+	 * 1="Nachlauf"
+	 * 2="Sperrzeit"
+	 * 3="Gesperrt"
+	 * 4="Aus F\u00fchler TZR"
+	 * 5="Ein"
+	 * 6="Frost"
+	 * 
+	 * 0="off"
+	 * 1="overrun"
+	 * 2="locked (time)"
+	 * 3="locked"
+	 * 4="off (temperature)"
+	 * 5="on"
+	 * 6="anti freeze"
+	 */
+	public int circulationOperationMode;
+	public final String[] circulationOperationModeNames = {"off","overrun","locked (time)","locked","off (temperature)","on","anti freeze"};
+
 	/**
      * timestamp for this status in number of seconds from the epoch of 1970-01-01T00:00:00Z (UTC)
      */

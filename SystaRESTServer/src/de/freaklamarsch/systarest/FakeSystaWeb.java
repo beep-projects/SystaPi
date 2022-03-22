@@ -96,7 +96,7 @@ public class FakeSystaWeb implements Runnable {
       this.loggerFileRootPath = logFileRootPath;
       this.loggerFileCount = writerFileCount;
       this.loggerBufferedEntries = bufferedEntries;
-      this.commitDate = "2022-03-16T08:23:13+00:00";
+      this.commitDate = "2022-03-22T21:48:56+00:00";
     }
   }
 
@@ -147,7 +147,7 @@ public class FakeSystaWeb implements Runnable {
     }
   }
 
-  private final String commitDate = "2022-03-16T08:23:13+00:00";
+  private final String commitDate = "2022-03-22T21:48:56+00:00";
   private MessageType typeOfLastReceivedMessage = MessageType.NONE;
   private InetAddress remoteAddress;
   private int remotePort;
@@ -411,6 +411,7 @@ public class FakeSystaWeb implements Runnable {
     status.boilerPumpSpeedMin = intData[i][SystaIndex.BOILER_PUMP_SPEED_MIN]; // in %
     status.boilerPumpSpeedActual = intData[i][SystaIndex.BOILER_PUMP_SPEED_ACTUAL] * 5;// 0=0%, 20=100%
     status.boilerOperationMode = intData[i][SystaIndex.BOILER_OPERATION_MODE];
+    status.circulationOperationMode = intData[i][SystaIndex.CIRCULATION_OPERATION_MODE];
     status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN]; // in min
     status.circulationLockoutTimePushButton = intData[i][SystaIndex.CIRCULATION_LOCKOUT_TIME_PUSH_BUTTON]; // in min
     status.circulationHysteresis = intData[i][SystaIndex.CIRCULATION_HYSTERESIS] / 10.0;
