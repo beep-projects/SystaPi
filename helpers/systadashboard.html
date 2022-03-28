@@ -109,7 +109,7 @@
       /* grid container settings */
       display: grid;
       grid-template-columns: 1fr;
-      grid-template-rows: 10vh 87vh 3vh ;
+      grid-template-rows: 10vh 87vh 3vh;
       grid-template-areas:
         "header"
         "dashboard"
@@ -196,19 +196,29 @@
       grid-area: dashboard;
       display: grid;
       grid-gap: 5px;
-      grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
       grid-template-columns: 1fr 1fr 0.55fr 0.45fr;
       grid-template-areas:
         "logboiler circuit   outside outside"
         "logboiler circuit   outside outside"
         "logboiler circuit   outside outside"
+        "logboiler circuit   outside outside"
+        "logboiler circuit   outside outside"
+        "logboiler circuit   outside outside"
+        "logboiler circuit   outside outside"
         "logboiler circuit   relay   relay"
         "logboiler circuit   relay   relay"
+        "logboiler circuit   relay   relay"
+        "buffer    hotwater  relay   relay"
         "buffer    hotwater  relay   relay"
         "buffer    hotwater  status  config"
         "buffer    hotwater  status  config"
         "buffer    hotwater  status  config"
-        "buffer    hotwater  status  config";
+        "buffer    hotwater  status  config"
+        "buffer    hotwater  status  config"
+        "buffer    hotwater  status  config"
+        "buffer    hotwater  status  config"
+        "buffer    hotwater  logger  logger";
       background: var(--main-bg);
       padding: 10px;
     }
@@ -250,6 +260,8 @@
       grid-area: 2 / 1 / 3 / 1;
       border-top: 1px solid rgba(255, 255, 255, .12);
     }
+
+    .chartCanvasOnly {}
 
     .statustable td {
       padding-top: 2px;
@@ -327,7 +339,40 @@
       /*align-self: center;*/
     }
 
+    #logger {
+      grid-area: logger;
+    }
+
     /* END charts to be placed on the dashboard */
+
+    form {
+      display: grid;
+      /*grid-template-columns:repeat(7, 1fr);*/
+      grid-auto-flow: column;
+      grid-column-gap: 10px;
+      font-weight: normal;
+      align-self: center;
+    }
+
+    input[type=text] {
+      border: 1px solid var(--main-fg);
+      background-color: var(--secondary-bg);
+      border-radius: 4px;
+    }
+
+    input[type=submit] {
+      border: 2px solid var(--main-fg);
+      background-color: var(--main-fg);
+      border-radius: 4px;
+      color: var(--secondary-bg);
+    }
+
+    input[type=submit]:active {
+      border: 2px solid var(--main-fg);
+      background-color: var(--main-bg);
+      border-radius: 4px;
+      color: var(--secondary-bg);
+    }
 
     .footer {
       grid-area: footer;
@@ -566,12 +611,7 @@
                 burnerNumberOfStarts: result.burnerNumberOfStarts,
                 boilerOperationTime: result.boilerOperationTimeHours + "h " + result.boilerOperationTimeMinutes + "m",
               }))
-              //console.log(this.state)
-              //console.log(this.state.outsideTemp);
-              //console.log(this.state.hotWaterTemp);
-              //console.log(this.state.relay);
               this.lastTimeUpdated = result.timestamp;
-              //this.setState({ data: result.rawData })
             }
           })
           .catch(error => {
@@ -597,7 +637,7 @@
               unitIP: result.unitIP,
               unitVersion: result.unitVersion,
               unitBaseVersion: result.unitBaseVersion,
-              STouchAppSupported: (result.STouchAppSupported)?"yes":"no",
+              STouchAppSupported: (result.STouchAppSupported) ? "yes" : "no",
             }))
           })
           .catch(error => {
@@ -621,7 +661,7 @@
             this.setState(prevState => ({
               lastDataReceivedAt: result.lastDataReceivedAt.slice(11, 19),
               packetsReceived: result.packetsReceived,
-              loggingData: (result.loggingData)?"yes":"no",
+              loggingData: (result.loggingData) ? "yes" : "no",
               logFilesWritten: result.logFilesWritten,
             }))
           })
@@ -658,9 +698,7 @@
               id: "outsidegauge",
               title: "Outside",
               lineColor: colorMainYellow,
-              //name: "Outside Temperature",
               value: this.state.outsideTemp,
-              //fontSize: 60,
               fontColor: colorMainYellow,
               unit: "\u00B0C",
               minMax: 60,
@@ -671,9 +709,7 @@
               id: "hotwatergauge",
               title: "Hot Water",
               lineColor: colorMainYellow,
-              //name: "Hot Water Temperature",
               value: this.state.hotWaterTemp,
-              //fontSize: 60,
               fontColor: colorMainYellow,
               unit: "\u00B0C",
               minMax: 100,
@@ -684,9 +720,7 @@
               id: "logpumpgauge",
               title: "Log Pump",
               lineColor: colorMainYellow,
-              //name: "Hot Water Temperature",
               value: this.state.logBoilerPumpSpeedActual,
-              //fontSize: 60,
               fontColor: colorMainYellow,
               unit: "\u0025",
               minMax: 100,
@@ -697,9 +731,7 @@
               id: "boilerpumpgauge",
               title: "Boiler Pump",
               lineColor: colorMainYellow,
-              //name: "Hot Water Temperature",
               value: this.state.boilerPumpSpeedActual,
-              //fontSize: 60,
               fontColor: colorMainYellow,
               unit: "\u0025",
               minMax: 100,
@@ -710,9 +742,7 @@
               id: "heatingpumpgauge",
               title: "Heating Pump",
               lineColor: colorMainYellow,
-              //name: "Hot Water Temperature",
               value: this.state.heatingPumpSpeedActual,
-              //fontSize: 60,
               fontColor: colorMainYellow,
               unit: "\u0025",
               minMax: 100,
@@ -766,7 +796,7 @@
               title: "Buffer Temperatures",
               types: ["line", "line", "line", "line", "line"],
               fill: ["+1", "false", "false", "false", "false"],
-              fillColor: [colorMainYellow25, "", "", "", ""],
+              fillColor: [colorMainYellow25, colorSecondary09, colorMainGrey, colorSecondary03, colorSecondary01],
               lineColor: [colorMainYellow, colorSecondary09, colorMainGrey, colorSecondary03, colorSecondary01],
               dataNames: ["Buffer Temp Top", "Buffer Temp Bottom", "Buffer Temp Set", "Buffer Temp Max", "Buffer Temp Min"],
               orders: [1, 2, 0, 3, 4],
@@ -800,7 +830,7 @@
               title: "Hot Water Temperatures",
               types: ["line", "line", "line", "line", "line"],
               fill: ["false", "false", "false", "false", "false"],
-              fillColor: ["", "", "", "", ""],
+              fillColor: [colorMainYellow, colorMainGrey, colorSecondary02, colorSecondary04, colorSecondary06],
               lineColor: [colorMainYellow, colorMainGrey, colorSecondary02, colorSecondary04, colorSecondary06],
               dataNames: ["Hot Water Temp", "Hot Water Temp Set", "Hot Water Teamp Normal", "Hot Water Temp Comfort", "Hot Water Temp Max"],
               orders: [1, 0, 2, 3, 4],
@@ -860,6 +890,23 @@
               fontColor: colorMainYellow,
               dataNames: ["Unit Name", "Unit IP", "Version", "Base Version", "S-Touch", "Pakets received", "logging", "# Log Files", "Last Data"],
               data: [this.state.unitName, this.state.unitIP, this.state.unitVersion, this.state.unitBaseVersion, this.state.STouchAppSupported, this.state.packetsReceived, this.state.loggingData, this.state.logFilesWritten, this.state.lastDataReceivedAt],
+              backgroundColor: colorSecondaryBg,
+            }, null),
+            React.createElement(Form, {
+              id: "logger",
+              title: undefined,
+              minimal: false,
+              titleColor: "rgb(255,255,255)",
+              labelColor: "rgb(255,255,255)",
+              inputColor: colorMainYellow,
+              inputLabels: ["Prefix", "Delimiter", "# Entries"],
+              inputNames: ["filePrefix", "logEntryDelimiter", "entriesPerFile"],
+              inputDefaults: ["SystaREST", ";", 60],
+              inputWidth: [15, 1, 3],
+              buttonLabels: ["log", "stop"],
+              state: this.state.loggingData,
+              onComplete: this.fetchServiceStatus.bind(this),
+              urls: ["http://systapi:1337/SystaREST/enablelogging", "http://systapi:1337/SystaREST/disablelogging"],
               backgroundColor: colorSecondaryBg,
             }, null),
           ]),
@@ -1263,11 +1310,11 @@
         this.tableRef = React.createRef();
       }
 
-      componentDidUpdate() {
+      /*componentDidUpdate() {
         const DOMNode = this.tableRef.current;
         DOMNode.style.fontSize = "40px";
         console.log(DOMNode.style.fontSize);
-      }
+      }*/
 
       renderTableData() {
         let rows = [];
@@ -1302,6 +1349,92 @@
             )
           ]);
         }
+      }
+    }
+
+    class Form extends React.Component {
+      constructor(props) {
+        super(props);
+        this.key = reactKey++;
+        this.tableRef = React.createRef();
+        let entries = this.props.inputNames.map((name, i) => [name, this.props.inputDefaults[i]]);
+        this.state = Object.fromEntries(entries);
+        this.changeInput = this.changeInput.bind(this);
+        this.submit = this.submit.bind(this);
+      }
+
+      /*componentDidUpdate() {
+        const DOMNode = this.tableRef.current;
+        DOMNode.style.fontSize = "40px";
+        console.log(DOMNode.style.fontSize);
+      }*/
+
+      renderInputs() {
+        let rows = [];
+        for (let i = 0; i < this.props.inputNames.length; i++) {
+          rows.push(
+            React.createElement("label", { style: { color: this.props.labelColor } }, this.props.inputLabels[i])
+          );
+          rows.push(
+            React.createElement("input", {
+              type: "text",
+              name: this.props.inputNames[i],
+              defaultValue: this.state[this.props.inputNames[i]],
+              size: this.props.inputWidth[i],
+              style: { color: this.props.inputColor },
+              onChange: this.changeInput
+            }),
+          );
+        }
+        return rows;
+      }
+
+      render() {
+        let i = (this.props.state && (this.props.state == true || this.props.state.toLowerCase() == "yes")) ? 1 : 0;
+        let form = React.createElement("form", { ref: this.tableRef, className: "form", onSubmit: this.submit },
+                    this.renderInputs(),
+                    React.createElement("input", { type: "submit", value: this.props.buttonLabels[i] })
+                  );
+        if (this.props.minimal) {
+          return React.createElement("div", { id: this.props.id, className: "minichart", style: { backgroundColor: this.props.backgroundColor } },
+            form
+          );
+        } else if (!this.props.title) {
+          return React.createElement("div", { id: this.props.id, className: "chart", style: { backgroundColor: this.props.backgroundColor } },
+            React.createElement("div", { className: "chartCanvasOnly" },
+              form
+            )
+          );
+        } else {
+          return React.createElement("div", { id: this.props.id, className: "chart", style: { backgroundColor: this.props.backgroundColor } },
+            React.createElement("div", { className: "chartTitle", style: { color: this.props.titleColor } }, this.props.title),
+            React.createElement("div", { className: "chartCanvas" },
+              form
+            )
+          );
+        }
+      }
+
+      submit(e) {
+        e.preventDefault();
+        let url = new URL(this.props.urls[0]);
+        if (document.activeElement.value == this.props.buttonLabels[1]) {
+          url = new URL(this.props.urls[1]);
+        }
+        const params = this.state;
+        url.search = new URLSearchParams(params);
+        fetch(url, {
+            method: "PUT",
+          }).catch((error) => {
+            console.error('Error fetching data:', error);
+        });
+        if (this.props.onComplete != null) {
+            this.props.onComplete();
+        }
+      }
+
+      changeInput(e) {
+        this.setState({ [e.target.name]: e.target.value });
       }
     }
 
