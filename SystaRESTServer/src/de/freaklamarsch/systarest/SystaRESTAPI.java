@@ -42,6 +42,7 @@ import jakarta.json.Json;
 import jakarta.json.JsonArrayBuilder;
 import jakarta.json.JsonBuilderFactory;
 import jakarta.json.JsonObject;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -51,6 +52,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 
 /**
  * class for creating a Jersey resource that offers a REST API for a Paradigma
@@ -186,20 +189,20 @@ public class SystaRESTAPI {
 		// System.out.println("Service Status called");
 		try {
 			FakeSystaWebStatus fsws = fsw.getStatus();
-			
+
 			JsonObject jo = jsonFactory.createObjectBuilder()
-			        .add("timeStampString", DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault())))
-			        .add("connected", fsws.connected)
-					.add("running", fsws.running).add("lastDataReceivedAt", fsws.lastTimestamp)
-					.add("packetsReceived", fsws.dataPacketsReceived).add("paradigmaListenerIP", fsws.localAddress)
-					.add("paradigmaListenerPort", fsws.localPort)
+					.add("timeStampString",
+							DateTimeFormatter.ISO_OFFSET_DATE_TIME
+									.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault())))
+					.add("connected", fsws.connected).add("running", fsws.running)
+					.add("lastDataReceivedAt", fsws.lastTimestamp).add("packetsReceived", fsws.dataPacketsReceived)
+					.add("paradigmaListenerIP", fsws.localAddress).add("paradigmaListenerPort", fsws.localPort)
 					.add("paradigmaIP", (fsws.remoteAddress == null) ? "" : fsws.remoteAddress.getHostAddress())
 					.add("paradigmaPort", fsws.remotePort).add("loggingData", fsws.logging)
 					.add("logFileSize", fsws.packetsPerFile).add("logFilePrefix", fsws.loggerFilePrefix)
 					.add("logFileDelimiter", fsws.loggerEntryDelimiter).add("logFileRootPath", fsws.loggerFileRootPath)
 					.add("logFilesWritten", fsws.loggerFileCount).add("logBufferedEntries", fsws.loggerBufferedEntries)
-					.add("commitDate", fsws.commitDate)
-					.build();
+					.add("commitDate", fsws.commitDate).build();
 			return jo;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -319,30 +322,27 @@ public class SystaRESTAPI {
 				.add("logBoilerParallelOperation", ps.logBoilerParallelOperation)
 				.add("logBoilerOperationMode", ps.logBoilerOperationMode)
 				.add("logBoilerOperationModeName", ps.logBoilerOperationModeNames[ps.logBoilerOperationMode])
-				.add("boilerHeatsBuffer", ps.boilerHeatsBuffer)
-				.add("boilerOperationMode", ps.boilerOperationMode)
+				.add("boilerHeatsBuffer", ps.boilerHeatsBuffer).add("boilerOperationMode", ps.boilerOperationMode)
 				.add("boilerOperationModeName", ps.boilerOperationModeNames[ps.boilerOperationMode])
 				.add("boilerFlowTemp", ps.boilerFlowTemp).add("boilerReturnTemp", ps.boilerReturnTemp)
 				.add("boilerTempSet", ps.boilerTempSet).add("boilerSuperelevation", ps.boilerSuperelevation)
 				.add("boilerHysteresis", ps.boilerHysteresis).add("boilerOperationTime", ps.boilerOperationTime)
 				.add("boilerShutdownTemp", ps.boilerShutdownTemp).add("boilerPumpSpeedMin", ps.boilerPumpSpeedMin)
-				.add("boilerPumpSpeedActual", ps.boilerPumpSpeedActual)
-				.add("boilerLedIsOn", ps.boilerLedIsOn)
+				.add("boilerPumpSpeedActual", ps.boilerPumpSpeedActual).add("boilerLedIsOn", ps.boilerLedIsOn)
 				.add("circulationOperationMode", ps.circulationOperationMode)
 				.add("circulationOperationModeName", ps.circulationOperationModeNames[ps.circulationOperationMode])
 				.add("circulationTemp", ps.circulationTemp).add("circulationPumpIsOn", ps.circulationPumpIsOn)
 				.add("circulationPumpOverrun", ps.circulationPumpOverrun)
 				.add("circulationLockoutTimePushButton", ps.circulationLockoutTimePushButton)
 				.add("circulationHysteresis", ps.circulationHysteresis).add("circuit2FlowTemp", ps.circuit2FlowTemp)
-				.add("circuit2FlowTemp", ps.circuit2FlowTemp)
-				.add("circuit2ReturnTemp", ps.circuit2ReturnTemp).add("circuit2FlowTempSet", ps.circuit2FlowTempSet)
-				.add("roomTempActual1", ps.roomTempActual1).add("roomTempSet1", ps.roomTempSet1)
-				.add("roomTempActual2", ps.roomTempActual2).add("roomTempSet2", ps.roomTempSet2)
-				.add("roomTempSetNormal", ps.roomTempSetNormal)
+				.add("circuit2FlowTemp", ps.circuit2FlowTemp).add("circuit2ReturnTemp", ps.circuit2ReturnTemp)
+				.add("circuit2FlowTempSet", ps.circuit2FlowTempSet).add("roomTempActual1", ps.roomTempActual1)
+				.add("roomTempSet1", ps.roomTempSet1).add("roomTempActual2", ps.roomTempActual2)
+				.add("roomTempSet2", ps.roomTempSet2).add("roomTempSetNormal", ps.roomTempSetNormal)
 				.add("roomTempSetComfort", ps.roomTempSetComfort).add("roomTempSetLowering", ps.roomTempSetLowering)
-				.add("roomImpact", ps.roomImpact)
-				.add("roomTempCorrection", ps.roomTempCorrection).add("collectorTempActual", ps.collectorTempActual)
-				.add("swimmingpoolTemp", ps.swimmingpoolTemp).add("swimmingpoolFlowTemp", ps.swimmingpoolFlowTemp)
+				.add("roomImpact", ps.roomImpact).add("roomTempCorrection", ps.roomTempCorrection)
+				.add("collectorTempActual", ps.collectorTempActual).add("swimmingpoolTemp", ps.swimmingpoolTemp)
+				.add("swimmingpoolFlowTemp", ps.swimmingpoolFlowTemp)
 				.add("swimmingpoolReturnTemp", ps.swimmingpoolReturnTemp)
 				.add("heatingOperationMode", ps.heatingOperationMode)
 				.add("heatingOperationModeName", ps.heatingOperationModes[ps.heatingOperationMode])
@@ -355,17 +355,16 @@ public class SystaRESTAPI {
 				.add("heatingPumpSpeedMin", ps.heatingPumpSpeedMin).add("controlledBy", ps.controlledBy)
 				.add("controlMethodName", ps.controlMethods[ps.controlledBy]).add("maxFlowTemp", ps.maxFlowTemp)
 				.add("antiFreezeOutsideTemp", ps.antiFreezeOutsideTemp).add("heatUpTime", ps.heatUpTime)
-				.add("mixerRuntime", ps.mixerRuntime)
-				.add("mixer1IsOnWarm", ps.mixer1IsOnWarm).add("mixer1IsOnCool", ps.mixer1IsOnCool)
-				.add("mixer1State", ps.mixer1State).add("mixer1StateName", ps.mixerStateNames[ps.mixer1State])
+				.add("mixerRuntime", ps.mixerRuntime).add("mixer1IsOnWarm", ps.mixer1IsOnWarm)
+				.add("mixer1IsOnCool", ps.mixer1IsOnCool).add("mixer1State", ps.mixer1State)
+				.add("mixer1StateName", ps.mixerStateNames[ps.mixer1State])
 				.add("underfloorHeatingBasePoint", ps.underfloorHeatingBasePoint)
 				.add("underfloorHeatingGradient", ps.underfloorHeatingGradient).add("bufferTempMax", ps.bufferTempMax)
 				.add("bufferTempMin", ps.bufferTempMin).add("adjustRoomTempBy", ps.adjustRoomTempBy)
 				.add("solarPowerActual", ps.solarPowerActual).add("solarGainDay", ps.solarGainDay)
 				.add("solarGainTotal", ps.solarGainTotal).add("relay", ps.relay)
 				.add("chargePumpIsOn", ps.chargePumpIsOn).add("boilerIsOn", ps.boilerIsOn)
-				.add("burnerIsOn", ps.burnerIsOn)
-				.add("systemNumberOfStarts", ps.systemNumberOfStarts)
+				.add("burnerIsOn", ps.burnerIsOn).add("systemNumberOfStarts", ps.systemNumberOfStarts)
 				.add("burnerNumberOfStarts", ps.burnerNumberOfStarts)
 				.add("boilerOperationTimeHours", ps.boilerOperationTimeHours)
 				.add("boilerOperationTimeMinutes", ps.boilerOperationTimeMinutes)
@@ -407,24 +406,43 @@ public class SystaRESTAPI {
 		fsw.stopLoggingRawData();
 	}
 
+	@GET
+	@Path("{getalllogs : (?i)getalllogs}")
+	@Produces("application/zip")
+	public Response getAllLogs() {
+		File file = fsw.getAllLogs();
+		ResponseBuilder responseBuilder = Response.ok((Object) file);
+		responseBuilder.header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+		return responseBuilder.build();
+	}
+
+	@DELETE
+	@Path("{deletealllogs : (?i)deletealllogs}")
+	public void deleteAllLogs() {
+		fsw.deleteAllLogs();
+	}
+
 	/**
 	 * Returns the a .html file for monitoring raw data in the browser.
-	 * @param theme parameter to define which page .html file to load. Possible values are systarest or systaweb
-	 * @return the InputStream of the file, or null, if something went wrong in the file handling
+	 * 
+	 * @param theme parameter to define which page .html file to load. Possible
+	 *              values are systarest or systaweb
+	 * @return the InputStream of the file, or null, if something went wrong in the
+	 *         file handling
 	 */
 	@GET
-	@Produces({MediaType.TEXT_HTML})
-    @Path("{monitorrawdata : (?i)monitorrawdata}")
+	@Produces({ MediaType.TEXT_HTML })
+	@Path("{monitorrawdata : (?i)monitorrawdata}")
 	public InputStream getMonitorRawDataHTML(@DefaultValue("systarest") @QueryParam("theme") String theme) {
 		String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
 		String monitorHTML = rootPath;
-		if(theme.equalsIgnoreCase("systaweb")) {
+		if (theme.equalsIgnoreCase("systaweb")) {
 			monitorHTML += "fakeremoteportal.html";
 		} else {
-			//default page to load
+			// default page to load
 			monitorHTML += "rawdatamonitor.html";
 		}
-		
+
 		File f = new File(monitorHTML);
 		try {
 			return new FileInputStream(f);
@@ -434,22 +452,13 @@ public class SystaRESTAPI {
 		}
 	}
 
-	
-	
 	/**
 	 * set the operation mode of the Systa Comfort
 	 * 
-	 * @param mode     the intended operation mode
-	 *                 0 = Auto Prog. 1
-	 *                 1 = Auto Prog. 2
-	 *                 2 = Auto Prog. 3
-	 *                 3 = Continuous Normal 
-	 *                 4 = Continuous Comfort 
-	 *                 5 = Continuous Lowering 
-	 *                 6 = Summer 
-	 *                 7 = Off 
-	 *                 8 = Party 
-	 *                 14= Test or chimney sweep
+	 * @param mode the intended operation mode 0 = Auto Prog. 1 1 = Auto Prog. 2 2 =
+	 *             Auto Prog. 3 3 = Continuous Normal 4 = Continuous Comfort 5 =
+	 *             Continuous Lowering 6 = Summer 7 = Off 8 = Party 14= Test or
+	 *             chimney sweep
 	 */
 	@PUT
 	@Path("{operationmode : (?i)operationmode}")

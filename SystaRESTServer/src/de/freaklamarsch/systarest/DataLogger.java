@@ -45,7 +45,7 @@ public class DataLogger<T> {
 	/**
 	 * Inner class for representing the status of this @see DataLogger.
 	 */
-	public class DataLoggerStatus {
+	public static class DataLoggerStatus {
 		public final int capacity;
 		public final boolean saveLoggedData;
 		public final String logFilePrefix;
@@ -67,16 +67,18 @@ public class DataLogger<T> {
 	}
 
 	private static final int DEFAULT_CAPACITY = 60;
+	private static final String DEFAULT_DELIMITER = ";";
+	private static final String DEFAULT_PREFIX = "DataLogger";
+	private static final String DEFAULT_FILENAME = "";
+	private static final String DEFAULT_ROOT_PATH = System.getProperty("user.home") + File.separator + "logs";
 	private int capacity = DEFAULT_CAPACITY;
 	private CircularBuffer<T[]> dataBuffer = null;
 	private CircularBuffer<String> timestampBuffer = null;
 	private boolean saveLoggedData = false;
-	private String logFilePrefix = "DataLogger";
-	private String logFilename = "";
-	// private String logFileRootPath =
-	// DataLogger.class.getClassLoader().getResource("").getPath();
-	private String logFileRootPath = System.getProperty("user.home") + File.separator + "logs";
-	private String logEntryDelimiter = ";";
+	private String logFilePrefix = DEFAULT_PREFIX;
+	private String logFilename = DEFAULT_FILENAME;
+	private String logFileRootPath = DEFAULT_ROOT_PATH;
+	private String logEntryDelimiter = DEFAULT_DELIMITER;
 	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
 	private int writerFileCount = 0;
 
@@ -85,17 +87,20 @@ public class DataLogger<T> {
 	 * {@value #DEFAULT_CAPACITY} entries.
 	 */
 	public DataLogger() {
-		this("", DEFAULT_CAPACITY);
+		this(DEFAULT_PREFIX, DEFAULT_FILENAME, DEFAULT_DELIMITER, DEFAULT_CAPACITY, DEFAULT_ROOT_PATH);
 	}
 
 	/**
 	 * Constructor for a DataLogger that writes one file per {@code entriesPerFile}
 	 * entries.
 	 *
-	 * @param entriesPerFile this is the number of entries contained in each written
-	 *                       log file.
+	 * @param prefix the value to use for {@link #logFilePrefix}
+	 * @param filename the value to use for {@link #logFilename}
+	 * @param delimiter the value to use for {@link #logEntryDelimiter}
+	 * @param entriesPerFile the value to use for {@link #capacity}
+	 * @param rootPath the value to use for {@link #logFileRootPath}
 	 */
-	public DataLogger(String filename, int entriesPerFile) {
+	public DataLogger(String prefix, String filename, String delimiter, int entriesPerFile, String rootPath) {
 		if (entriesPerFile > 0) {
 			this.capacity = entriesPerFile;
 		} else {
@@ -113,7 +118,9 @@ public class DataLogger<T> {
 	 *                  is set in {@link DataLogger#logEntryDelimiter}.
 	 */
 	public void setLogEntryDelimiter(String delimiter) {
+		boolean wasLoggingRunning = stopLoggingAndWriteFileIfRunning();
 		this.logEntryDelimiter = delimiter;
+		saveLoggedData = wasLoggingRunning;
 	}
 
 	/**
@@ -129,16 +136,118 @@ public class DataLogger<T> {
 	}
 
 	/**
+	 * @return the capacity
+	 */
+	public int getCapacity() {
+		return capacity;
+	}
+
+	/**
+	 * @param capacity the capacity to set
+	 */
+	public void setCapacity(int capacity) {
+		boolean wasLoggingRunning = stopLoggingAndWriteFileIfRunning();
+		this.capacity = capacity;
+		this.dataBuffer = new CircularBuffer<>(capacity);
+		this.dataBuffer.setOverwrite(true);
+		this.timestampBuffer = new CircularBuffer<>(capacity);
+		this.timestampBuffer.setOverwrite(true);
+		saveLoggedData = wasLoggingRunning;
+	}
+
+	/**
+	 * @return the logFilePrefix
+	 */
+	public String getLogFilePrefix() {
+		return logFilePrefix;
+	}
+
+	/**
+	 * @param logFilePrefix the logFilePrefix to set
+	 */
+	public void setLogFilePrefix(String logFilePrefix) {
+		boolean wasLoggingRunning = stopLoggingAndWriteFileIfRunning();
+		this.logFilePrefix = logFilePrefix;
+		saveLoggedData = wasLoggingRunning;
+	}
+
+	/**
+	 * @return the logFilename
+	 */
+	public String getLogFilename() {
+		return logFilename;
+	}
+
+	/**
+	 * @param logFilename the logFilename to set
+	 */
+	public void setLogFilename(String logFilename) {
+		boolean wasLoggingRunning = stopLoggingAndWriteFileIfRunning();
+		this.logFilename = logFilename;
+		saveLoggedData = wasLoggingRunning;
+	}
+
+	/**
+	 * @return the logFileRootPath
+	 */
+	public String getLogFileRootPath() {
+		return logFileRootPath;
+	}
+
+	/**
+	 * @param logFileRootPath the logFileRootPath to set
+	 */
+	public void setLogFileRootPath(String logFileRootPath) {
+		boolean wasLoggingRunning = stopLoggingAndWriteFileIfRunning();
+		this.logFileRootPath = logFileRootPath;
+		saveLoggedData = wasLoggingRunning;
+	}
+
+	/**
+	 * @return the writerFileCount
+	 */
+	public int getWriterFileCount() {
+		return writerFileCount;
+	}
+
+	/**
+	 * @param writerFileCount the writerFileCount to set
+	 */
+	public void setWriterFileCount(int writerFileCount) {
+		this.writerFileCount = writerFileCount;
+	}
+
+	/**
+	 * @return the logEntryDelimiter
+	 */
+	public String getLogEntryDelimiter() {
+		return logEntryDelimiter;
+	}
+
+	/**
 	 * Activates the saving of log files. For each {@link DataLogger#capacity}
 	 * entries a new log file will be written.
 	 */
 	public void saveLoggedData() {
+		stopLoggingAndWriteFileIfRunning();
+		saveLoggedData = true;
+	}
+
+	/**
+	 * checks if {@link DataLogger#saveLoggedData} is already
+	 * {@code true}. If it is {@code true}, {@link DataLogger#stopSavingLoggedData} is called.
+	 * If it is {@code false}, {@link DataLogger#writeLoggedDataToFile} is called.
+	 * 
+	 * @return returns the initial value of {@link DataLogger#saveLoggedData} 
+	 */
+	private boolean stopLoggingAndWriteFileIfRunning() {
 		if (saveLoggedData) {
 			stopSavingLoggedData();
+			return true;
 		} else {
 			writeLoggedDataToFile();
+			return false;
 		}
-		saveLoggedData = true;
 	}
 
 	/**
@@ -152,12 +261,7 @@ public class DataLogger<T> {
 	 *                       this value
 	 */
 	public synchronized void saveLoggedData(int entriesPerFile) {
-		// access to dataBuffer and timestampBuffer has to be synchronized
-		if (saveLoggedData) {
-			stopSavingLoggedData();
-		} else {
-			writeLoggedDataToFile();
-		}
+		stopLoggingAndWriteFileIfRunning();
 		if (entriesPerFile > 0) {
 			this.capacity = entriesPerFile;
 		} else {
@@ -231,7 +335,6 @@ public class DataLogger<T> {
 		// array changes
 		T[] d = Arrays.copyOf(data, data.length);
 		dataBuffer.add(d);
-
 		if (timestampBuffer.isFull() && saveLoggedData) {
 			writeLoggedDataToFile();
 		}
@@ -265,10 +368,7 @@ public class DataLogger<T> {
 		// add the data records column by column to the fileContent
 		while (!dataBuffer.isEmpty()) {
 			T[] entry = dataBuffer.remove();
-			// System.out.println("add next entry");
 			for (T e : entry) {
-				// System.out.println("R: "+r+", C: "+c+", E: "+e);
-				// fileContent[r][c] = Integer.toString(e);
 				if (e == null) {
 					fileContent[r][c] = "";
 				} else {

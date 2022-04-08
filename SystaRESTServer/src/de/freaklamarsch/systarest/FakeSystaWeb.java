@@ -1,29 +1,35 @@
 /*
-* Copyright (c) 2021, The beep-projects contributors
-* this file originated from https://github.com/beep-projects
-* Do not remove the lines above.
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see https://www.gnu.org/licenses/
-*
-*/
+ * Copyright (c) 2021, The beep-projects contributors
+ * this file originated from https://github.com/beep-projects
+ * Do not remove the lines above.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/
+ *
+ */
 package de.freaklamarsch.systarest;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.LocalDateTime;
@@ -32,7 +38,11 @@ import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import de.freaklamarsch.systarest.DataLogger.DataLoggerStatus;
 import de.freaklamarsch.systarest.DeviceTouchSearch.DeviceTouchDeviceInfo;
@@ -45,762 +55,808 @@ import de.freaklamarsch.systarest.SystaWaterHeaterStatus.tempUnit;
  */
 public class FakeSystaWeb implements Runnable {
 
-  enum MessageType {
-    NONE,
-    DATA0,
-    DATA1,
-    DATA2,
-    DATA3,
-    OK,
-    ERR
-  }
-  
-  /**
-   * Inner class for representing the status of this @see FakeSystaWeb
-   */
-  public class FakeSystaWebStatus {
-    public final boolean running;
-    public final boolean connected;
-    public final String lastTimestamp;
-    public final long dataPacketsReceived;
-    public final String localAddress;
-    public final int localPort;
-    public final InetAddress remoteAddress;
-    public final int remotePort;
-    public final boolean logging;
-    public final int packetsPerFile;
-    public final String loggerFilePrefix;
-    public final String loggerEntryDelimiter;
-    public final String loggerFileRootPath;
-    public final int loggerFileCount;
-    public final int loggerBufferedEntries;
-    public final String commitDate;
+	enum MessageType {
+		NONE, DATA0, DATA1, DATA2, DATA3, OK, ERR
+	}
 
-    public FakeSystaWebStatus(boolean running, boolean connected, long dataPacketsReceived, String timestamp,
-        String localAddress, int localPort, InetAddress remoteAddress, int remotePort, boolean saveLoggedData,
-        int capacity, String logFilePrefix, String logEntryDelimiter, String logFileRootPath,
-        int writerFileCount, int bufferedEntries, String commitDate) {
+	/**
+	 * Inner class for representing the status of this @see FakeSystaWeb
+	 */
+	public static class FakeSystaWebStatus {
+		public final boolean running;
+		public final boolean connected;
+		public final String lastTimestamp;
+		public final long dataPacketsReceived;
+		public final String localAddress;
+		public final int localPort;
+		public final InetAddress remoteAddress;
+		public final int remotePort;
+		public final boolean logging;
+		public final int packetsPerFile;
+		public final String loggerFilePrefix;
+		public final String loggerEntryDelimiter;
+		public final String loggerFileRootPath;
+		public final int loggerFileCount;
+		public final int loggerBufferedEntries;
+		public final String commitDate;
 
-      this.running = running;
-      this.connected = connected;
-      this.lastTimestamp = timestamp;
-      this.dataPacketsReceived = dataPacketsReceived;
-      this.localAddress = localAddress;
-      this.localPort = localPort;
-      this.remoteAddress = remoteAddress;
-      this.remotePort = remotePort;
-      this.logging = saveLoggedData;
-      this.packetsPerFile = capacity;
-      this.loggerFilePrefix = logFilePrefix;
-      this.loggerEntryDelimiter = logEntryDelimiter;
-      this.loggerFileRootPath = logFileRootPath;
-      this.loggerFileCount = writerFileCount;
-      this.loggerBufferedEntries = bufferedEntries;
-      this.commitDate = "2022-03-28T19:25:31+00:00";
-    }
-  }
+		public FakeSystaWebStatus(boolean running, boolean connected, long dataPacketsReceived, String timestamp,
+				String localAddress, int localPort, InetAddress remoteAddress, int remotePort, boolean saveLoggedData,
+				int capacity, String logFilePrefix, String logEntryDelimiter, String logFileRootPath,
+				int writerFileCount, int bufferedEntries, String commitDate) {
 
-  /**
-   * Inner class for representing the info about a SystaComfort unit
-   */
-  public class SystaComfortInfo {
-    public final String systawebIp;
-    public final int systawebPort;
-    public final String systaBcastIp;
-    public final int systaBcastPort;
-    public final String scInfoString;
-    public final String unitIp;
-    public final int unitStouchPort;
-    public final String unitName;
-    public final String unitId;
-    public final int unitApp;
-    public final int unitPlatform;
-    public final String unitScFullVersion;
-    public final int unitScVersion;
-    public final int unitScMinor;
-    public final String unitPassword;
-    public final String unitBaseVersion;
-    public final String unitMac;
+			this.running = running;
+			this.connected = connected;
+			this.lastTimestamp = timestamp;
+			this.dataPacketsReceived = dataPacketsReceived;
+			this.localAddress = localAddress;
+			this.localPort = localPort;
+			this.remoteAddress = remoteAddress;
+			this.remotePort = remotePort;
+			this.logging = saveLoggedData;
+			this.packetsPerFile = capacity;
+			this.loggerFilePrefix = logFilePrefix;
+			this.loggerEntryDelimiter = logEntryDelimiter;
+			this.loggerFileRootPath = logFileRootPath;
+			this.loggerFileCount = writerFileCount;
+			this.loggerBufferedEntries = bufferedEntries;
+			this.commitDate = "2022-04-08T20:43:20+00:00";
+		}
+	}
 
-    public SystaComfortInfo(String systawebIp, int systawebPort, String systaBcastIp, int systaBcastPort,
-        String scInfoString, String unitIp, int unitStouchPort, String unitName, String unitId, int unitApp,
-        int unitPlatform, String unitScFullVersion, int unitScVersion, int unitScMinor, String unitPassword,
-        String unitBaseVersion, String unitMac) {
-      this.systawebIp = systawebIp;
-      this.systawebPort = systawebPort;
-      this.systaBcastIp = systaBcastIp;
-      this.systaBcastPort = systaBcastPort;
-      this.scInfoString = scInfoString;
-      this.unitIp = unitIp;
-      this.unitStouchPort = unitStouchPort;
-      this.unitName = unitName;
-      this.unitId = unitId;
-      this.unitApp = unitApp;
-      this.unitPlatform = unitPlatform;
-      this.unitScFullVersion = unitScFullVersion;
-      this.unitScVersion = unitScVersion;
-      this.unitScMinor = unitScMinor;
-      this.unitPassword = unitPassword;
-      this.unitBaseVersion = unitBaseVersion;
-      this.unitMac = unitMac;
+	/**
+	 * Inner class for representing the info about a SystaComfort unit
+	 */
+	public class SystaComfortInfo {
+		public final String systawebIp;
+		public final int systawebPort;
+		public final String systaBcastIp;
+		public final int systaBcastPort;
+		public final String scInfoString;
+		public final String unitIp;
+		public final int unitStouchPort;
+		public final String unitName;
+		public final String unitId;
+		public final int unitApp;
+		public final int unitPlatform;
+		public final String unitScFullVersion;
+		public final int unitScVersion;
+		public final int unitScMinor;
+		public final String unitPassword;
+		public final String unitBaseVersion;
+		public final String unitMac;
 
-    }
-  }
+		public SystaComfortInfo(String systawebIp, int systawebPort, String systaBcastIp, int systaBcastPort,
+				String scInfoString, String unitIp, int unitStouchPort, String unitName, String unitId, int unitApp,
+				int unitPlatform, String unitScFullVersion, int unitScVersion, int unitScMinor, String unitPassword,
+				String unitBaseVersion, String unitMac) {
+			this.systawebIp = systawebIp;
+			this.systawebPort = systawebPort;
+			this.systaBcastIp = systaBcastIp;
+			this.systaBcastPort = systaBcastPort;
+			this.scInfoString = scInfoString;
+			this.unitIp = unitIp;
+			this.unitStouchPort = unitStouchPort;
+			this.unitName = unitName;
+			this.unitId = unitId;
+			this.unitApp = unitApp;
+			this.unitPlatform = unitPlatform;
+			this.unitScFullVersion = unitScFullVersion;
+			this.unitScVersion = unitScVersion;
+			this.unitScMinor = unitScMinor;
+			this.unitPassword = unitPassword;
+			this.unitBaseVersion = unitBaseVersion;
+			this.unitMac = unitMac;
 
-  private final String commitDate = "2022-03-28T19:25:31+00:00";
-  private MessageType typeOfLastReceivedMessage = MessageType.NONE;
-  private InetAddress remoteAddress;
-  private int remotePort;
-  private final int PORT = 22460;
-  private final int MAX_DATA_LENGTH = 1048;
-  private final int MAX_NUMBER_ENTRIES = 256;
-  private final int COUNTER_OFFSET_REPLY = 0x3FBF;
-  private final int COUNTER_OFFSET_REPLY_2 = 0x3FC0;
-  private final int COUNTER_OFFSET_PWD = 0x10F9;
-  private final int COUNTER_OFFSET_CHANGE = 0x3FBF;
-  private final int MAC_OFFSET_REPLY = 0x8E82;
-  private final int MAC_OFFSET_REPLY_VDR = 0x8E83;
-  //private final int MAC_OFFSET_PWD = 0x8E83;
-  //private final int MAC_OFFSET_PWD = 0x8E81;
-  //private final int MAC_OFFSET_PWD = 0x8E82;
-  private final int MAC_OFFSET_CHANGE = 0x8E7E;
-  //private final int REPLY_MSG_LENGTH = 20;
+		}
+	}
 
-  //the SystaComfort sends burst of 3 to 4 messages every minute
-  //at the moment only packets of type 0x01 are processed, so 2 buffers should be enough
-  //TODO adjust this value if more packet types are processed
-  private final int RING_BUFFER_SIZE = 2;
-  private int readIndex = -1;
-  private int writeIndex = -1;
-  private long dataPacketsReceived = 0;
-  private byte[][] replyHeader = new byte[RING_BUFFER_SIZE][8];
-  private Integer[][] intData = new Integer[RING_BUFFER_SIZE][MAX_NUMBER_ENTRIES];
-  //private byte[] reply = new byte[REPLY_MSG_LENGTH];
-  private long[] timestamp = new long[RING_BUFFER_SIZE];
+	private final String commitDate = "2022-04-08T20:43:20+00:00";
+	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
+	private InetAddress remoteAddress;
+	private int remotePort;
+	private final int PORT = 22460;
+	private final int MAX_DATA_LENGTH = 1048;
+	private final int MAX_NUMBER_ENTRIES = 256;
+	private final int COUNTER_OFFSET_REPLY = 0x3FBF;
+	private final int COUNTER_OFFSET_REPLY_2 = 0x3FC0;
+	private final int COUNTER_OFFSET_PWD = 0x10F9;
+	private final int COUNTER_OFFSET_CHANGE = 0x3FBF;
+	private final int MAC_OFFSET_REPLY = 0x8E82;
+	private final int MAC_OFFSET_REPLY_VDR = 0x8E83;
+	// private final int MAC_OFFSET_PWD = 0x8E83;
+	// private final int MAC_OFFSET_PWD = 0x8E81;
+	// private final int MAC_OFFSET_PWD = 0x8E82;
+	private final int MAC_OFFSET_CHANGE = 0x8E7E;
+	// private final int REPLY_MSG_LENGTH = 20;
 
-  private String inetAddress = "192.186.1.1";
-  private DatagramSocket socket = null;
-  private boolean running = false;
-  private boolean stopRequested = false;
-  private byte[] receiveData = new byte[MAX_DATA_LENGTH];
-  private DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+	// the SystaComfort sends burst of 3 to 4 messages every minute
+	// at the moment only packets of type 0x01 are processed, so 2 buffers should be
+	// enough
+	// TODO adjust this value if more packet types are processed
+	private final int RING_BUFFER_SIZE = 2;
+	private int readIndex = -1;
+	private int writeIndex = -1;
+	private long dataPacketsReceived = 0;
+	private byte[][] replyHeader = new byte[RING_BUFFER_SIZE][8];
+	private Integer[][] intData = new Integer[RING_BUFFER_SIZE][MAX_NUMBER_ENTRIES];
+	// private byte[] reply = new byte[REPLY_MSG_LENGTH];
+	private long[] timestamp = new long[RING_BUFFER_SIZE];
 
-  private final String[] WATER_HEATER_OPERATION_MODES = { "off", "normal", "comfort", "locked" };
+	private String inetAddress = "192.186.1.1";
+	private DatagramSocket socket = null;
+	private boolean running = false;
+	private boolean stopRequested = false;
+	private byte[] receiveData = new byte[MAX_DATA_LENGTH];
+	private DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
-  private int WRITER_MAX_DATA = 60;
-  private DataLogger<Integer> logInt = new DataLogger<>("data", WRITER_MAX_DATA);
-  private DataLogger<Byte> logRaw = new DataLogger<>("raw", WRITER_MAX_DATA);
+	private final String[] WATER_HEATER_OPERATION_MODES = { "off", "normal", "comfort", "locked" };
 
-  // constructor
-  public FakeSystaWeb() {
-    for (int i = 0; i < timestamp.length; i++) {
-      timestamp[i] = -1;
-    }
-  }
+	private static final int WRITER_MAX_DATA = 60;
+	private static final String DELIMITER = ";";
+	private static final String PREFIX = "SystaREST";
+	private static final String LOG_PATH = System.getProperty("user.home") + File.separator + "logs";
+	private static final String logFileFilterString = ".*-(raw|data)-[0-9]+\\.txt";
+	private static final FilenameFilter logFileFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			return name.matches(logFileFilterString);
+		}
+	};
+	private DataLogger<Integer> logInt = new DataLogger<>(PREFIX, "data", DELIMITER, WRITER_MAX_DATA, LOG_PATH);
+	private DataLogger<Byte> logRaw = new DataLogger<>(PREFIX, "raw", DELIMITER, WRITER_MAX_DATA, LOG_PATH);
 
-  public FakeSystaWebStatus getStatus() {
-    DataLoggerStatus dls = logRaw.getStatus();
-    // if we have received data within the last 120 seconds, we are considered being
-    // connected
-    //boolean connected = (readIndex < 0) ? false
-    //        : (timestamp[readIndex] > 0
-    //            && (LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - timestamp[readIndex] < 120));
-    boolean connected = (readIndex < 0) ? false
-            : (timestamp[readIndex] > 0
-                && (Instant.now().getEpochSecond() - timestamp[readIndex] < 120));
-    return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.getTimestampString(),
-        this.inetAddress, this.PORT, this.remoteAddress, this.remotePort, dls.saveLoggedData, dls.capacity,
-        dls.logFilePrefix, dls.logEntryDelimiter, dls.logFileRootPath, dls.writerFileCount,
-        dls.bufferedEntries, this.commitDate);
-  }
+	// constructor
+	public FakeSystaWeb() {
+		for (int i = 0; i < timestamp.length; i++) {
+			timestamp[i] = -1;
+		}
+	}
 
-  public DeviceTouchDeviceInfo findSystaComfort() {
-    return DeviceTouchSearch.search();
-  }
+	public FakeSystaWebStatus getStatus() {
+		DataLoggerStatus dls = logRaw.getStatus();
+		// if we have received data within the last 120 seconds, we are considered being
+		// connected
+		// boolean connected = (readIndex < 0) ? false
+		// : (timestamp[readIndex] > 0
+		// && (LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - timestamp[readIndex]
+		// < 120));
+		boolean connected = (readIndex < 0) ? false
+				: (timestamp[readIndex] > 0 && (Instant.now().getEpochSecond() - timestamp[readIndex] < 120));
+		return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.getTimestampString(),
+				this.inetAddress, this.PORT, this.remoteAddress, this.remotePort, dls.saveLoggedData, dls.capacity,
+				dls.logFilePrefix, dls.logEntryDelimiter, dls.logFileRootPath, dls.writerFileCount, dls.bufferedEntries,
+				this.commitDate);
+	}
 
-  /**
-   * @param mode     the intended operation mode
-   *                 0 = Auto Prog. 1
-   *                 1 = Auto Prog. 2
-   *                 2 = Auto Prog. 3
-   *                 3 = Continuous Normal 
-   *                 4 = Continuous Comfort 
-   *                 5 = Continuous Lowering 
-   *                 6 = Summer 
-   *                 7 = Off 
-   *                 8 = Party 
-   *                 14= Test or chimney sweep
-   */
-  public void setOperationMode(int mode) {
-    System.out.println("setOperationMode to "+mode);
-    synchronized(typeOfLastReceivedMessage) {
-      try {
-    	sendPassword();
-        //wait 1s for the reply
-        typeOfLastReceivedMessage.wait(1000);
-        //TODO handle error
-        sendOperationModeChange(mode);
-        //wait 1s for the reply
-        typeOfLastReceivedMessage.wait(1000);
-      } catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	  }
-    }
-    System.out.println("setOperationMode to "+mode+" DONE!");
-  }
+	public DeviceTouchDeviceInfo findSystaComfort() {
+		return DeviceTouchSearch.search();
+	}
 
-  /**
-   * @return the inetAddress
-   */
-  public String getInetAddress() {
-    return inetAddress;
-  }
+	/**
+	 * TODO Make this method work
+	 * 
+	 * @param mode the intended operation mode 0 = Auto Prog. 1 1 = Auto Prog. 2 2 =
+	 *             Auto Prog. 3 3 = Continuous Normal 4 = Continuous Comfort 5 =
+	 *             Continuous Lowering 6 = Summer 7 = Off 8 = Party 14= Test or
+	 *             chimney sweep
+	 */
+	public void setOperationMode(int mode) {
+		System.out.println("setOperationMode to " + mode);
+		synchronized (typeOfLastReceivedMessage) {
+			try {
+				sendPassword();
+				// wait 1s for the reply
+				typeOfLastReceivedMessage.wait(1000);
+				// TODO handle error
+				sendOperationModeChange(mode);
+				// wait 1s for the reply
+				typeOfLastReceivedMessage.wait(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		System.out.println("setOperationMode to " + mode + " DONE!");
+	}
 
-  /**
-   * @param inetAddress the inetAddress to set
-   */
-  public void setInetAddress(String inetAddress) {
-    this.inetAddress = inetAddress;
-  }
+	/**
+	 * @return the inetAddress
+	 */
+	public String getInetAddress() {
+		return inetAddress;
+	}
 
-  /**
-   * get the timestamp for the current measurement
-   *
-   * @return the timestamp in seconds from the epoch of 1970-01-01T00:00:00Z.
-   *         Which is UTC.
-   */
-  public long getTimestamp() {
-    return (readIndex < 0) ? -1 : timestamp[readIndex];
-  }
+	/**
+	 * @param inetAddress the inetAddress to set
+	 */
+	public void setInetAddress(String inetAddress) {
+		this.inetAddress = inetAddress;
+	}
 
-  /**
-   * get the timestamp for the current measurement as human readable string
-   *
-   * @return the timestamp as a LocalDateTime string, which is a date-time with
-   *         a time-zone offset in the ISO-8601 calendar system
-   *         e.g. 2021-12-24T14:49:27+01:00
-   *         or "never"
-   */
-  public String getTimestampString() {
-    return (readIndex < 0) ? "never"
-        : getFormattedTimeString(timestamp[readIndex]);
-  }
+	/**
+	 * get the timestamp for the current measurement
+	 *
+	 * @return the timestamp in seconds from the epoch of 1970-01-01T00:00:00Z.
+	 *         Which is UTC.
+	 */
+	public long getTimestamp() {
+		return (readIndex < 0) ? -1 : timestamp[readIndex];
+	}
 
-  /**
-   * get the timestamp (epoch seconds) as formatted string for the local timezone
-   *
-   * @return the timestamp as a LocalDateTime string, which is a date-time with
-   *         a time-zone offset in the ISO-8601 calendar system
-   *         e.g. 2021-12-24T14:49:27+01:00
-   */
-  public String getFormattedTimeString(long timestamp) {
-    //return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC), ZoneId.systemDefault()));
-    return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp, 0, OffsetDateTime.now().getOffset()), ZoneId.systemDefault()));
-  }
-  /**
-   * @return the intData of the current measurement, or null if no measurement has
-   *         been done so far
-   */
-  public Integer[] getData() {
-    // safe readIndex, so we do not read inconsistent data, if it gets updated
-    // between calls
-    // System.out.println("[FakeSystaWeb] FSW.getData()");
-    int i = readIndex;
-    // System.out.println("FSW.getData(): i=="+i);
-    if (i >= 0 && timestamp[i] > 0) {
-      // System.out.println("[FakeSystaWeb] FSW.getData(): return rawData["+i+"]");
-      return intData[i];
-    } else {
-      // System.out.println("[FakeSystaWeb] FSW.getData(): return null");
-      return null;
-    }
-  }
+	/**
+	 * get the timestamp for the current measurement as human readable string
+	 *
+	 * @return the timestamp as a LocalDateTime string, which is a date-time with a
+	 *         time-zone offset in the ISO-8601 calendar system e.g.
+	 *         2021-12-24T14:49:27+01:00 or "never"
+	 */
+	public String getTimestampString() {
+		return (readIndex < 0) ? "never" : getFormattedTimeString(timestamp[readIndex]);
+	}
 
-  public SystaWaterHeaterStatus getWaterHeaterStatus() {
-    SystaWaterHeaterStatus status = new SystaWaterHeaterStatus();
-    int i = readIndex; // save readIndex, so we do not read inconsistent data if it gets updated
-    if (i < 0 || timestamp[i] <= 0) {
-      return null;
-    }
-    status.minTemp = 40.0; // TODO check this value
-    status.maxTemp = 65.0; // TODO check this value
-    status.currentTemperature = intData[i][SystaIndex.HOT_WATER_TEMP] / 10.0;
-    status.targetTemperature = intData[i][SystaIndex.HOT_WATER_TEMP_SET] / 10.0;
-    status.targetTemperatureHigh = intData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
-    status.targetTemperatureLow = Math.max(0.0,
-        status.targetTemperature - intData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0);
-    status.temperatureUnit = tempUnit.TEMP_CELSIUS;
-    status.currentOperation = WATER_HEATER_OPERATION_MODES[intData[i][SystaIndex.HOT_WATER_OPERATION_MODE]];
-    status.operationList = WATER_HEATER_OPERATION_MODES;
-    status.supportedFeatures = new String[] {}; // TODO check what supported features are
-    status.is_away_mode_on = false; // TODO match with ferien mode if possible
-    status.timestamp = timestamp[i];
-    status.timestampString = getFormattedTimeString(timestamp[readIndex]);
-    return status;
-  }
+	/**
+	 * get the timestamp (epoch seconds) as formatted string for the local timezone
+	 *
+	 * @return the timestamp as a LocalDateTime string, which is a date-time with a
+	 *         time-zone offset in the ISO-8601 calendar system e.g.
+	 *         2021-12-24T14:49:27+01:00
+	 */
+	public String getFormattedTimeString(long timestamp) {
+		// return
+		// DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp,
+		// 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+		return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(
+				LocalDateTime.ofEpochSecond(timestamp, 0, OffsetDateTime.now().getOffset()), ZoneId.systemDefault()));
+	}
 
-  public SystaStatus getParadigmaStatus() {
-    SystaStatus status = new SystaStatus();
-    int i = readIndex; // save readIndex, so we do not read inconsistent data if it gets updated
-    if (i < 0 || timestamp[i] <= 0) {
-      System.out.println("i: " + i + ", timestamp: " + timestamp[i]);
-      return null;
-    }
-    status.outsideTemp = intData[i][SystaIndex.OUTSIDE_TEMP] / 10.0;
-    status.circuit1FlowTemp = intData[i][SystaIndex.CIRCUIT_1_FLOW_TEMP] / 10.0;
-    status.circuit1ReturnTemp = intData[i][SystaIndex.CIRCUIT_1_RETURN_TEMP] / 10.0;
-    status.circuit1OperationMode = intData[i][SystaIndex.CIRCUIT_1_OPERATION_MODE];
-    status.hotWaterTemp = intData[i][SystaIndex.HOT_WATER_TEMP] / 10.0;
-    status.bufferTempTop = intData[i][SystaIndex.BUFFER_TEMP_TOP] / 10.0;
-    status.bufferTempBottom = intData[i][SystaIndex.BUFFER_TEMP_BOTTOM] / 10.0;
-    status.circulationTemp = intData[i][SystaIndex.CIRCULATION_TEMP] / 10.0;
-    status.circuit2FlowTemp = intData[i][SystaIndex.CIRCUIT_2_FLOW_TEMP] / 10.0;
-    status.circuit2ReturnTemp = intData[i][SystaIndex.CIRCUIT_2_RETURN_TEMP] / 10.0;
-    status.roomTempActual1 = intData[i][SystaIndex.ROOM_TEMP_ACTUAL_1] / 10.0;
-    status.roomTempActual2 = intData[i][SystaIndex.ROOM_TEMP_ACTUAL_2] / 10.0;
-    status.collectorTempActual = intData[i][SystaIndex.COLLECTOR_TEMP_ACTUAL] / 10.0;
-    status.boilerFlowTemp = intData[i][SystaIndex.BOILER_FLOW_TEMP] / 10.0;
-    status.boilerReturnTemp = intData[i][SystaIndex.BOILER_RETURN_TEMP] / 10.0;
-    status.logBoilerFlowTemp = intData[i][SystaIndex.LOG_BOILER_FLOW_TEMP] / 10.0;
-    status.logBoilerReturnTemp = intData[i][SystaIndex.LOG_BOILER_RETURN_TEMP] / 10.0;
-    status.logBoilerBufferTempTop = intData[i][SystaIndex.LOG_BOILER_BUFFER_TEMP_TOP] / 10.0;
-    status.swimmingpoolTemp = intData[i][SystaIndex.SWIMMINGPOOL_TEMP] / 10.0;
-    status.swimmingpoolFlowTemp = intData[i][SystaIndex.SWIMMINGPOOL_FLOW_TEMP] / 10.0;
-    status.swimmingpoolReturnTemp = intData[i][SystaIndex.SWIMMINGPOOL_RETURN_TEMP] / 10.0;
-    status.hotWaterTempSet = intData[i][SystaIndex.HOT_WATER_TEMP_SET] / 10.0;
-    status.roomTempSet1 = intData[i][SystaIndex.ROOM_TEMP_SET_1] / 10.0;
-    status.circuit1FlowTempSet = intData[i][SystaIndex.CIRCUIT_1_FLOW_TEMP_SET] / 10.0;
-    status.circuit2FlowTempSet = intData[i][SystaIndex.CIRCUIT_2_FLOW_TEMP_SET] / 10.0;
-    status.roomTempSet2 = intData[i][SystaIndex.ROOM_TEMP_SET_2] / 10.0;
-    status.bufferTempSet = intData[i][SystaIndex.BUFFER_TEMP_SET] / 10.0;
-    status.boilerTempSet = intData[i][SystaIndex.BOILER_TEMP_SET] / 10.0;
-    status.operationMode = intData[i][SystaIndex.OPERATION_MODE];
-    status.roomTempSetNormal = intData[i][SystaIndex.ROOM_TEMP_SET_NORMAL] / 10.0;
-    status.roomTempSetComfort = intData[i][SystaIndex.ROOM_TEMP_SET_COMFORT] / 10.0;
-    status.roomTempSetLowering = intData[i][SystaIndex.ROOM_TEMP_SET_LOWERING] / 10.0;
-    status.heatingOperationMode = intData[i][SystaIndex.HEATING_OPERATION_MODE];
-    status.controlledBy = intData[i][SystaIndex.CONTROLLED_BY];
-    status.heatingCurveBasePoint = intData[i][SystaIndex.HEATING_CURVE_BASE_POINT] / 10.0;
-    status.heatingCurveGradient = intData[i][SystaIndex.HEATING_CURVE_GRADIENT] / 10.0;
-    status.maxFlowTemp = intData[i][SystaIndex.MAX_FLOW_TEMP] / 10.0;
-    status.heatingLimitTemp = intData[i][SystaIndex.HEATING_LIMIT_TEMP] / 10.0;
-    status.heatingLimitTeampLowering = intData[i][SystaIndex.HEATING_LIMIT_TEMP_LOWERING] / 10.0;
-    status.antiFreezeOutsideTemp = intData[i][SystaIndex.ANTI_FREEZE_OUTSIDE_TEMP] / 10.0;
-    status.heatUpTime = intData[i][SystaIndex.HEAT_UP_TIME]; // in minutes
-    status.roomImpact = intData[i][SystaIndex.ROOM_IMPACT] / 10.0;
-    status.boilerSuperelevation = intData[i][SystaIndex.BOILER_SUPERELEVATION];
-    status.heatingCircuitSpreading = intData[i][SystaIndex.HEATING_CIRCUIT_SPREADING] / 10.0;
-    status.heatingPumpSpeedMin = intData[i][SystaIndex.HEATING_PUMP_SPEED_MIN]; // in %
-    status.mixerRuntime = intData[i][SystaIndex.MIXER_RUNTIME]; // in minutes
-    status.roomTempCorrection = intData[i][SystaIndex.ROOM_TEMP_CORRECTION] / 10.0;
-    status.underfloorHeatingBasePoint = intData[i][SystaIndex.UNDERFLOOR_HEATING_BASE_POINT] / 10.0;
-    status.underfloorHeatingGradient = intData[i][SystaIndex.UNDERFLOOR_HEATING_GRADIENT] / 10.0;
-    status.hotWaterTempNormal = intData[i][SystaIndex.HOT_WATER_TEMP_NORMAL] / 10.0;
-    status.hotWaterTempComfort = intData[i][SystaIndex.HOT_WATER_TEMP_COMFORT] / 10.0;
-    status.hotWaterOperationMode = intData[i][SystaIndex.HOT_WATER_OPERATION_MODE];
-    status.hotWaterHysteresis = intData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0;
-    status.hotWaterTempMax = intData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
-    status.heatingPumpOverrun = intData[i][SystaIndex.PUMP_OVERRUN];
-    status.heatingPumpSpeedActual = intData[i][SystaIndex.HEATING_PUMP_SPEED_ACTUAL] * 5; // in %
-    status.bufferTempMax = intData[i][SystaIndex.BUFFER_TEMP_MAX] / 10.0;
-    status.bufferTempMin = intData[i][SystaIndex.BUFFER_TEMP_MIN] / 10.0;
-    status.boilerHysteresis = intData[i][SystaIndex.BOILER_HYSTERESIS] / 10.0;
-    status.boilerOperationTime = intData[i][SystaIndex.BOILER_RUNTIME_MIN]; // in min
-    status.boilerShutdownTemp = intData[i][SystaIndex.BOILER_SHUTDOWN_TEMP] / 10.0;
-    status.boilerPumpSpeedMin = intData[i][SystaIndex.BOILER_PUMP_SPEED_MIN]; // in %
-    status.boilerPumpSpeedActual = intData[i][SystaIndex.BOILER_PUMP_SPEED_ACTUAL] * 5;// 0=0%, 20=100%
-    status.boilerOperationMode = intData[i][SystaIndex.BOILER_OPERATION_MODE];
-    status.circulationOperationMode = intData[i][SystaIndex.CIRCULATION_OPERATION_MODE];
-    status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN]; // in min
-    status.circulationLockoutTimePushButton = intData[i][SystaIndex.CIRCULATION_LOCKOUT_TIME_PUSH_BUTTON]; // in min
-    status.circulationHysteresis = intData[i][SystaIndex.CIRCULATION_HYSTERESIS] / 10.0;
-    status.adjustRoomTempBy = intData[i][SystaIndex.ADJUST_ROOM_TEMP_BY] / 10.0;
-    status.boilerOperationTimeHours = intData[i][SystaIndex.BOILER_OPERATION_TIME_HOURS];
-    status.boilerOperationTimeMinutes = intData[i][SystaIndex.BOILER_OPERATION_TIME_MINUTES];
-    status.burnerNumberOfStarts = intData[i][SystaIndex.BURNER_NUMBER_OF_STARTS];
-    status.solarPowerActual = intData[i][SystaIndex.SOLAR_POWER_ACTUAL] / 10.0;
-    status.solarGainDay = intData[i][SystaIndex.SOLAR_GAIN_DAY] / 10.0;
-    status.solarGainTotal = intData[i][SystaIndex.SOLAR_GAIN_TOTAL] / 10.0;
-    status.systemNumberOfStarts = intData[i][SystaIndex.SYSTEM_NUMBER_OF_STARTS];
-    status.circuit1LeadTime = intData[i][SystaIndex.CIRCUIT_1_LEAD_TIME]; // in min
-    status.circuit2LeadTime = intData[i][SystaIndex.CIRCUIT_2_LEAD_TIME]; // in min
-    status.circuit3LeadTime = intData[i][SystaIndex.CIRCUIT_3_LEAD_TIME]; // in min
-    status.relay = intData[i][SystaIndex.RELAY];
-    status.heatingPumpIsOn = (status.relay & SystaStatus.HEATING_PUMP_MASK) != 0;
-    status.chargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_MASK) != 0;
-    status.logBoilderChargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_LOG_BOILER_MASK) != 0;
-    status.circulationPumpIsOn = (status.relay & SystaStatus.CIRCULATION_PUMP_MASK) != 0;
-    status.boilerIsOn = ((status.relay & SystaStatus.BOILER_MASK) != 0)
-        || (List.of(1, 2, 3, 8, 9, 11, 12).contains(status.boilerOperationMode));
-    status.burnerIsOn = ((status.relay & SystaStatus.BURNER_MASK) != 0);
-    status.boilerLedIsOn = (status.relay & SystaStatus.LED_BOILER_MASK) != 0;
-    status.unknowRelayState1IsOn = (status.relay & SystaStatus.UNKNOWN_1_MASK) != 0;
-    status.unknowRelayState2IsOn = (status.relay & SystaStatus.UNKNOWN_2_MASK) != 0;
-    status.mixer1IsOnWarm = (status.relay & SystaStatus.MIXER_WARM_MASK) != 0;
-    status.mixer1IsOnCool = (status.relay & SystaStatus.MIXER_COLD_MASK) != 0;
-    status.mixer1State = (!status.mixer1IsOnWarm && !status.mixer1IsOnCool) ? 0
-        : ((status.mixer1IsOnWarm && !status.mixer1IsOnCool) ? 1
-            : ((!status.mixer1IsOnWarm && status.mixer1IsOnCool) ? 2 : 3));
-    status.unknowRelayState5IsOn = (status.relay & SystaStatus.UNKNOWN_5_MASK) != 0;
-    status.error = intData[i][SystaIndex.ERROR];
-    status.operationModeX = intData[i][SystaIndex.OPERATION_MODE_X];
-    status.heatingOperationModeX = intData[i][SystaIndex.HEATING_OPERATION_MODE_X];
-    status.logBoilerBufferTempMin = intData[i][SystaIndex.LOG_BOILER_BUFFER_TEMP_MIN] / 10.0;
-    status.logBoilerTempMin = intData[i][SystaIndex.LOG_BOILER_TEMP_MIN] / 10.0;
-    status.logBoilerSpreadingMin = intData[i][SystaIndex.LOG_BOILER_SPREADING_MIN] / 10.0;
-    status.logBoilerPumpSpeedMin = intData[i][SystaIndex.LOG_BOILER_PUMP_SPEED_MIN];// it is already in %
-    status.logBoilerPumpSpeedActual = intData[i][SystaIndex.LOG_BOILER_PUMP_SPEED_ACTUAL] * 5;// 0=0%, 20=100%
-    status.logBoilerSettings = intData[i][SystaIndex.LOG_BOILER_SETTINGS];
-    status.logBoilerParallelOperation = (status.logBoilerSettings
-        & SystaStatus.LOG_BOILER_PARALLEL_OPERATION_MASK) != 0;
-    status.logBoilerOperationMode = intData[i][SystaIndex.LOG_BOILER_OPERATION_MODE];
-    status.boilerHeatsBuffer = (status.logBoilerSettings & SystaStatus.BOILER_HEATS_BUFFER_MASK) != 0;
-    status.bufferType = intData[i][SystaIndex.BUFFER_TYPE];
-    status.timestamp = timestamp[i];
-    status.timestampString = getFormattedTimeString(timestamp[readIndex]);
-    return status;
-  }
+	/**
+	 * @return the intData of the current measurement, or null if no measurement has
+	 *         been done so far
+	 */
+	public Integer[] getData() {
+		// safe readIndex, so we do not read inconsistent data, if it gets updated
+		// between calls
+		// System.out.println("[FakeSystaWeb] FSW.getData()");
+		int i = readIndex;
+		// System.out.println("FSW.getData(): i=="+i);
+		if (i >= 0 && timestamp[i] > 0) {
+			// System.out.println("[FakeSystaWeb] FSW.getData(): return rawData["+i+"]");
+			return intData[i];
+		} else {
+			// System.out.println("[FakeSystaWeb] FSW.getData(): return null");
+			return null;
+		}
+	}
 
-  /**
-   * stop the communication with a Paradigma SystaComfort II if running
-   */
-  public void stop() {
-    stopRequested = true;
-    if (socket != null && !socket.isClosed()) {
-      socket.close();
-    }
-  }
+	public SystaWaterHeaterStatus getWaterHeaterStatus() {
+		SystaWaterHeaterStatus status = new SystaWaterHeaterStatus();
+		int i = readIndex; // save readIndex, so we do not read inconsistent data if it gets updated
+		if (i < 0 || timestamp[i] <= 0) {
+			return null;
+		}
+		status.minTemp = 40.0; // TODO check this value
+		status.maxTemp = 65.0; // TODO check this value
+		status.currentTemperature = intData[i][SystaIndex.HOT_WATER_TEMP] / 10.0;
+		status.targetTemperature = intData[i][SystaIndex.HOT_WATER_TEMP_SET] / 10.0;
+		status.targetTemperatureHigh = intData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
+		status.targetTemperatureLow = Math.max(0.0,
+				status.targetTemperature - intData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0);
+		status.temperatureUnit = tempUnit.TEMP_CELSIUS;
+		status.currentOperation = WATER_HEATER_OPERATION_MODES[intData[i][SystaIndex.HOT_WATER_OPERATION_MODE]];
+		status.operationList = WATER_HEATER_OPERATION_MODES;
+		status.supportedFeatures = new String[] {}; // TODO check what supported features are
+		status.is_away_mode_on = false; // TODO match with ferien mode if possible
+		status.timestamp = timestamp[i];
+		status.timestampString = getFormattedTimeString(timestamp[readIndex]);
+		return status;
+	}
 
-  /**
-   * start the communication with a Paradigma SystaComfort II
-   * requires the globals inetAddress and PORT to be properly configured
-   */
-  @Override // from the Runnable interface
-  public void run() {
-    if (running) {
-      // we can't be started twice
-      return;
-    }
-    running = true;
-    System.out.println("[FakeSystaWeb] trying to open DatagramSocket for UDP communication");
-    // try to open the listening socket
-    try {
-      InetAddress ip = InetAddress.getByName(inetAddress);
-      socket = new DatagramSocket(PORT, ip);
-    } catch (Exception e) {
-      System.out.println("[FakeSystaWeb] exception thrown when trying to open DatagramSocket");
-      e.printStackTrace();
-      running = false;
-      return;
-    }
-    stopRequested = false;
-    dataPacketsReceived = 0;
-    System.out.println("[FakeSystaWeb] UDP communication with Paradigma SystaComfort II started");
-    while (!stopRequested) {
-      try {
-        socket.receive(receivePacket);
-        dataPacketsReceived++;
-      } catch (IOException e) {
-        if (stopRequested) {
-          // this exception should be thrown if the socket is closed on request
-          System.out.println("[FakeSystaWeb] call to receive UDP packets got interrupted");
-          break;
-        } else {
-          e.printStackTrace();
-          break;
-        }
-      }
-      // calculate the buffer id for writing
-      writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
-      //timestamp[writeIndex] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
-      timestamp[writeIndex] = Instant.now().getEpochSecond();
-      remoteAddress = receivePacket.getAddress();
-      remotePort = receivePacket.getPort();
-      logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);
-      // get the entire content
-      ByteBuffer data = ByteBuffer.wrap(receivePacket.getData()).order(ByteOrder.LITTLE_ENDIAN);
-      // parse it
-      // 0..5: MAC address of paradigma control board:
-      replyHeader[writeIndex][0] = data.get();
-      replyHeader[writeIndex][1] = data.get();
-      replyHeader[writeIndex][2] = data.get();
-      replyHeader[writeIndex][3] = data.get();
-      replyHeader[writeIndex][4] = data.get();
-      replyHeader[writeIndex][5] = data.get();
-      // 6..7: counter, incremented by 1 for each packet
-      replyHeader[writeIndex][6] = data.get();
-      replyHeader[writeIndex][7] = data.get();
-      // 8..15: always "09 09 0C 00 32 DA 00 00"
-      // byte 12, 13 are the protocol version 32 DA, or 32 DC or 33 DF
-      // 16: packet type (00 = empty intial packet, 01 = actual data packet, 02 =
-      // short final packet, FF = parameter change ok)
-      data.position(16);
-      byte type = data.get();
-      if (type == 0x00) {
-        // processType0(data, currentWriteBuffer);
-        typeOfLastReceivedMessage = MessageType.DATA0;
-        sendDataReply(writeIndex);
-        //sendOperationModeChange(2);
-      } else if (type == 0x01) {
-        processType1(data);
-        typeOfLastReceivedMessage = MessageType.DATA1;
-        readIndex = writeIndex;
-        //sendPassword();
-        //System.out.println("WI: "+writeIndex);
-        //if(writeIndex==1) {
-        //  sendPassword();
-        //} else {
-          sendDataReply(writeIndex);
-        //}
-        logInt.addData(intData[readIndex], timestamp[readIndex]);
-      } else if (type == 0x02) {
-        // processType2(data, currentWriteBuffer);
-        typeOfLastReceivedMessage = MessageType.DATA2;
-        sendDataReply(writeIndex);
-        //readIndex = writeIndex;
-      } else if (type == 0x03) {
-        // processType2(data, currentWriteBuffer);
-        typeOfLastReceivedMessage = MessageType.DATA3;
-        //readIndex = writeIndex;
-        //sendPassword();
-        sendDataReply(writeIndex);
-      } else if (type == 0xFF) {
-        // processType2(data, currentWriteBuffer);
-        typeOfLastReceivedMessage = MessageType.OK;
-      } else {
-        typeOfLastReceivedMessage = MessageType.ERR;
-      }
-      if(typeOfLastReceivedMessage != MessageType.ERR) {
-        //update readIndex
-        //readIndex = writeIndex;
-      }
-      synchronized(typeOfLastReceivedMessage) {
-    	  typeOfLastReceivedMessage.notifyAll();
-      }
-    }
-    System.out.println("[FakeSystaWeb] UDP communication with Paradigma SystaComfort II stopped");
-    socket.close();
-    stopRequested = false;
-    running = false;
-  }
+	public SystaStatus getParadigmaStatus() {
+		SystaStatus status = new SystaStatus();
+		int i = readIndex; // save readIndex, so we do not read inconsistent data if it gets updated
+		if (i < 0 || timestamp[i] <= 0) {
+			System.out.println("i: " + i + ", timestamp: " + timestamp[i]);
+			return null;
+		}
+		status.outsideTemp = intData[i][SystaIndex.OUTSIDE_TEMP] / 10.0;
+		status.circuit1FlowTemp = intData[i][SystaIndex.CIRCUIT_1_FLOW_TEMP] / 10.0;
+		status.circuit1ReturnTemp = intData[i][SystaIndex.CIRCUIT_1_RETURN_TEMP] / 10.0;
+		status.circuit1OperationMode = intData[i][SystaIndex.CIRCUIT_1_OPERATION_MODE];
+		status.hotWaterTemp = intData[i][SystaIndex.HOT_WATER_TEMP] / 10.0;
+		status.bufferTempTop = intData[i][SystaIndex.BUFFER_TEMP_TOP] / 10.0;
+		status.bufferTempBottom = intData[i][SystaIndex.BUFFER_TEMP_BOTTOM] / 10.0;
+		status.circulationTemp = intData[i][SystaIndex.CIRCULATION_TEMP] / 10.0;
+		status.circuit2FlowTemp = intData[i][SystaIndex.CIRCUIT_2_FLOW_TEMP] / 10.0;
+		status.circuit2ReturnTemp = intData[i][SystaIndex.CIRCUIT_2_RETURN_TEMP] / 10.0;
+		status.roomTempActual1 = intData[i][SystaIndex.ROOM_TEMP_ACTUAL_1] / 10.0;
+		status.roomTempActual2 = intData[i][SystaIndex.ROOM_TEMP_ACTUAL_2] / 10.0;
+		status.collectorTempActual = intData[i][SystaIndex.COLLECTOR_TEMP_ACTUAL] / 10.0;
+		status.boilerFlowTemp = intData[i][SystaIndex.BOILER_FLOW_TEMP] / 10.0;
+		status.boilerReturnTemp = intData[i][SystaIndex.BOILER_RETURN_TEMP] / 10.0;
+		status.logBoilerFlowTemp = intData[i][SystaIndex.LOG_BOILER_FLOW_TEMP] / 10.0;
+		status.logBoilerReturnTemp = intData[i][SystaIndex.LOG_BOILER_RETURN_TEMP] / 10.0;
+		status.logBoilerBufferTempTop = intData[i][SystaIndex.LOG_BOILER_BUFFER_TEMP_TOP] / 10.0;
+		status.swimmingpoolTemp = intData[i][SystaIndex.SWIMMINGPOOL_TEMP] / 10.0;
+		status.swimmingpoolFlowTemp = intData[i][SystaIndex.SWIMMINGPOOL_FLOW_TEMP] / 10.0;
+		status.swimmingpoolReturnTemp = intData[i][SystaIndex.SWIMMINGPOOL_RETURN_TEMP] / 10.0;
+		status.hotWaterTempSet = intData[i][SystaIndex.HOT_WATER_TEMP_SET] / 10.0;
+		status.roomTempSet1 = intData[i][SystaIndex.ROOM_TEMP_SET_1] / 10.0;
+		status.circuit1FlowTempSet = intData[i][SystaIndex.CIRCUIT_1_FLOW_TEMP_SET] / 10.0;
+		status.circuit2FlowTempSet = intData[i][SystaIndex.CIRCUIT_2_FLOW_TEMP_SET] / 10.0;
+		status.roomTempSet2 = intData[i][SystaIndex.ROOM_TEMP_SET_2] / 10.0;
+		status.bufferTempSet = intData[i][SystaIndex.BUFFER_TEMP_SET] / 10.0;
+		status.boilerTempSet = intData[i][SystaIndex.BOILER_TEMP_SET] / 10.0;
+		status.operationMode = intData[i][SystaIndex.OPERATION_MODE];
+		status.roomTempSetNormal = intData[i][SystaIndex.ROOM_TEMP_SET_NORMAL] / 10.0;
+		status.roomTempSetComfort = intData[i][SystaIndex.ROOM_TEMP_SET_COMFORT] / 10.0;
+		status.roomTempSetLowering = intData[i][SystaIndex.ROOM_TEMP_SET_LOWERING] / 10.0;
+		status.heatingOperationMode = intData[i][SystaIndex.HEATING_OPERATION_MODE];
+		status.controlledBy = intData[i][SystaIndex.CONTROLLED_BY];
+		status.heatingCurveBasePoint = intData[i][SystaIndex.HEATING_CURVE_BASE_POINT] / 10.0;
+		status.heatingCurveGradient = intData[i][SystaIndex.HEATING_CURVE_GRADIENT] / 10.0;
+		status.maxFlowTemp = intData[i][SystaIndex.MAX_FLOW_TEMP] / 10.0;
+		status.heatingLimitTemp = intData[i][SystaIndex.HEATING_LIMIT_TEMP] / 10.0;
+		status.heatingLimitTeampLowering = intData[i][SystaIndex.HEATING_LIMIT_TEMP_LOWERING] / 10.0;
+		status.antiFreezeOutsideTemp = intData[i][SystaIndex.ANTI_FREEZE_OUTSIDE_TEMP] / 10.0;
+		status.heatUpTime = intData[i][SystaIndex.HEAT_UP_TIME]; // in minutes
+		status.roomImpact = intData[i][SystaIndex.ROOM_IMPACT] / 10.0;
+		status.boilerSuperelevation = intData[i][SystaIndex.BOILER_SUPERELEVATION];
+		status.heatingCircuitSpreading = intData[i][SystaIndex.HEATING_CIRCUIT_SPREADING] / 10.0;
+		status.heatingPumpSpeedMin = intData[i][SystaIndex.HEATING_PUMP_SPEED_MIN]; // in %
+		status.mixerRuntime = intData[i][SystaIndex.MIXER_RUNTIME]; // in minutes
+		status.roomTempCorrection = intData[i][SystaIndex.ROOM_TEMP_CORRECTION] / 10.0;
+		status.underfloorHeatingBasePoint = intData[i][SystaIndex.UNDERFLOOR_HEATING_BASE_POINT] / 10.0;
+		status.underfloorHeatingGradient = intData[i][SystaIndex.UNDERFLOOR_HEATING_GRADIENT] / 10.0;
+		status.hotWaterTempNormal = intData[i][SystaIndex.HOT_WATER_TEMP_NORMAL] / 10.0;
+		status.hotWaterTempComfort = intData[i][SystaIndex.HOT_WATER_TEMP_COMFORT] / 10.0;
+		status.hotWaterOperationMode = intData[i][SystaIndex.HOT_WATER_OPERATION_MODE];
+		status.hotWaterHysteresis = intData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0;
+		status.hotWaterTempMax = intData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
+		status.heatingPumpOverrun = intData[i][SystaIndex.PUMP_OVERRUN];
+		status.heatingPumpSpeedActual = intData[i][SystaIndex.HEATING_PUMP_SPEED_ACTUAL] * 5; // in %
+		status.bufferTempMax = intData[i][SystaIndex.BUFFER_TEMP_MAX] / 10.0;
+		status.bufferTempMin = intData[i][SystaIndex.BUFFER_TEMP_MIN] / 10.0;
+		status.boilerHysteresis = intData[i][SystaIndex.BOILER_HYSTERESIS] / 10.0;
+		status.boilerOperationTime = intData[i][SystaIndex.BOILER_RUNTIME_MIN]; // in min
+		status.boilerShutdownTemp = intData[i][SystaIndex.BOILER_SHUTDOWN_TEMP] / 10.0;
+		status.boilerPumpSpeedMin = intData[i][SystaIndex.BOILER_PUMP_SPEED_MIN]; // in %
+		status.boilerPumpSpeedActual = intData[i][SystaIndex.BOILER_PUMP_SPEED_ACTUAL] * 5;// 0=0%, 20=100%
+		status.boilerOperationMode = intData[i][SystaIndex.BOILER_OPERATION_MODE];
+		status.circulationOperationMode = intData[i][SystaIndex.CIRCULATION_OPERATION_MODE];
+		status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN]; // in min
+		status.circulationLockoutTimePushButton = intData[i][SystaIndex.CIRCULATION_LOCKOUT_TIME_PUSH_BUTTON]; // in min
+		status.circulationHysteresis = intData[i][SystaIndex.CIRCULATION_HYSTERESIS] / 10.0;
+		status.adjustRoomTempBy = intData[i][SystaIndex.ADJUST_ROOM_TEMP_BY] / 10.0;
+		status.boilerOperationTimeHours = intData[i][SystaIndex.BOILER_OPERATION_TIME_HOURS];
+		status.boilerOperationTimeMinutes = intData[i][SystaIndex.BOILER_OPERATION_TIME_MINUTES];
+		status.burnerNumberOfStarts = intData[i][SystaIndex.BURNER_NUMBER_OF_STARTS];
+		status.solarPowerActual = intData[i][SystaIndex.SOLAR_POWER_ACTUAL] / 10.0;
+		status.solarGainDay = intData[i][SystaIndex.SOLAR_GAIN_DAY] / 10.0;
+		status.solarGainTotal = intData[i][SystaIndex.SOLAR_GAIN_TOTAL] / 10.0;
+		status.systemNumberOfStarts = intData[i][SystaIndex.SYSTEM_NUMBER_OF_STARTS];
+		status.circuit1LeadTime = intData[i][SystaIndex.CIRCUIT_1_LEAD_TIME]; // in min
+		status.circuit2LeadTime = intData[i][SystaIndex.CIRCUIT_2_LEAD_TIME]; // in min
+		status.circuit3LeadTime = intData[i][SystaIndex.CIRCUIT_3_LEAD_TIME]; // in min
+		status.relay = intData[i][SystaIndex.RELAY];
+		status.heatingPumpIsOn = (status.relay & SystaStatus.HEATING_PUMP_MASK) != 0;
+		status.chargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_MASK) != 0;
+		status.logBoilderChargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_LOG_BOILER_MASK) != 0;
+		status.circulationPumpIsOn = (status.relay & SystaStatus.CIRCULATION_PUMP_MASK) != 0;
+		status.boilerIsOn = ((status.relay & SystaStatus.BOILER_MASK) != 0)
+				|| (List.of(1, 2, 3, 8, 9, 11, 12).contains(status.boilerOperationMode));
+		status.burnerIsOn = ((status.relay & SystaStatus.BURNER_MASK) != 0);
+		status.boilerLedIsOn = (status.relay & SystaStatus.LED_BOILER_MASK) != 0;
+		status.unknowRelayState1IsOn = (status.relay & SystaStatus.UNKNOWN_1_MASK) != 0;
+		status.unknowRelayState2IsOn = (status.relay & SystaStatus.UNKNOWN_2_MASK) != 0;
+		status.mixer1IsOnWarm = (status.relay & SystaStatus.MIXER_WARM_MASK) != 0;
+		status.mixer1IsOnCool = (status.relay & SystaStatus.MIXER_COLD_MASK) != 0;
+		status.mixer1State = (!status.mixer1IsOnWarm && !status.mixer1IsOnCool) ? 0
+				: ((status.mixer1IsOnWarm && !status.mixer1IsOnCool) ? 1
+						: ((!status.mixer1IsOnWarm && status.mixer1IsOnCool) ? 2 : 3));
+		status.unknowRelayState5IsOn = (status.relay & SystaStatus.UNKNOWN_5_MASK) != 0;
+		status.error = intData[i][SystaIndex.ERROR];
+		status.operationModeX = intData[i][SystaIndex.OPERATION_MODE_X];
+		status.heatingOperationModeX = intData[i][SystaIndex.HEATING_OPERATION_MODE_X];
+		status.logBoilerBufferTempMin = intData[i][SystaIndex.LOG_BOILER_BUFFER_TEMP_MIN] / 10.0;
+		status.logBoilerTempMin = intData[i][SystaIndex.LOG_BOILER_TEMP_MIN] / 10.0;
+		status.logBoilerSpreadingMin = intData[i][SystaIndex.LOG_BOILER_SPREADING_MIN] / 10.0;
+		status.logBoilerPumpSpeedMin = intData[i][SystaIndex.LOG_BOILER_PUMP_SPEED_MIN];// it is already in %
+		status.logBoilerPumpSpeedActual = intData[i][SystaIndex.LOG_BOILER_PUMP_SPEED_ACTUAL] * 5;// 0=0%, 20=100%
+		status.logBoilerSettings = intData[i][SystaIndex.LOG_BOILER_SETTINGS];
+		status.logBoilerParallelOperation = (status.logBoilerSettings
+				& SystaStatus.LOG_BOILER_PARALLEL_OPERATION_MASK) != 0;
+		status.logBoilerOperationMode = intData[i][SystaIndex.LOG_BOILER_OPERATION_MODE];
+		status.boilerHeatsBuffer = (status.logBoilerSettings & SystaStatus.BOILER_HEATS_BUFFER_MASK) != 0;
+		status.bufferType = intData[i][SystaIndex.BUFFER_TYPE];
+		status.timestamp = timestamp[i];
+		status.timestampString = getFormattedTimeString(timestamp[readIndex]);
+		return status;
+	}
 
-  private Byte[] toByteArray(byte[] bytes) {
-    if (bytes == null) {
-      return null;
-    }
-    Byte[] b = new Byte[bytes.length];
-    for (int i = 0; i < bytes.length; i++) {
-      b[i] = Byte.valueOf(bytes[i]);
-    }
-    return b;
-  }
+	/**
+	 * stop the communication with a Paradigma SystaComfort II if running
+	 */
+	public void stop() {
+		stopRequested = true;
+		if (socket != null && !socket.isClosed()) {
+			socket.close();
+		}
+	}
 
-  /**
-   * function to reply the messages received from a Paradigma SystaComfort II, for
-   * keeping the communication alive
-   * 
-   */
-  private void sendPassword() {
-	    byte[] reply = Arrays.copyOf(replyHeader[readIndex], 28);
-	    // Always constant:
-	    reply[8] = 0x01;
-	    reply[12] = 0x02;
-	    reply[14] = 0x08;
-	    reply[19] = 0x31;
-	    reply[20] = 0x32;
-	    reply[21] = 0x31;
-	    reply[22] = 0x32;
-	    // Generate reply ID from MAC address:
-	    //int m =  (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) 
-	    //		+ ((reply[20] & 0xFF) << 8) + (reply[19] & 0xFF)
-	    //		+ MAC_OFFSET_PWD) & 0xFFFF;
-	    int m =  (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) 
-	    		+ 0xBFB5) & 0xFFFF;
-	    
-	    reply[24] = (byte) (m & 0xFF);
-	    reply[25] = (byte) (m >> 8);
-	    // Generate reply counter with offset:
-	    int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) 
-	    		+ COUNTER_OFFSET_PWD) & 0xFFFF;
-	    reply[26] = (byte) (n & 0xFF);
-	    reply[27] = (byte) (n >> 8);
-	    send(reply);
-	  }
-	  
-  private void sendOperationModeChange(int mode) {
-	    byte[] reply = Arrays.copyOf(replyHeader[readIndex], 28);
-	    // Always constant:
-	    reply[8] = 0x01;
-	    reply[12] = 0x02;
-	    reply[14] = 0x11;
-	    reply[15] = 0x01;
-	    reply[16] = 0x1F;
-	    reply[20] = (byte) (mode & 0xFF);
-	    reply[21] = (byte) (mode >> 8 & 0xFF);
-	    // Generate reply ID from MAC address:
-	    int m =  (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) 
-	    		+ ((reply[21] & 0xFF) << 8) + (reply[20] & 0xFF)
-	    		+ MAC_OFFSET_CHANGE) & 0xFFFF;
-	    reply[24] = (byte) (m & 0xFF);
-	    reply[25] = (byte) (m >> 8);
-	    // Generate reply counter with offset:
-	    int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF)
-	    		+ (reply[14] & 0xFF)
-	    		+ 0x100 //TODO check if it is 0x200, 0x300
-	    		+ COUNTER_OFFSET_CHANGE) & 0xFFFF;
-	    reply[26] = (byte) (n & 0xFF);
-	    reply[27] = (byte) (n >> 8);
-	    send(reply);
-	  }
-	  
-  /**
-   * function to reply the messages received from a Paradigma SystaComfort II, for
-   * keeping the communication alive
-   * 
-   * @param index         index in replyHeader where the current message is stored
-   */
-  private void sendDataReply(int index) {
-    byte[] reply = Arrays.copyOf(replyHeader[index], 16);
-    // Generate reply ID from MAC address:
-    int m = ((((int)reply[5] & 0xFF) << 8) + ((int)reply[4] & 0xFF) 
-    		+ MAC_OFFSET_REPLY) & 0xFFFF;
-    reply[12] = (byte) (m & 0xFF);
-    reply[13] = (byte) (m >> 8);
-    // Generate reply counter with offset:
-    int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) 
-    		+ COUNTER_OFFSET_REPLY) & 0xFFFF;
-    //System.out.println("maccount: "+((int)reply[5]+(int)reply[4]));
-    if(((int)reply[5]+(int)reply[4]) == 57 || ((int)reply[5]+(int)reply[4]) == 313) {//TODO this is just a hack to support a specific unit. Make it generic
-    	n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) 
-        	+ COUNTER_OFFSET_REPLY_2) & 0xFFFF;
-    	//System.out.println("SpecialSysta");
-    }
-    reply[14] = (byte) (n & 0xFF);
-    reply[15] = (byte) (n >> 8);
-    send(reply);
-  }
-  
-  /**
-   * function to reply the messages received from a Paradigma SystaComfort II, for
-   * keeping the communication alive
-   * 
-   * @param index         index in replyHeader where the current message is stored
-   */
-  private void sendDataReplyVDR(int index) {
-    byte[] reply = Arrays.copyOf(replyHeader[index], 20);
-    // Always constant:
-    reply[12] = 0x01;
-    // Generate reply ID from MAC address:
-    int m = ((((int)reply[5] & 0xFF) << 8) + ((int)reply[4] & 0xFF) 
-    		+ MAC_OFFSET_REPLY_VDR) & 0xFFFF;
-    reply[16] = (byte) (m & 0xFF);
-    reply[17] = (byte) (m >> 8);
-    // Generate reply counter with offset:
-    int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) 
-    		+ COUNTER_OFFSET_REPLY) & 0xFFFF;
-    reply[18] = (byte) (n & 0xFF);
-    reply[19] = (byte) (n >> 8);
-    send(reply);
-  }
-  /**
-   * send a message to the SystaComfort II unit
-   * 
-   * @param reply byte[] holding the message to be sent
-   */
-  private void send(byte[] reply) {  
-    // send out the reply
-    DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, remoteAddress, remotePort);
-    try {
-      socket.send(replyPacket);
-    } catch (IOException ioe) {
-      // do nothing
-      System.out.println("[FakeSystaWeb] could not send reply");
-    }
-  }
+	/**
+	 * start the communication with a Paradigma SystaComfort II requires the globals
+	 * inetAddress and PORT to be properly configured
+	 */
+	@Override // from the Runnable interface
+	public void run() {
+		if (running) {
+			// we can't be started twice
+			return;
+		}
+		running = true;
+		System.out.println("[FakeSystaWeb] trying to open DatagramSocket for UDP communication");
+		// try to open the listening socket
+		try {
+			InetAddress ip = InetAddress.getByName(inetAddress);
+			socket = new DatagramSocket(PORT, ip);
+		} catch (Exception e) {
+			System.out.println("[FakeSystaWeb] exception thrown when trying to open DatagramSocket");
+			e.printStackTrace();
+			running = false;
+			return;
+		}
+		stopRequested = false;
+		dataPacketsReceived = 0;
+		System.out.println("[FakeSystaWeb] UDP communication with Paradigma SystaComfort II started");
+		while (!stopRequested) {
+			try {
+				socket.receive(receivePacket);
+				dataPacketsReceived++;
+			} catch (IOException e) {
+				if (stopRequested) {
+					// this exception should be thrown if the socket is closed on request
+					System.out.println("[FakeSystaWeb] call to receive UDP packets got interrupted");
+					break;
+				} else {
+					e.printStackTrace();
+					break;
+				}
+			}
+			// calculate the buffer id for writing
+			writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
+			// timestamp[writeIndex] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+			timestamp[writeIndex] = Instant.now().getEpochSecond();
+			remoteAddress = receivePacket.getAddress();
+			remotePort = receivePacket.getPort();
+			logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);
+			// get the entire content
+			ByteBuffer data = ByteBuffer.wrap(receivePacket.getData()).order(ByteOrder.LITTLE_ENDIAN);
+			// parse it
+			// 0..5: MAC address of paradigma control board:
+			replyHeader[writeIndex][0] = data.get();
+			replyHeader[writeIndex][1] = data.get();
+			replyHeader[writeIndex][2] = data.get();
+			replyHeader[writeIndex][3] = data.get();
+			replyHeader[writeIndex][4] = data.get();
+			replyHeader[writeIndex][5] = data.get();
+			// 6..7: counter, incremented by 1 for each packet
+			replyHeader[writeIndex][6] = data.get();
+			replyHeader[writeIndex][7] = data.get();
+			// 8..15: always "09 09 0C 00 32 DA 00 00"
+			// byte 12, 13 are the protocol version 32 DA, or 32 DC or 33 DF
+			// 16: packet type (00 = empty intial packet, 01 = actual data packet, 02 =
+			// short final packet, FF = parameter change ok)
+			data.position(16);
+			byte type = data.get();
+			if (type == 0x00) {
+				// processType0(data, currentWriteBuffer);
+				typeOfLastReceivedMessage = MessageType.DATA0;
+				sendDataReply(writeIndex);
+				// sendOperationModeChange(2);
+			} else if (type == 0x01) {
+				processType1(data);
+				typeOfLastReceivedMessage = MessageType.DATA1;
+				// readIndex = writeIndex;
+				// sendPassword();
+				// System.out.println("WI: "+writeIndex);
+				// if(writeIndex==1) {
+				// sendPassword();
+				// } else {
+				sendDataReply(writeIndex);
+				// }
+				logInt.addData(intData[readIndex], timestamp[readIndex]);
+			} else if (type == 0x02) {
+				// processType2(data, currentWriteBuffer);
+				typeOfLastReceivedMessage = MessageType.DATA2;
+				sendDataReply(writeIndex);
+				// readIndex = writeIndex;
+			} else if (type == 0x03) {
+				// processType2(data, currentWriteBuffer);
+				typeOfLastReceivedMessage = MessageType.DATA3;
+				// readIndex = writeIndex;
+				// sendPassword();
+				sendDataReply(writeIndex);
+			} else if (type == 0xFF) {
+				// processType2(data, currentWriteBuffer);
+				typeOfLastReceivedMessage = MessageType.OK;
+			} else {
+				typeOfLastReceivedMessage = MessageType.ERR;
+			}
+			if (typeOfLastReceivedMessage != MessageType.ERR) {
+				// update readIndex
+				// readIndex = writeIndex;
+			}
+			synchronized (typeOfLastReceivedMessage) {
+				typeOfLastReceivedMessage.notifyAll();
+			}
+		}
+		System.out.println("[FakeSystaWeb] UDP communication with Paradigma SystaComfort II stopped");
+		socket.close();
+		stopRequested = false;
+		running = false;
+	}
 
-  /**
-   * process UPD packets from Paradigma SystaComfort II with type field set to
-   * 0x00
-   *
-   * @param data ByteBuffer that holds the received data
-   */
-  private void processType0(ByteBuffer data) {
-    while (data.remaining() >= 4) {
-      System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.getInt());
-    }
-  }
+	private Byte[] toByteArray(byte[] bytes) {
+		if (bytes == null) {
+			return null;
+		}
+		Byte[] b = new Byte[bytes.length];
+		for (int i = 0; i < bytes.length; i++) {
+			b[i] = Byte.valueOf(bytes[i]);
+		}
+		return b;
+	}
 
-  /**
-   * process UPD packets from Paradigma SystaComfort II with type field set to
-   * 0x01
-   *
-   * @param data ByteBuffer that holds the received data
-   */
-  private void processType1(ByteBuffer data) {
-    data.position(24);
-    while (data.remaining() >= 4) {
-      intData[writeIndex][(data.position() - 24) / 4] = data.getInt();
-    }
-    readIndex = writeIndex;
-  }
+	/**
+	 * function to reply the messages received from a Paradigma SystaComfort II, for
+	 * keeping the communication alive
+	 * 
+	 */
+	private void sendPassword() {
+		byte[] reply = Arrays.copyOf(replyHeader[readIndex], 28);
+		// Always constant:
+		reply[8] = 0x01;
+		reply[12] = 0x02;
+		reply[14] = 0x08;
+		reply[19] = 0x31;
+		reply[20] = 0x32;
+		reply[21] = 0x31;
+		reply[22] = 0x32;
+		// Generate reply ID from MAC address:
+		// int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF)
+		// + ((reply[20] & 0xFF) << 8) + (reply[19] & 0xFF)
+		// + MAC_OFFSET_PWD) & 0xFFFF;
+		int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) + 0xBFB5) & 0xFFFF;
 
-  /**
-   * process UDP packets from Paradigma SystaComfort II with type field set to
-   * 0x02
-   *
-   * @param data ByteBuffer that holds the received data
-   */
-  private void processType2(ByteBuffer data) {
-    while (data.remaining() >= 4) {
-      System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.getInt());
-    }
-  }
+		reply[24] = (byte) (m & 0xFF);
+		reply[25] = (byte) (m >> 8);
+		// Generate reply counter with offset:
+		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_PWD) & 0xFFFF;
+		reply[26] = (byte) (n & 0xFF);
+		reply[27] = (byte) (n >> 8);
+		send(reply);
+	}
 
-  public void logRawData() {
-    logRaw.saveLoggedData();
-    logInt.saveLoggedData();
-  }
+	private void sendOperationModeChange(int mode) {
+		byte[] reply = Arrays.copyOf(replyHeader[readIndex], 28);
+		// Always constant:
+		reply[8] = 0x01;
+		reply[12] = 0x02;
+		reply[14] = 0x11;
+		reply[15] = 0x01;
+		reply[16] = 0x1F;
+		reply[20] = (byte) (mode & 0xFF);
+		reply[21] = (byte) (mode >> 8 & 0xFF);
+		// Generate reply ID from MAC address:
+		int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) + ((reply[21] & 0xFF) << 8) + (reply[20] & 0xFF)
+				+ MAC_OFFSET_CHANGE) & 0xFFFF;
+		reply[24] = (byte) (m & 0xFF);
+		reply[25] = (byte) (m >> 8);
+		// Generate reply counter with offset:
+		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + (reply[14] & 0xFF) + 0x100 // TODO check if it is 0x200,
+				// 0x300
+				+ COUNTER_OFFSET_CHANGE) & 0xFFFF;
+		reply[26] = (byte) (n & 0xFF);
+		reply[27] = (byte) (n >> 8);
+		send(reply);
+	}
 
-  public void logRawData(int entriesPerFile) {
-    logRaw.saveLoggedData(entriesPerFile * 3);
-    logInt.saveLoggedData(entriesPerFile);
-  }
+	/**
+	 * function to reply the messages received from a Paradigma SystaComfort II, for
+	 * keeping the communication alive
+	 * 
+	 * @param index index in replyHeader where the current message is stored
+	 */
+	private void sendDataReply(int index) {
+		byte[] reply = Arrays.copyOf(replyHeader[index], 16);
+		// Generate reply ID from MAC address:
+		int m = ((((int) reply[5] & 0xFF) << 8) + ((int) reply[4] & 0xFF) + MAC_OFFSET_REPLY) & 0xFFFF;
+		reply[12] = (byte) (m & 0xFF);
+		reply[13] = (byte) (m >> 8);
+		// Generate reply counter with offset:
+		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY) & 0xFFFF;
+		// System.out.println("maccount: "+((int)reply[5]+(int)reply[4]));
+		if (((int) reply[5] + (int) reply[4]) == 57 || ((int) reply[5] + (int) reply[4]) == 313) {// TODO this is just a
+			// hack to support a
+			// specific unit.
+			// Make it generic
+			n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY_2) & 0xFFFF;
+			// System.out.println("SpecialSysta");
+		}
+		reply[14] = (byte) (n & 0xFF);
+		reply[15] = (byte) (n >> 8);
+		send(reply);
+	}
 
-  public void logRawData(String filePrefix) {
-    logRaw.saveLoggedData(filePrefix);
-    logInt.saveLoggedData(filePrefix);
-  }
+	/**
+	 * function to reply the messages received from a Paradigma SystaComfort II, for
+	 * keeping the communication alive
+	 * 
+	 * @param index index in replyHeader where the current message is stored
+	 */
+	private void sendDataReplyVDR(int index) {
+		byte[] reply = Arrays.copyOf(replyHeader[index], 20);
+		// Always constant:
+		reply[12] = 0x01;
+		// Generate reply ID from MAC address:
+		int m = ((((int) reply[5] & 0xFF) << 8) + ((int) reply[4] & 0xFF) + MAC_OFFSET_REPLY_VDR) & 0xFFFF;
+		reply[16] = (byte) (m & 0xFF);
+		reply[17] = (byte) (m >> 8);
+		// Generate reply counter with offset:
+		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY) & 0xFFFF;
+		reply[18] = (byte) (n & 0xFF);
+		reply[19] = (byte) (n >> 8);
+		send(reply);
+	}
 
-  public void logRawData(String filePrefix, String delimiter, int entriesPerFile) {
-    logRaw.saveLoggedData(filePrefix, delimiter, entriesPerFile * 3);
-    logInt.saveLoggedData(filePrefix, delimiter, entriesPerFile);
-  }
+	/**
+	 * send a message to the SystaComfort II unit
+	 * 
+	 * @param reply byte[] holding the message to be sent
+	 */
+	private void send(byte[] reply) {
+		// send out the reply
+		DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, remoteAddress, remotePort);
+		try {
+			socket.send(replyPacket);
+		} catch (IOException ioe) {
+			// do nothing
+			System.out.println("[FakeSystaWeb] could not send reply");
+		}
+	}
 
-  public void stopLoggingRawData() {
-    logRaw.stopSavingLoggedData();
-    logInt.stopSavingLoggedData();
-  }
+	/**
+	 * process UPD packets from Paradigma SystaComfort II with type field set to
+	 * 0x00
+	 *
+	 * @param data ByteBuffer that holds the received data
+	 */
+	private void processType0(ByteBuffer data) {
+		while (data.remaining() >= 4) {
+			System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.getInt());
+		}
+	}
 
-  /*
-   * private String byteToHex(byte num) { char[] hexDigits = new char[2];
-   * hexDigits[0] = Character.forDigit((num >>> 4) & 0xF, 16); hexDigits[1] =
-   * Character.forDigit((num & 0xF), 16); return new String(hexDigits); }
-   */
+	/**
+	 * process UPD packets from Paradigma SystaComfort II with type field set to
+	 * 0x01
+	 *
+	 * @param data ByteBuffer that holds the received data
+	 */
+	private void processType1(ByteBuffer data) {
+		data.position(24);
+		while (data.remaining() >= 4) {
+			intData[writeIndex][(data.position() - 24) / 4] = data.getInt();
+		}
+		readIndex = writeIndex;
+	}
 
-  /*
-   * private void printBytesAsHex(byte[] bytes) { for (int j = 0; j <
-   * bytes.length; j++) { System.out.print(byteToHex(bytes[j])); }
-   * System.out.println(); }
-   */
+	/**
+	 * process UDP packets from Paradigma SystaComfort II with type field set to
+	 * 0x02
+	 *
+	 * @param data ByteBuffer that holds the received data
+	 */
+	private void processType2(ByteBuffer data) {
+		while (data.remaining() >= 4) {
+			System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.getInt());
+		}
+	}
 
-  /*
-   * private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-   * public void printBytesAsHex(byte[] bytes) { char[] hexChars = new
-   * char[bytes.length * 2]; for (int j = 0; j < bytes.length; j++) { int v =
-   * bytes[j] & 0xFF; hexChars[j * 2] = HEX_ARRAY[v >>> 4]; hexChars[j * 2 + 1] =
-   * HEX_ARRAY[v & 0x0F]; } System.out.println(hexChars); //return new
-   * String(hexChars); }
-   */
+	public void logRawData() {
+		logRaw.saveLoggedData();
+		logInt.saveLoggedData();
+	}
+
+	public void logRawData(int entriesPerFile) {
+		logRaw.saveLoggedData(entriesPerFile * 3);
+		logInt.saveLoggedData(entriesPerFile);
+	}
+
+	public void logRawData(String filePrefix) {
+		logRaw.saveLoggedData(filePrefix);
+		logInt.saveLoggedData(filePrefix);
+	}
+
+	public void logRawData(String filePrefix, String delimiter, int entriesPerFile) {
+		logRaw.saveLoggedData(filePrefix, delimiter, entriesPerFile * 3);
+		logInt.saveLoggedData(filePrefix, delimiter, entriesPerFile);
+	}
+
+	public void stopLoggingRawData() {
+		logRaw.stopSavingLoggedData();
+		logInt.stopSavingLoggedData();
+	}
+
+	public File getAllLogs() {
+		String zipFileName = LOG_PATH + File.separator + "SystaPiLogs_"
+				+ new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".zip";
+		System.out.println("[FakeSystaWeb] creating zip file: " + zipFileName);
+		File zippedLogs = new File(zipFileName);
+		if (zippedLogs.exists()) {
+			zippedLogs.delete();
+		}
+		try {
+			FileOutputStream fos = new FileOutputStream(zippedLogs);
+			ZipOutputStream zos = new ZipOutputStream(fos);
+
+			File fileToBeZipped = new File(LOG_PATH);
+			File[] files = fileToBeZipped.listFiles(logFileFilter);
+			for (File file : files) {
+				if (file.isDirectory()) {
+					// ignore directories
+					continue;
+				}
+				FileInputStream fis = new FileInputStream(file);
+				ZipEntry zipEntry = new ZipEntry(file.getName());
+				zos.putNextEntry(zipEntry);
+				byte[] bytes = new byte[1024];
+				while (fis.read(bytes) >= 0) {
+					zos.write(bytes, 0, bytes.length);
+				}
+				zos.closeEntry();
+				fis.close();
+			}
+			zos.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		zippedLogs.delete();
+		return zippedLogs;
+	}
+
+	public int deleteAllLogs() {
+		AtomicInteger i = new AtomicInteger(0);
+		Arrays.stream(new File(LOG_PATH).listFiles(logFileFilter)).forEach(file -> {
+			if (file.delete()) {
+				i.incrementAndGet();
+			}
+			;
+		}); // .forEach(File::delete);
+		return i.get();
+	}
+
+	/*
+	 * private String byteToHex(byte num) { char[] hexDigits = new char[2];
+	 * hexDigits[0] = Character.forDigit((num >>> 4) & 0xF, 16); hexDigits[1] =
+	 * Character.forDigit((num & 0xF), 16); return new String(hexDigits); }
+	 */
+
+	/*
+	 * private void printBytesAsHex(byte[] bytes) { for (int j = 0; j <
+	 * bytes.length; j++) { System.out.print(byteToHex(bytes[j])); }
+	 * System.out.println(); }
+	 */
+
+	/*
+	 * private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+	 * public void printBytesAsHex(byte[] bytes) { char[] hexChars = new
+	 * char[bytes.length * 2]; for (int j = 0; j < bytes.length; j++) { int v =
+	 * bytes[j] & 0xFF; hexChars[j * 2] = HEX_ARRAY[v >>> 4]; hexChars[j * 2 + 1] =
+	 * HEX_ARRAY[v & 0x0F]; } System.out.println(hexChars); //return new
+	 * String(hexChars); }
+	 */
 
 }

@@ -138,11 +138,12 @@
 
     #titlebar {
       display: grid;
-      grid-template-columns: 90px auto 90px;
+      /*grid-template-columns: 90px auto 90px;*/
+      grid-template-columns: auto 90px min-content 90px auto;
       grid-template-rows: 1fr 1fr;
       grid-template-areas:
-        "logo1 title    logo2"
-        "logo1 subtitle logo2";
+        "empty1 logo1 title    logo2 empty2"
+        "empty1 logo1 subtitle logo2 empty2";
       grid-column-gap: 20px;
       padding: 0px;
       margin: 0px;
@@ -155,6 +156,14 @@
       border-width: 5px;
       border-color: var(--main-yellow);
       box-shadow: 0 5px 5px 0 rgba(0, 0, 0, .25);*/
+    }
+
+    #empty1 {
+      grid-area: empty1;
+    }
+
+    #empty2 {
+      grid-area: empty2;
     }
 
     .title {
@@ -674,13 +683,15 @@
       }
 
       fetchAll() {
+        if(this.state.unitIP == null) {
+          this.findSystaComfort();
+        }
         this.fetchServiceStatus();
         this.fetchData();
       }
 
       componentDidMount() {
         this.fetchAll();
-        this.findSystaComfort();
         //set a timer to periodically update the component
         //the SystaComfort sends new values each minute, so scheduling it with a few seconds should be good enough
         this.timer = setInterval(() => this.fetchAll(), 5000);
@@ -750,10 +761,12 @@
               backgroundColor: colorMainBg,
             }, null),
             React.createElement("div", { id: "titlebar" },
+              React.createElement("div", { id: "empty1" }, null),
               React.createElement("img", { id: "logo1", src: systaPiLogo, style: { objectFit: "cover", height: "70%", maxHeight: "70%" } }, null),
               React.createElement("div", { className: "title" }, "SYSTA PI"),
               React.createElement("div", { className: "subtitle" }, "DASHBOARD"),
               React.createElement("img", { id: "logo2", src: systaPiLogo, style: { objectFit: "cover", height: "70%", maxHeight: "70%" } }, null),
+              React.createElement("div", { id: "empty2" }, null),
             ),
             React.createElement(MixedChart, {
               id: "relaybar",
@@ -1207,10 +1220,8 @@
       }
 
       componentDidUpdate() {
-        //this.myChart.data.plugins.valueLabel.value = this.props.value;
         let value = this.props.value;
         this.myChart.options.plugins.valueLabel.value = value;
-        //this.myChart.data.datasets[0].data = (this.props.value >= 0) ? [this.props.minMax, this.props.value, (this.props.minMax-this.props.value)] : [(this.props.minMax+this.props.value), -this.props.value, this.props.minMax];
         this.myChart.data.datasets[0].data = (value >= 0) ? [this.props.minMax, value, (this.props.minMax - value)] : [(this.props.minMax + value), -value, this.props.minMax];
         this.myChart.update();
       }
@@ -1253,7 +1264,6 @@
             afterDraw(chart, args, options) {
               const { ctx, chartArea: { top, right, bottom, left, width, height } } = chart;
               ctx.save();
-              //ctx.font = options.fontSize + "px sans-serif";
               ctx.font = "30px sans-serif";
               ctx.textAlign = "center";
               ctx.textBaseline = 'middle';
@@ -1266,9 +1276,6 @@
               var stringWidth = metrics.width;
               var elementWidth = (innerRadius * 2) - sidePaddingCalculated;
               var widthRatio = elementWidth / stringWidth;
-              //console.log(elementWidth);
-              //console.log(stringWidth);
-              //var newFontSize = Math.floor(options.fontSize * widthRatio);
               var newFontSize = Math.floor(30 * widthRatio);
               var elementHeight = (innerRadius * 2);
               var fontSizeToUse = Math.min(newFontSize, elementHeight);
@@ -1276,13 +1283,11 @@
               var centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
               ctx.font = fontSizeToUse + "px " + " sans-serif";
               ctx.fillText(text, centerX, centerY);
-              //alert("text: " + text + ", x: "+centerX+", y: "+centerY);
               //let lineHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-              //let lineHeight = metrics.fontBoundingBoxDescent;
-              let lineHeight = metrics.actualBoundingBoxDescent + 3;
+              let lineHeight = metrics.fontBoundingBoxAscent; //main text should have no descent, e.g. 55.2 °C
+              //let lineHeight = metrics.actualBoundingBoxDescent + 3;
               ctx.font = Math.round(0.7 * fontSizeToUse) + "px " + " sans-serif";
               ctx.fillText(options.title, centerX, centerY + lineHeight);
-              //alert("text: " + options.title + ", x: "+centerX+", y: "+centerY+", h: "+lineHeight);
             }
           }]
         });
