@@ -20,7 +20,6 @@ package de.freaklamarsch.systarest;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -31,11 +30,10 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
@@ -100,7 +98,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2022-04-08T20:43:20+00:00";
+			this.commitDate = "2022-04-17T20:53:53+00:00";
 		}
 	}
 
@@ -151,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	private final String commitDate = "2022-04-08T20:43:20+00:00";
+	private final String commitDate = "2022-04-17T20:53:53+00:00";
 	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
 	private InetAddress remoteAddress;
 	private int remotePort;
@@ -235,7 +233,7 @@ public class FakeSystaWeb implements Runnable {
 
 	/**
 	 * TODO Make this method work
-	 * 
+	 *
 	 * @param mode the intended operation mode 0 = Auto Prog. 1 1 = Auto Prog. 2 2 =
 	 *             Auto Prog. 3 3 = Continuous Normal 4 = Continuous Comfort 5 =
 	 *             Continuous Lowering 6 = Summer 7 = Off 8 = Party 14= Test or
@@ -611,7 +609,7 @@ public class FakeSystaWeb implements Runnable {
 	/**
 	 * function to reply the messages received from a Paradigma SystaComfort II, for
 	 * keeping the communication alive
-	 * 
+	 *
 	 */
 	private void sendPassword() {
 		byte[] reply = Arrays.copyOf(replyHeader[readIndex], 28);
@@ -655,7 +653,7 @@ public class FakeSystaWeb implements Runnable {
 		reply[25] = (byte) (m >> 8);
 		// Generate reply counter with offset:
 		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + (reply[14] & 0xFF) + 0x100 // TODO check if it is 0x200,
-				// 0x300
+		// 0x300
 				+ COUNTER_OFFSET_CHANGE) & 0xFFFF;
 		reply[26] = (byte) (n & 0xFF);
 		reply[27] = (byte) (n >> 8);
@@ -665,19 +663,19 @@ public class FakeSystaWeb implements Runnable {
 	/**
 	 * function to reply the messages received from a Paradigma SystaComfort II, for
 	 * keeping the communication alive
-	 * 
+	 *
 	 * @param index index in replyHeader where the current message is stored
 	 */
 	private void sendDataReply(int index) {
 		byte[] reply = Arrays.copyOf(replyHeader[index], 16);
 		// Generate reply ID from MAC address:
-		int m = ((((int) reply[5] & 0xFF) << 8) + ((int) reply[4] & 0xFF) + MAC_OFFSET_REPLY) & 0xFFFF;
+		int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) + MAC_OFFSET_REPLY) & 0xFFFF;
 		reply[12] = (byte) (m & 0xFF);
 		reply[13] = (byte) (m >> 8);
 		// Generate reply counter with offset:
 		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY) & 0xFFFF;
 		// System.out.println("maccount: "+((int)reply[5]+(int)reply[4]));
-		if (((int) reply[5] + (int) reply[4]) == 57 || ((int) reply[5] + (int) reply[4]) == 313) {// TODO this is just a
+		if ((reply[5] + reply[4]) == 57 || (reply[5] + reply[4]) == 313) {// TODO this is just a
 			// hack to support a
 			// specific unit.
 			// Make it generic
@@ -692,7 +690,7 @@ public class FakeSystaWeb implements Runnable {
 	/**
 	 * function to reply the messages received from a Paradigma SystaComfort II, for
 	 * keeping the communication alive
-	 * 
+	 *
 	 * @param index index in replyHeader where the current message is stored
 	 */
 	private void sendDataReplyVDR(int index) {
@@ -700,7 +698,7 @@ public class FakeSystaWeb implements Runnable {
 		// Always constant:
 		reply[12] = 0x01;
 		// Generate reply ID from MAC address:
-		int m = ((((int) reply[5] & 0xFF) << 8) + ((int) reply[4] & 0xFF) + MAC_OFFSET_REPLY_VDR) & 0xFFFF;
+		int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) + MAC_OFFSET_REPLY_VDR) & 0xFFFF;
 		reply[16] = (byte) (m & 0xFF);
 		reply[17] = (byte) (m >> 8);
 		// Generate reply counter with offset:
@@ -712,7 +710,7 @@ public class FakeSystaWeb implements Runnable {
 
 	/**
 	 * send a message to the SystaComfort II unit
-	 * 
+	 *
 	 * @param reply byte[] holding the message to be sent
 	 */
 	private void send(byte[] reply) {
@@ -792,7 +790,6 @@ public class FakeSystaWeb implements Runnable {
 	public File getAllLogs() {
 		String zipFileName = LOG_PATH + File.separator + "SystaPiLogs_"
 				+ new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".zip";
-		System.out.println("[FakeSystaWeb] creating zip file: " + zipFileName);
 		File zippedLogs = new File(zipFileName);
 		if (zippedLogs.exists()) {
 			zippedLogs.delete();
@@ -800,9 +797,11 @@ public class FakeSystaWeb implements Runnable {
 		try {
 			FileOutputStream fos = new FileOutputStream(zippedLogs);
 			ZipOutputStream zos = new ZipOutputStream(fos);
+			// no checked needed, if the folder does not exist, it is empty
+			File folderToBeZipped = new File(LOG_PATH);
 
-			File fileToBeZipped = new File(LOG_PATH);
-			File[] files = fileToBeZipped.listFiles(logFileFilter);
+			File[] files = folderToBeZipped.listFiles(logFileFilter);
+			System.out.println("[FakeSystaWeb] found " + files.length + " files to be zipped");
 			for (File file : files) {
 				if (file.isDirectory()) {
 					// ignore directories
@@ -823,7 +822,7 @@ public class FakeSystaWeb implements Runnable {
 			e.printStackTrace();
 			return null;
 		}
-		zippedLogs.delete();
+		// zippedLogs.delete();
 		return zippedLogs;
 	}
 
@@ -831,10 +830,15 @@ public class FakeSystaWeb implements Runnable {
 		AtomicInteger i = new AtomicInteger(0);
 		Arrays.stream(new File(LOG_PATH).listFiles(logFileFilter)).forEach(file -> {
 			if (file.delete()) {
+				System.out.println("[FakeSystaWeb] deleted "+file.getName());
 				i.incrementAndGet();
 			}
-			;
-		}); // .forEach(File::delete);
+		});
+		if(i.get() != (logRaw.getWriterFileCount()+logInt.getWriterFileCount())) {
+			System.out.println("[FakeSystaWeb] missmatch in numbers. Deteled "+i.get()+" files, but loggers had counted "+(logRaw.getWriterFileCount()+logInt.getWriterFileCount())+" files.");
+		}
+		logRaw.setWriterFileCount(0);
+		logInt.setWriterFileCount(0);
 		return i.get();
 	}
 

@@ -144,7 +144,7 @@
       grid-template-areas:
         "empty1 logo1 title    logo2 empty2"
         "empty1 logo1 subtitle logo2 empty2";
-      grid-column-gap: 20px;
+      grid-column-gap: 5px;
       padding: 0px;
       margin: 0px;
       align-items: center;
@@ -156,14 +156,6 @@
       border-width: 5px;
       border-color: var(--main-yellow);
       box-shadow: 0 5px 5px 0 rgba(0, 0, 0, .25);*/
-    }
-
-    #empty1 {
-      grid-area: empty1;
-    }
-
-    #empty2 {
-      grid-area: empty2;
     }
 
     .title {
@@ -333,6 +325,10 @@
       grid-area: heatingpumpgauge;
     }
 
+    #empty1 {
+      grid-area: empty1;
+    }
+
     #logo1 {
       grid-area: logo1;
       margin: auto;
@@ -343,9 +339,13 @@
       margin: auto;
     }
 
+    #empty2 {
+      grid-area: empty2;
+    }
+
     #relaybar {
       grid-area: relaybar;
-      /*align-self: center;*/
+      /*align-self: right;*/
     }
 
     #logger {
@@ -377,6 +377,20 @@
     }
 
     input[type=submit]:active {
+      border: 2px solid var(--main-fg);
+      background-color: var(--main-bg);
+      border-radius: 4px;
+      color: var(--secondary-bg);
+    }
+
+    button[type=button] {
+      border: 2px solid var(--secondary-09);
+      background-color: var(--secondary-09);
+      border-radius: 4px;
+      color: var(--secondary-bg);
+    }
+
+    button[type=button]:active {
       border: 2px solid var(--main-fg);
       background-color: var(--main-bg);
       border-radius: 4px;
@@ -916,10 +930,11 @@
               inputNames: ["filePrefix", "logEntryDelimiter", "entriesPerFile"],
               inputDefaults: ["SystaREST", ";", 60],
               inputWidth: [15, 1, 3],
-              buttonLabels: ["log", "stop"],
+              buttonLabels: [["log", "stop"],["del"],["zip"]],
               state: this.state.loggingData,
               onComplete: this.fetchServiceStatus.bind(this),
-              urls: ["http://systapi:1337/SystaREST/enablelogging", "http://systapi:1337/SystaREST/disablelogging"],
+              urls: [["http://systapi:1337/SystaREST/enablelogging", "http://systapi:1337/SystaREST/disablelogging"], ["http://systapi:1337/SystaREST/deletealllogs"], ["http://systapi:1337/SystaREST/getalllogs"]],
+              methods: [["PUT", "PUT"], ["DELETE"], ["URL"]],
               backgroundColor: colorSecondaryBg,
             }, null),
           ]),
@@ -1315,12 +1330,6 @@
         this.tableRef = React.createRef();
       }
 
-      /*componentDidUpdate() {
-        const DOMNode = this.tableRef.current;
-        DOMNode.style.fontSize = "40px";
-        console.log(DOMNode.style.fontSize);
-      }*/
-
       renderTableData() {
         let rows = [];
         for (let i = 0; i < this.props.data.length; i++) {
@@ -1368,12 +1377,6 @@
         this.submit = this.submit.bind(this);
       }
 
-      /*componentDidUpdate() {
-        const DOMNode = this.tableRef.current;
-        DOMNode.style.fontSize = "40px";
-        console.log(DOMNode.style.fontSize);
-      }*/
-
       renderInputs() {
         let rows = [];
         for (let i = 0; i < this.props.inputNames.length; i++) {
@@ -1394,11 +1397,21 @@
         return rows;
       }
 
-      render() {
+      renderButtons() {
         let i = (this.props.state && (this.props.state == true || this.props.state.toLowerCase() == "yes")) ? 1 : 0;
+        //create the buttons, submit button is mandatory
+        let buttons = [React.createElement("input", { type: "submit", value: this.props.buttonLabels[0][i]})];
+        //add additional buttos if defined
+        for(let b=1;b<this.props.buttonLabels.length;b++) {
+          buttons.push(React.createElement("button", { type: "button", onClick: this.buttonAction.bind(this, b)}, this.props.buttonLabels[b][0]));
+        }
+        return buttons;
+      }
+
+      render() {
         let form = React.createElement("form", { ref: this.tableRef, className: "form", onSubmit: this.submit },
                     this.renderInputs(),
-                    React.createElement("input", { type: "submit", value: this.props.buttonLabels[i] })
+                    this.renderButtons()
                   );
         if (this.props.minimal) {
           return React.createElement("div", { id: this.props.id, className: "minichart", style: { backgroundColor: this.props.backgroundColor } },
@@ -1422,17 +1435,71 @@
 
       submit(e) {
         e.preventDefault();
-        let url = new URL(this.props.urls[0]);
-        if (document.activeElement.value == this.props.buttonLabels[1]) {
-          url = new URL(this.props.urls[1]);
+        let url = new URL(this.props.urls[0][0]);
+        let method = this.props.methods[0][0];
+        if (document.activeElement.value == this.props.buttonLabels[0][1]) {
+          url = new URL(this.props.urls[0][1]);
+          method = this.props.methods[0][1];
         }
         const params = this.state;
         url.search = new URLSearchParams(params);
         fetch(url, {
-            method: "PUT",
+            method: method,
           }).catch((error) => {
             console.error('Error fetching data:', error);
         });
+        if (this.props.onComplete != null) {
+            this.props.onComplete();
+        }
+      }
+
+      buttonAction(i) {
+        let url = new URL(this.props.urls[i][0]);
+        let method = this.props.methods[i][0];
+        if(method.toUpperCase() == "URL") {
+          window.location.href = url;
+          return;
+        }
+        url.search = new URLSearchParams();
+        fetch(url, {
+            method: method,
+          }).then(response => {
+            if (response.ok) {
+              /* blob = response.blob();
+              console.log(blob);
+              
+              console.log(response);
+              let arrayBuffers = blob.arrayBuffer();
+              let newBlob = new Blob(arrayBuffers, {type: blob.type});
+              const url = URL.createObjectURL(newBlob);
+              console.log(url);
+              const link = document.createElement("a");
+              link.href = url;
+              link.download = "SystaLogs.zip";
+              console.log("link: "+link);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);*/
+              //return response.json();
+            } else {
+              throw response;
+            }
+          })/*.then(result => {
+            this.setState(prevState => ({
+              unitName: result.unitName,
+              unitIP: result.unitIP,
+              unitVersion: result.unitVersion,
+              unitBaseVersion: result.unitBaseVersion,
+              STouchAppSupported: (result.STouchAppSupported) ? "yes" : "no",
+            }))
+          })*/
+          .catch(error => {
+            console.error("Error fetching data: ", error);
+          })
+          .finally(() => {
+            //cleanup?;
+          });
         if (this.props.onComplete != null) {
             this.props.onComplete();
         }

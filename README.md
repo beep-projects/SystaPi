@@ -6,10 +6,11 @@
 **SystaPi** adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs.
 The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST, see the documentation for details of the supported fields [Javadoc: SystaStatus](https://beep-projects.github.io/SystaPi/de/freaklamarsch/systarest/SystaStatus.html).  
 
-<img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;" align="right"/>**Note:** The communication protocol is not publicly available, everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. **Please contribute information from your system!**  
+<img src="resources/systapidashboard.jpg" alt="SystaPi Dashboard" style="width:45%;"/> <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;"/>  
+**Note:** The communication protocol is not publicly available! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. **Please contribute information from your system!**  
 
-To support you in reverse engineering, the server has a rudimentary [logging](#enablelogging) functionality integrated. You can use this to set triggers on value changes with your home automation system and start logging of values for analysis.   
-You can also use [helpers/rawdatamonitor.html](helpers/rawdatamonitor.html) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system (see also [monitorrawdata](#monitorrawdata)). That page is created using [React](https://reactjs.org/), so you also can use it as starting point for creating a dashboard.  
+To support you in reverse engineering, the server has a rudimentary [logging](#enablelogging) functionality integrated. [systapidashboard](#systapidashboard) gives you an overview of the known values received in the last 24h and has buttons to start/stop the logging and to download all log files as zip, for easy logfile handling.  
+You can also use [monitorrawdata](#monitorrawdata) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system (see also [monitorrawdata](#monitorrawdata)). These pages are created using [React](https://reactjs.org/), so you also can use them as starting point for creating your own dashboard.  
 
 If you want to report new fields, simply open a new issue or discussion.  
 
@@ -33,6 +34,7 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
   - [stop](#stop)
   - [servicestatus](#servicestatus)
   - [rawdata](#rawdata)
+  - [systapidashboard](#systapidashboard)
   - [monitorrawdata](#monitorrawdata)
   - [waterheater](#waterheater)
   - [status](#status)
@@ -373,6 +375,15 @@ curl "http://systapi:1337/SystaREST/rawdata"
     ]
 }
 ```
+
+#### systapidashboard
+
+`GET` `/SystaREST/systapidashboard` 
+[http://systapi:1337/SystaREST/systapidashboard](http://systapi:1337/SystaREST/systapidashboard)  
+
+Returns a React-based HTML dashboard that displays the received data for the last 24h. On the bottom right of the dashboard, you can start the logging of data (log/stop), delete the log files on the SystaPi (del) and download all saved logs as zip file (zip). Call this function from your browser, to see something like:
+
+<img src="resources/systapidashboard.jpg" alt="systapidashboard" style="width:100%;"/>
 
 #### monitorrawdata
 

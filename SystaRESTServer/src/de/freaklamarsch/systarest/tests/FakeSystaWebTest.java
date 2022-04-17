@@ -74,11 +74,7 @@ class FakeSystaWebTest {
 	}
 
 	/**
-	 * @throws NoSuchFieldException
-	 * @throws SecurityException
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
-	 * @throws NoSuchMethodException
+	 * initialize components for access via reflection
 	 */
 	@SuppressWarnings("unchecked")
 	private boolean initialize() {
@@ -115,7 +111,7 @@ class FakeSystaWebTest {
 			};
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception during test initialization: "+e);
+			fail("Exception during test initialization: " + e);
 			return false;
 		}
 		initializeData();
@@ -262,8 +258,9 @@ class FakeSystaWebTest {
 		// make sure initialization is successfull
 		assertTrue(initialize());
 		File logs = new File(logDir);
-		System.out.println("logDir: "+logDir);
-		System.out.println("Files: "+logs.listFiles());
+		if (!logs.exists()) {
+			logs.mkdirs();
+		}
 		// clean folder
 		for (File file : logs.listFiles()) {
 			file.delete();
@@ -272,13 +269,10 @@ class FakeSystaWebTest {
 		try {
 			Method processType1 = prepareInvokeProcessType1(fsw);
 			// enable logging
-			System.out.println("enable logging");
 			fsw.logRawData("test", "<>", 10);
 			// prepare data
 			byte[] bytes = data.array();
 			Byte[] Data = new Byte[bytes.length];
-			// System.out.println("Data.length: "+Data.length);
-
 			int j = 0;
 			// Associating Byte array values with bytes. (byte[] to Byte[])
 			for (byte b : bytes) {
@@ -287,12 +281,10 @@ class FakeSystaWebTest {
 			// "send" 151 packets
 			for (int i = 0; i < 151; i++) {
 				assertTrue(updateWriteIndexAndTimestamp(fsw));
-				System.out.println("addRaw");
 				logRawAddData.invoke(logRaw, Data, ((long[]) timestamp.get(fsw))[writeIndex.getInt(fsw)]);
 				if ((i % 3) == 0) {
 					// mimic the behavior that each 3rd packet is a data packet
 					processType1.invoke(fsw, data);
-					System.out.println("addInt");
 					logIntAddData.invoke(logInt, ((Integer[][]) intData.get(fsw))[readIndex.getInt(fsw)],
 							((long[]) timestamp.get(fsw))[readIndex.getInt(fsw)]);
 				}
@@ -307,6 +299,7 @@ class FakeSystaWebTest {
 		assertEquals(10, files.length);
 		// validate the content of the zip
 		File zf = fsw.getAllLogs();
+		
 		ZipFile zipFile = null;
 		try {
 			// open a zip file for reading
@@ -372,9 +365,9 @@ class FakeSystaWebTest {
 	}
 
 	/**
+	 * update the writeIndex and timestamp as it is done inside the FakeSystaWeb run method
 	 * @param fsw
-	 * @throws IllegalArgumentException
-	 * @throws IllegalAccessException
+	 * @return true if everything worked fine, false if an error occurred
 	 */
 	private boolean updateWriteIndexAndTimestamp(FakeSystaWeb fsw) {
 		try {

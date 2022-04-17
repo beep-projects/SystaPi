@@ -25,9 +25,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
@@ -94,11 +91,11 @@ public class DataLogger<T> {
 	 * Constructor for a DataLogger that writes one file per {@code entriesPerFile}
 	 * entries.
 	 *
-	 * @param prefix the value to use for {@link #logFilePrefix}
-	 * @param filename the value to use for {@link #logFilename}
-	 * @param delimiter the value to use for {@link #logEntryDelimiter}
+	 * @param prefix         the value to use for {@link #logFilePrefix}
+	 * @param filename       the value to use for {@link #logFilename}
+	 * @param delimiter      the value to use for {@link #logEntryDelimiter}
 	 * @param entriesPerFile the value to use for {@link #capacity}
-	 * @param rootPath the value to use for {@link #logFileRootPath}
+	 * @param rootPath       the value to use for {@link #logFileRootPath}
 	 */
 	public DataLogger(String prefix, String filename, String delimiter, int entriesPerFile, String rootPath) {
 		if (entriesPerFile > 0) {
@@ -234,11 +231,11 @@ public class DataLogger<T> {
 	}
 
 	/**
-	 * checks if {@link DataLogger#saveLoggedData} is already
-	 * {@code true}. If it is {@code true}, {@link DataLogger#stopSavingLoggedData} is called.
-	 * If it is {@code false}, {@link DataLogger#writeLoggedDataToFile} is called.
-	 * 
-	 * @return returns the initial value of {@link DataLogger#saveLoggedData} 
+	 * checks if {@link DataLogger#saveLoggedData} is already {@code true}. If it is
+	 * {@code true}, {@link DataLogger#stopSavingLoggedData} is called. If it is
+	 * {@code false}, {@link DataLogger#writeLoggedDataToFile} is called.
+	 *
+	 * @return returns the initial value of {@link DataLogger#saveLoggedData}
 	 */
 	private boolean stopLoggingAndWriteFileIfRunning() {
 		if (saveLoggedData) {
@@ -320,8 +317,10 @@ public class DataLogger<T> {
 	public synchronized void addData(T[] data, long timestamp) {
 		// access to dataBuffer and timestampBuffer has to be synchronized
 		// make sure that there is new data to write
-		//String newTimestamp = formatter.format(LocalDateTime.ofEpochSecond(timestamp, 0, ZoneOffset.UTC));
-		String newTimestamp = formatter.format(LocalDateTime.ofEpochSecond(timestamp, 0, OffsetDateTime.now().getOffset()));
+		// String newTimestamp = formatter.format(LocalDateTime.ofEpochSecond(timestamp,
+		// 0, ZoneOffset.UTC));
+		String newTimestamp = formatter
+				.format(LocalDateTime.ofEpochSecond(timestamp, 0, OffsetDateTime.now().getOffset()));
 		String lastTimestamp = timestampBuffer.peek();
 		if (lastTimestamp != null && newTimestamp.equals(lastTimestamp)) {
 			// check if there is already data in the buffer (lastTimestamp!=null)
@@ -402,7 +401,7 @@ public class DataLogger<T> {
 			bufferedWriter.close();
 			myWriter.close();
 			writerFileCount++;
-			System.out.println("[DataLogger] Successfully wrote to " + fileName);
+			System.out.println("[DataLogger] wrote " + fileName);
 		} catch (IOException e) {
 			System.out.println("[DataLogger] An error occurred while trying to write " + fileName);
 			e.printStackTrace();

@@ -253,7 +253,7 @@ public final class SystaIndex {
 	/**
 	 * Raumeinfluss
 	 */
-	final static int ROOM_IMPACT = 57; //in K/K
+	final static int ROOM_IMPACT = 57; // in K/K
 	/**
 	 * Ueberhoehung Kessel
 	 */
@@ -397,14 +397,10 @@ public final class SystaIndex {
 	 */
 	final static int HOT_WATER_TEMP_MAX = 156;
 	/**
-	 * 0 = "OPTIMA/EXPRESSO"
-	 * 1 = "TITAN"
-     * 2 = "Puffer und ULV"
-     * 3 = "Puffer + LP"
-     * 4 = "Expressino"
-     * 5 = "Puffer u. Frischwasserstation"
+	 * 0 = "OPTIMA/EXPRESSO" 1 = "TITAN" 2 = "Puffer und ULV" 3 = "Puffer + LP" 4 =
+	 * "Expressino" 5 = "Puffer u. Frischwasserstation"
 	 */
-	//TODO add this
+	// TODO add this
 	final static int BUFFER_TYPE = 157;
 	/**
 	 * Nachlauf Pumpe PK/LP
@@ -473,7 +469,7 @@ public final class SystaIndex {
 	 */
 	final static int BURNER_NUMBER_OF_STARTS = 181;
 	/**
-	 * Solare Leistung 
+	 * Solare Leistung
 	 */
 	final static int SOLAR_POWER_ACTUAL = 182;
 	/**
@@ -505,7 +501,7 @@ public final class SystaIndex {
 	 */
 	final static int LOG_BOILER_BUFFER_TEMP_MIN = 189;
 	/**
-	 * Minimale Temperatur des Scheitholzkessels 
+	 * Minimale Temperatur des Scheitholzkessels
 	 */
 	final static int LOG_BOILER_TEMP_MIN = 190;
 	/**
@@ -567,9 +563,9 @@ public final class SystaIndex {
 	// final static int = 225
 	// final static int = 226
 	/**
-	 * Kesselpumpe Geschwindigkeit x*5%	
+	 * Kesselpumpe Geschwindigkeit x*5%
 	 */
-	//TODO add this
+	// TODO add this
 	final static int BOILER_PUMP_SPEED_ACTUAL = 227;
 	/**
 	 * Fehlerstatus (65535 = OK)
@@ -585,28 +581,13 @@ public final class SystaIndex {
 	 */
 	final static int HEATING_OPERATION_MODE_X = 231;
 	/**
-	 * Status HK 1
-	 * 0="Aus"
-     * 1="Aus Heizgrenze"
-     * 2="Aus TI"
-     * 3="Gesperrt TPO"
-     * 4="Aus WW-Vorrang"
-     * 5="Ein"
-     * 6="Frostschutz"
-     * 7=,"K\u00fchlen"
-     * 8="Vorhaltezeit"
-     * 9="Heizbetrieb"
-     * 10="Komfortbetrieb"
-     * 11="Absenkbetrieb"
-     * 12="Aus TSB"
-     * 13="Gesperrt"
-     * 14="Normal"
-     * 15="Erh\u00f6ht"
-     * 16="WW-Modus"
-     * 17="Estrich trocknen"
-     * 18="K\u00fchlbetrieb"
-     */
-	//TODO add this to status
+	 * Status HK 1 0="Aus" 1="Aus Heizgrenze" 2="Aus TI" 3="Gesperrt TPO" 4="Aus
+	 * WW-Vorrang" 5="Ein" 6="Frostschutz" 7=,"K\u00fchlen" 8="Vorhaltezeit"
+	 * 9="Heizbetrieb" 10="Komfortbetrieb" 11="Absenkbetrieb" 12="Aus TSB"
+	 * 13="Gesperrt" 14="Normal" 15="Erh\u00f6ht" 16="WW-Modus" 17="Estrich
+	 * trocknen" 18="K\u00fchlbetrieb"
+	 */
+	// TODO add this to status
 	final static int CIRCUIT_1_OPERATION_MODE = 232;
 	// final static int = 233
 	// final static int = 234
@@ -634,14 +615,8 @@ public final class SystaIndex {
 	 */
 	final static int BOILER_OPERATION_MODE = 248;
 	/**
-	 * Status Zirkulation
-	 * 0="Aus"
-	 * 1="Nachlauf"
-	 * 2="Sperrzeit"
-	 * 3="Gesperrt"
-	 * 4="Aus F\u00fchler TZR"
-	 * 5="Ein"
-	 * 6="Frost"
+	 * Status Zirkulation 0="Aus" 1="Nachlauf" 2="Sperrzeit" 3="Gesperrt" 4="Aus
+	 * F\u00fchler TZR" 5="Ein" 6="Frost"
 	 */
 	final static int CIRCULATION_OPERATION_MODE = 249;
 }

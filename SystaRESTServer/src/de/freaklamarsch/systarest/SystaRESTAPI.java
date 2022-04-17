@@ -23,6 +23,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -50,10 +52,12 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.StreamingOutput;
 
 /**
  * class for creating a Jersey resource that offers a REST API for a Paradigma
@@ -411,9 +415,21 @@ public class SystaRESTAPI {
 	@Produces("application/zip")
 	public Response getAllLogs() {
 		File file = fsw.getAllLogs();
-		ResponseBuilder responseBuilder = Response.ok((Object) file);
-		responseBuilder.header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
-		return responseBuilder.build();
+		System.out.println("[SystaRESTServer] return zip file: "+file);
+		return Response
+				.ok(file)
+				.header("Content-Disposition", "attachment; filename=" + file.getName())
+				.entity(new StreamingOutput() {
+					@Override
+					public void write(final OutputStream output) throws IOException, WebApplicationException {
+						try {
+							Files.copy(file.toPath(), output);
+						} finally {
+							file.delete();
+						}
+					}
+				})
+				.build();
 	}
 
 	@DELETE
@@ -453,6 +469,30 @@ public class SystaRESTAPI {
 	}
 
 	/**
+	 * Returns the a .html file for showing a dashboard for the values of the last 24h in the browser.
+	 * 
+	 * @return the InputStream of the file, or null, if something went wrong in the
+	 *         file handling
+	 */
+	@GET
+	@Produces({ MediaType.TEXT_HTML })
+	@Path("{dashboard : (?i)dashboard}")
+	public InputStream getDashboardHTML() {
+		String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+		String dashboardHTML = rootPath;
+		dashboardHTML += "systapidashboard.html";
+
+		File f = new File(dashboardHTML);
+		try {
+			return new FileInputStream(f);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
+	 * WARNING: This function is not yet finished
 	 * set the operation mode of the Systa Comfort
 	 * 
 	 * @param mode the intended operation mode 0 = Auto Prog. 1 1 = Auto Prog. 2 2 =
