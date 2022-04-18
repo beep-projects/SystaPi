@@ -39,6 +39,12 @@ echo "START firstrun.sh"
 
 # which hostname do you want to give your raspberry pi?
 HOSTNAME=systapi
+#username: beep, password: projects
+#you can change it if you want, generate a new password with
+#mkpasswd --method=SHA-256
+USER="beep"
+# shellcheck disable=SC2016
+PASSWD='$5$oLShbrSnGq$nrbeFyt99o2jOsBe1XRNqev5sWccQw8Uvyt8jK9mFR9' #keep single quote to avoid expansion of $
 # configure the wifi connection
 # the example WPA_PASSPHRASE is generated via
 #     wpa_passphrase MY_WIFI passphrase
@@ -70,6 +76,29 @@ echo "setting hostname"
 CURRENT_HOSTNAME=$( </etc/hostname tr -d " \t\n\r" )
 echo $HOSTNAME >/etc/hostname
 sed -i "s/127.0.1.1.*$CURRENT_HOSTNAME/127.0.1.1\t$HOSTNAME/g" /etc/hosts
+
+echo "set default user"
+FIRSTUSER=$( getent passwd 1000 | cut -d: -f1 )
+#FIRSTUSERHOME=$( getent passwd 1000 | cut -d: -f6 )
+if [ -f /usr/lib/userconf-pi/userconf ]; then
+   /usr/lib/userconf-pi/userconf "${USER}" "${PASSWD}"
+else
+   echo "${FIRSTUSER}:${PASSWD}" | chpasswd -e
+   if [ "${FIRSTUSER}" != "${USER}" ]; then
+      usermod -l "${USER}" "${FIRSTUSER}"
+      usermod -m -d "/home/${USER}" "${USER}"
+      groupmod -n "${USER}" "${FIRSTUSER}"
+      if grep -q "^autologin-user=" /etc/lightdm/lightdm.conf ; then
+         sed /etc/lightdm/lightdm.conf -i -e "s/^autologin-user=.*/autologin-user=${USER}/"
+      fi
+      if [ -f /etc/systemd/system/getty@tty1.service.d/autologin.conf ]; then
+         sed /etc/systemd/system/getty@tty1.service.d/autologin.conf -i -e "s/${FIRSTUSER}/${USER}/"
+      fi
+      if [ -f /etc/sudoers.d/010_pi-nopasswd ]; then
+         sed -i "s/^${FIRSTUSER} /${USER} /" /etc/sudoers.d/010_pi-nopasswd
+      fi
+   fi
+fi
 
 echo "setting network options"
 
