@@ -129,6 +129,12 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    
    # which hostname do you want to give your raspberry pi?
    HOSTNAME=systapi
+   #username: beep, password: projects
+   #you can change it if you want, generate a new password with
+   #mkpasswd --method=SHA-256
+   USER=beep
+   # shellcheck disable=SC2016
+   PASSWD='$5$oLShbrSnGq$nrbeFyt99o2jOsBe1XRNqev5sWccQw8Uvyt8jK9mFR9' #keep single quote to avoid expansion of $
    # configure the wifi connection
    # the example WPA_PASSPHRASE is generated via
    #     wpa_passphrase MY_WIFI passphrase
@@ -169,10 +175,10 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 7. Power up the Raspberry Pi
 
 8. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
-    For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and whatch the installation process
+    For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and watch the installation process. Default user is `beep` with password `projects`.
 
    ```bash
-   ssh -x pi@systapi.local
+   ssh -x beep@systapi.local
    tail -f /boot/secondrun.log
    ```
     The password for the ```pi``` user is not changed from the default, so you should change it
@@ -199,6 +205,12 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    
    # which hostname do you want to give your raspberry pi?
    HOSTNAME=systapi
+   #username: beep, password: projects
+   #you can change it if you want, generate a new password with
+   #mkpasswd --method=SHA-256
+   USER=beep
+   # shellcheck disable=SC2016
+   PASSWD='$5$oLShbrSnGq$nrbeFyt99o2jOsBe1XRNqev5sWccQw8Uvyt8jK9mFR9' #keep single quote to avoid expansion of $
    # configure the wifi connection
    # the example WPA_PASSPHRASE is generated via
    #     wpa_passphrase MY_WIFI passphrase
@@ -238,10 +250,10 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 12. Power up the Raspberry Pi
 
 13. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
-For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and whatch the installation process
+For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and whatch the installation process.. Default user is `beep` with password `projects`.
 
     ```bash
-    ssh -x pi@systapi.local
+    ssh -x beep@systapi.local
     tail -f /boot/secondrun.log
     ```
 The password for the ```pi``` user is not changed from the default, so you should change it
@@ -250,7 +262,7 @@ The password for the ```pi``` user is not changed from the default, so you shoul
 
 1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong.
 2. If the pi does not boot, check if you did step 7 in case of a manual installation.
-3. If you do not know where the install script died on the Raspberry Pi, have a look into the `/boot` folder via `ls /boot/*.sh`. 
+3. If you do not know where the install script died on the Raspberry Pi, have a look into the `/boot` folder via `ls /boot/*.log`. 
 Each script creates a log file, so check `firstrun.log`, `secondrun.log` and `thirdrun.log`, to see where the script failed.
 4. SystaRESTServer is installed as a service on the raspberry pi. 
 `systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
@@ -577,7 +589,7 @@ curl -X PUT http://systapi:1337/SystaREST/disblelogging
 
 ## Known Issues
 
-There are some ENC28J60 modules around with wrong jumper settings. Make sure you set the jumpers as in the picture on the left (vertically connecting the PINs).
+There are some ENC28J60 modules sold with wrong jumper settings. Make sure you set the jumpers as in the picture on the left (vertically connecting the PINs).
 
 | correct                                                   | wrong                                                   |
 | --------------------------------------------------------- | ------------------------------------------------------- |
