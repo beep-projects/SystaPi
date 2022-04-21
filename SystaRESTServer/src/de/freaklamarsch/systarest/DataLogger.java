@@ -103,7 +103,7 @@ public class DataLogger<T> {
 		} else {
 			this.capacity = DEFAULT_CAPACITY;
 		}
-		this.logFilename = filename;
+		this.logFilename = sanitizeFilename(filename);
 		this.dataBuffer = new CircularBuffer<>(capacity);
 		this.dataBuffer.setOverwrite(true);
 		this.timestampBuffer = new CircularBuffer<>(capacity);
@@ -164,7 +164,7 @@ public class DataLogger<T> {
 	 */
 	public void setLogFilePrefix(String logFilePrefix) {
 		boolean wasLoggingRunning = stopLoggingAndWriteFileIfRunning();
-		this.logFilePrefix = logFilePrefix;
+		this.logFilePrefix = sanitizeFilename(logFilePrefix);
 		saveLoggedData = wasLoggingRunning;
 	}
 
@@ -180,7 +180,7 @@ public class DataLogger<T> {
 	 */
 	public void setLogFilename(String logFilename) {
 		boolean wasLoggingRunning = stopLoggingAndWriteFileIfRunning();
-		this.logFilename = logFilename;
+		this.logFilename = sanitizeFilename(logFilename);
 		saveLoggedData = wasLoggingRunning;
 	}
 
@@ -277,7 +277,7 @@ public class DataLogger<T> {
 	 * @param filePrefix the value to use for {@link #logFilePrefix}
 	 */
 	public void saveLoggedData(String filePrefix) {
-		logFilePrefix = filePrefix;
+		logFilePrefix = sanitizeFilename(filePrefix);
 		saveLoggedData();
 	}
 
@@ -290,7 +290,7 @@ public class DataLogger<T> {
 	 * @param entriesPerFile the value to use for {@link #capacity}
 	 */
 	public void saveLoggedData(String filePrefix, String delimiter, int entriesPerFile) {
-		logFilePrefix = filePrefix;
+		logFilePrefix = sanitizeFilename(filePrefix);
 		logEntryDelimiter = delimiter;
 		saveLoggedData(entriesPerFile);
 	}
@@ -409,4 +409,17 @@ public class DataLogger<T> {
 		}
 		return true;
 	}
+	
+    public static String sanitizeFilename(String name) {
+        String[] invalidSymbols = new String[] { File.separator, "\\",  "..", "/", ":", "*", "?", "\"", "<", ">", "|" };
+        String sanitizedName = name;
+
+        for (String currentSymbol : invalidSymbols) {
+            sanitizedName = sanitizedName.replaceAll("[\\" + currentSymbol + "]", "_");
+        }
+        return sanitizedName;
+    	//return name.replaceAll(File.separator, "_")
+    	//		.replaceAll("..", "_");
+    }
+
 }
