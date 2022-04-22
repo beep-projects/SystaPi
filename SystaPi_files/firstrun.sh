@@ -40,8 +40,9 @@ echo "START firstrun.sh"
 # which hostname do you want to give your raspberry pi?
 HOSTNAME=systapi
 #username: beep, password: projects
-#you can change it if you want, generate a new password with
-#mkpasswd --method=SHA-256
+#you can change the password if you want and generate a new password with
+#Linux: mkpasswd --method=SHA-256
+#Windows: you can use an online generator like https://www.dcode.fr/crypt-hasing-function
 USERNAME=beep
 # shellcheck disable=SC2016
 PASSWD='$5$oLShbrSnGq$nrbeFyt99o2jOsBe1XRNqev5sWccQw8Uvyt8jK9mFR9' #keep single quote to avoid expansion of $

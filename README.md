@@ -114,11 +114,11 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 1. Run the following commands in a shell for downloading and unzipping the project files
 
    ```bash
-   wget https://github.com/beep-projects/SystaPi/archive/refs/heads/main.zip
-   unzip main.zip
+   wget https://github.com/beep-projects/SystaPi/releases/download/2.0/SystaPi-2.0.zip
+   unzip SystaPi-2.0.zip
    ```
 
-2. Open `SystaPi-main/SystaPi_files/firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
+2. Open `SystaPi-2.0/SystaPi_files/firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
    Most probably you want to generate your `WPA_PASSPHRASE` via `wpa_passphrase MY_WIFI passphrase` , or  use the [WPA PSK (Raw Key) Generator](https://www.wireshark.org/tools/wpa-psk.html), and add the credentials to the file.
    If you use the network `192.168.1.x` for your local network, you should change the `IP_PREFIX` to another IP range, to avoid network collisions
    
@@ -130,8 +130,9 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    # which hostname do you want to give your raspberry pi?
    HOSTNAME=systapi
    #username: beep, password: projects
-   #you can change it if you want, generate a new password with
-   #mkpasswd --method=SHA-256
+   #you can change the password if you want and generate a new password with
+   #Linux: mkpasswd --method=SHA-256
+   #Windows: you can use an online generator like https://www.dcode.fr/crypt-hasing-function
    USER=beep
    # shellcheck disable=SC2016
    PASSWD='$5$oLShbrSnGq$nrbeFyt99o2jOsBe1XRNqev5sWccQw8Uvyt8jK9mFR9' #keep single quote to avoid expansion of $
@@ -164,7 +165,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 4. Continue in the shell
 
    ```bash
-   cd SystaPi-main
+   cd SystaPi-2.0
    ./install_systapi.sh
    ```
 
@@ -188,7 +189,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 1. Install Raspberry Pi OS following this [guide](https://www.raspberrypi.org/documentation/installation/installing-images/).
    [Raspberry Pi OS Lite](https://www.raspberrypi.org/software/operating-systems/#raspberry-pi-os-32-bit) is sufficient.
 
-2. Download [SystaPi](https://github.com/beep-projects/SystaPi/archive/refs/heads/main.zip)
+2. Download [SystaPi](https://github.com/beep-projects/SystaPi/releases/download/2.0/SystaPi-2.0.zip)
 
 3. Extract the downloaded zip file
 
@@ -206,8 +207,9 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    # which hostname do you want to give your raspberry pi?
    HOSTNAME=systapi
    #username: beep, password: projects
-   #you can change it if you want, generate a new password with
-   #mkpasswd --method=SHA-256
+   #you can change the password if you want and generate a new password with
+   #Linux: mkpasswd --method=SHA-256
+   #Windows: you can use an online generator like https://www.dcode.fr/crypt-hasing-function
    USER=beep
    # shellcheck disable=SC2016
    PASSWD='$5$oLShbrSnGq$nrbeFyt99o2jOsBe1XRNqev5sWccQw8Uvyt8jK9mFR9' #keep single quote to avoid expansion of $
@@ -234,7 +236,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    #------------------------ END OF CONFIGURATION ---------------------------------
    #-------------------------------------------------------------------------------
    ```
-
+   
 6. Make sure that the `boot`-partition of the Micro SD card is accessible via file explorer
 
 7. Open `cmdline.txt` from the Micro SD card and copy the `root=PARTUUID=`-Number over into the `cmdline.txt` in the `SystaPi_files` subfolder. If you do not do this step, your pi will not boot!
