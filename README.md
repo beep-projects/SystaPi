@@ -182,7 +182,6 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    ssh -x beep@systapi.local
    tail -f /boot/secondrun.log
    ```
-    The password for the ```pi``` user is not changed from the default, so you should change it
 
 ### Windows / manual installation
 
@@ -258,7 +257,6 @@ For troubleshooting, you can check the progress by checking the logs. After 5 mi
     ssh -x beep@systapi.local
     tail -f /boot/secondrun.log
     ```
-The password for the ```pi``` user is not changed from the default, so you should change it
 
 ### Troubleshooting the installation
 
