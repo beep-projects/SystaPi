@@ -144,8 +144,8 @@ if $ENABLE_ENC28J60; then
 fi
 
 #clean up
-echo "removing firstrun.sh from the system"
-rm -f /boot/firstrun.sh
+#echo "removing firstrun.sh from the system"
+#rm -f /boot/firstrun.sh
 sed -i "s| systemd.run.*||g" /boot/cmdline.txt
 
 echo "installing secondrun.service"

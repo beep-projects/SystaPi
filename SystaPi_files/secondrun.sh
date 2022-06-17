@@ -67,7 +67,7 @@ IP_PREFIX="192.168.1"
 #configured user name
 USERNAME=beep
 
-#internet connectivity is required for installing required packaged
+#internet connectivity is required for installing required packages and updating the system
 waitForInternet
 
 #network should be up, update the system
