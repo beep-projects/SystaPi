@@ -1,0 +1,903 @@
+<!--
+ Copyright (c) 2022, The beep-projects contributors
+ this file originated from https://github.com/beep-projects
+ Do not remove the lines above.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see https://www.gnu.org/licenses/
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>SystaPi Data Monitor</title>
+    <style>
+      .center
+      {
+        text-align:center
+      }
+      .left
+      {
+        text-align:left
+      }
+      .right
+      {
+        text-align:right
+      }
+      div#parameterview
+      {
+        bottom:0;
+        font-family:verdana,helvetica,arial,"frutiger linotype","lucida grande",sans-serif;
+        font-size:12px;
+        left:0;
+        margin:0;
+        padding:5px 5px 10px;
+        position:absolute;
+        right:0;
+        top:20px
+      }
+      table
+      {
+        border-collapse:collapse;
+        color:#000;
+        margin:0;
+        padding:0
+      }
+      table.elementList
+      {
+        border:1px solid #1F5582;
+        border-collapse:collapse
+      }
+      td.group
+      {
+        margin:0;
+        padding:3px
+      }
+      td.number
+      {
+        text-align:right;
+        white-space:nowrap
+      }
+      td.sectiontitle
+      {
+        font-weight:700;
+        margin:0;
+        padding:4px;
+        vertical-align:top
+      }
+      td.title,td.value,td.unit
+      {
+        margin:0;
+        padding:4px;
+        vertical-align:top
+      }
+      td.value
+      {
+        white-space:nowrap
+      }
+      thead th,tbody th
+      {
+        background-color:#9c9c9c;
+        color:#fff;
+        margin:0;
+        white-space:nowrap
+      }
+      thead,colgroup,col
+      {
+        margin:0;
+        padding:0
+      }
+      tr
+      {
+        margin:0;
+        padding:0;
+        vertical-align:top
+      }
+      tr td,tr th
+      {
+        padding:2px 4px 4px;
+        vertical-align:top
+      }
+      tr.parameter td
+      {
+        border-right:none
+      }
+      tr.parameter:nth-child(odd)
+      {
+        background:#e8e8e8
+      }
+    </style>
+    <!-- Load React. -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+  </head>
+  <body>
+    <!-- add the React components into this -->
+    <div id="parameterview"></div>
+    <div id="htmlview"></div>
+  </body>
+  <!-- Load the SystaPi component. -->
+  <script>
+    var parameters = [];
+    parameters["Kollektor (TSA)_undefined"] = {systaindex: 11, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Kollektor (TSA)", title: "Kollektor (TSA)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Solarr\u00fccklauf (TSE)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Solarr\u00fccklauf (TSE)", title: "Solarr\u00fccklauf (TSE)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Solarvorlauf (TSV)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Solarvorlauf (TSV)", title: "Solarvorlauf (TSV)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Speicher Oben (TW)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Speicher Oben (TW)", title: "Speicher Oben (TW)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Au\u00dfentemperatur (TAM)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Au\u00dfentemperatur (TAM)", title: "Au\u00dfentemperatur (TAM)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Au\u00dfentemperatur 2 (TAM2)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Au\u00dfentemperatur (TAM2)", title: "Au\u00dfentemperatur 2 (TAM2)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Volumenstrom_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Volumenstrom", title: "Volumenstrom", unit: "l/min", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Speicher Oben (TW2)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Speicher Oben (TW2)", title: "Speicher Oben (TW2)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Kollektor Maximum_undefined"] = {systaindex: 156, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Kollektor Maximum", title: "Kollektor Maximum", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Solare Leistung_undefined"] = {systaindex: 182, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Solare Leistung", title: "Solare Leistung", unit: "kW", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Tagesgewinn_undefined"] = {systaindex: 183, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Tagesgewinn", title: "Tagesgewinn", unit: "kWh", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Solargewinn_undefined"] = {systaindex: 184, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Solargewinn", title: "Solargewinn", unit: "kWh", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Kollektor 1 (TSA 1)_undefined"] = {systaindex: 11, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Kollektor 1 (TSA 1)", title: "Kollektor 1 (TSA 1)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Kollektor 2 (TSA 2)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Kollektor 2 (TSA 2)", title: "Kollektor 2 (TSA 2)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Laufzeit Pumpe_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Laufzeit Pumpe", title: "Laufzeit Pumpe", unit: "h", factor: 0.000277778, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Zeit TSA > MAX_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaSolar Aqua II", menutitle: "Zeit TSA > MAX", title: "Zeit TSA > MAX", unit: "h", factor: 0.0166667, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["St\u00f6rcode SystaSolar Aqua II_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "St\u00f6rung SystaSolar Aqua II", title: "St\u00f6rcode SystaSolar Aqua II", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Keine St\u00f6rung"]};
+    parameters["Status SystaSolar Aqua II_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "Status SystaSolar Aqua II", title: "Status SystaSolar Aqua II", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Warten auf Sonne","Frostschutz","Anschieben","Einschaltverz\u00f6gerung","Solaranlage erw\u00e4rmt Speicher","Speicher voll","\u00dcberhitzung Kollektor","Manuell","Messung","Notbetrieb"]};
+    parameters["Solarpumpe % (PSO)_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Solarpumpe % (PSO)", title: "Solarpumpe % (PSO)", unit: "%", factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Speicher (TSP)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaExpresso", menutitle: "Speicher (TSP)", title: "Speicher (TSP)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Warmwasser (TWW)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaExpresso", menutitle: "Warmwasser (TWW)", title: "Warmwasser (TWW)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Kaltwasser (TKW)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaExpresso", menutitle: "Kaltwasser (TKW)", title: "Kaltwasser (TKW)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Volumenstrom Kaltwasser_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaExpresso", menutitle: "Volumenstrom Kaltwasser", title: "Volumenstrom Kaltwasser", unit: "l/min", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Volumenstrom Speicher_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaExpresso", menutitle: "Volumenstrom Speicher", title: "Volumenstrom Speicher", unit: "l/min", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Speicher Soll_undefined"] = {systaindex: 70, parameter_menu_title: "Werte SystaExpresso", menutitle: "Speicher Soll", title: "Speicher Soll", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["W\u00e4rmemenge Warmwasser_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaExpresso", menutitle: "W\u00e4rmemenge Warmwasser", title: "W\u00e4rmemenge Warmwasser", unit: "kWh", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["W\u00e4rmemenge Zirkulation_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaExpresso", menutitle: "W\u00e4rmemenge Zirkulation", title: "W\u00e4rmemenge Zirkulation", unit: "kWh", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["St\u00f6rcode SystaExpresso_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "St\u00f6rung SystaExpresso", title: "St\u00f6rcode SystaExpresso", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Keine St\u00f6rung"]};
+    parameters["Meldung SystaExpresso_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "Meldung SystaExpresso", title: "Meldung SystaExpresso", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Keine Meldung"]};
+    parameters["Speicherpumpe % PSP_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Speicherpumpe % PSP", title: "Speicherpumpe % PSP", unit: "%", factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Puffer Sollwert_undefined"] = {systaindex: 33, parameter_menu_title: "Werte SystaComfort", menutitle: "Puffer Sollwert", title: "Puffer Sollwert", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Puffer oben (TPO)_undefined"] = {systaindex: 4, parameter_menu_title: "Werte SystaComfort", menutitle: "Puffer oben (TPO)", title: "Puffer oben (TPO)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Betriebsstunden_undefined"] = {systaindex: 179, parameter_menu_title: "Werte SystaComfort", menutitle: "Betriebsstunden", title: "Betriebsstunden", unit: "h", factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Kesselvorlauf (TV)_undefined"] = {systaindex: 12, parameter_menu_title: "Werte SystaComfort", menutitle: "Kesselvorlauf (TV)", title: "Kesselvorlauf (TV)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Kesselr\u00fccklauf (TR)_undefined"] = {systaindex: 13, parameter_menu_title: "Werte SystaComfort", menutitle: "Kesselr\u00fccklauf (TR)", title: "Kesselr\u00fccklauf (TR)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Kesselstarts_undefined"] = {systaindex: 181, parameter_menu_title: "Werte SystaComfort", menutitle: "Kesselstarts", title: "Kesselstarts", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Au\u00dfen (TA)_undefined"] = {systaindex: 0, parameter_menu_title: "Werte SystaComfort", menutitle: "Au\u00dfen (TA)", title: "Au\u00dfen (TA)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Raum 1_undefined"] = {systaindex: 9, parameter_menu_title: "Werte SystaComfort", menutitle: "Raum 1", title: "Raum 1", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Raum 1 Soll_undefined"] = {systaindex: 23, parameter_menu_title: "Werte SystaComfort", menutitle: "Raum 1 Soll", title: "Raum 1 Soll", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Warmwasser (TWO)_undefined"] = {systaindex: 3, parameter_menu_title: "Werte SystaComfort", menutitle: "Warmwasser (TWO)", title: "Warmwasser (TWO)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Warmwasser Soll_undefined"] = {systaindex: 22, parameter_menu_title: "Werte SystaComfort", menutitle: "Warmwasser Soll", title: "Warmwasser Soll", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Vorlauf (TV)_undefined"] = {systaindex: 1, parameter_menu_title: "Werte SystaComfort", menutitle: "Vorlauf (TV)", title: "Vorlauf (TV)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Vorlauf Soll_undefined"] = {systaindex: 24, parameter_menu_title: "Werte SystaComfort", menutitle: "Vorlauf Soll", title: "Vorlauf Soll", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["R\u00fccklauf (TR)_undefined"] = {systaindex: 2, parameter_menu_title: "Werte SystaComfort", menutitle: "R\u00fccklauf (TR)", title: "R\u00fccklauf (TR)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Zirkulation (TZR)_undefined"] = {systaindex: 6, parameter_menu_title: "Werte SystaComfort", menutitle: "Zirkulation (TZR)", title: "Zirkulation (TZR)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Raum 2_undefined"] = {systaindex: 10, parameter_menu_title: "Werte SystaComfort", menutitle: "Raum 2", title: "Raum 2", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Raum 2 Soll_undefined"] = {systaindex: 26, parameter_menu_title: "Werte SystaComfort", menutitle: "Raum 2 Soll", title: "Raum 2 Soll", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Vorlauf 2 (TV2)_undefined"] = {systaindex: 7, parameter_menu_title: "Werte SystaComfort", menutitle: "Vorlauf 2 (TV2)", title: "Vorlauf 2 (TV2)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Vorlauf 2 Soll_undefined"] = {systaindex: 25, parameter_menu_title: "Werte SystaComfort", menutitle: "Vorlauf 2 Soll", title: "Vorlauf 2 Soll", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["R\u00fccklauf 2 (TR2)_undefined"] = {systaindex: 8, parameter_menu_title: "Werte SystaComfort", menutitle: "R\u00fccklauf 2 (TR2)", title: "R\u00fccklauf 2 (TR2)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Raum 3 Soll_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "Raum 3 Soll", title: "Raum 3 Soll", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Vorlauf 3 (TV3)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "Vorlauf 3 (TV3)", title: "Vorlauf 3 (TV3)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Vorlauf 3 Soll_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "Vorlauf 3 Soll", title: "Vorlauf 3 Soll", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["R\u00fccklauf 3 (TR3)_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "R\u00fccklauf 3 (TR3)", title: "R\u00fccklauf 3 (TR3)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Schwimmbadtemp. (TSB)_undefined"] = {systaindex: 17, parameter_menu_title: "Werte SystaComfort", menutitle: "Schwimmbadtemp. (TSB)", title: "Schwimmbadtemp. (TSB)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Vorlauf SB (TV SB)_undefined"] = {systaindex: 18, parameter_menu_title: "Werte SystaComfort", menutitle: "Vorlauf SB (TV SB)", title: "Vorlauf SB (TV SB)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Vorlauf SB Soll_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "Vorlauf SB Soll", title: "Vorlauf SB Soll", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["R\u00fccklauf SB (TR SB)_undefined"] = {systaindex: 19, parameter_menu_title: "Werte SystaComfort", menutitle: "R\u00fccklauf SB (TR SB)", title: "R\u00fccklauf SB (TR SB)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Betriebsstunden Ofen_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "Betriebsstunden Ofen", title: "Betriebsstunden Ofen", unit: "h", factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Pelletsverbrauch Ofen_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "Pelletsverbrauch Ofen", title: "Pelletsverbrauch Ofen", unit: "t", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["St\u00f6rung F\u00fchler_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "St\u00f6rung F\u00fchler", title: "St\u00f6rung F\u00fchler", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Keine St\u00f6rung"]};
+    parameters["Status Kessel_undefined"] = {systaindex: 248, parameter_menu_title: "Statusanzeigen", menutitle: "Status Kessel", title: "Status Kessel", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Ein","Ein Warmwasser","Ein Heizung","Gesperrt Holzkessel","Gesperrt Ofen","Gesperrt TA","K\u00fchlbetrieb"]};
+    parameters["Status HK 1_undefined"] = {systaindex: 232, parameter_menu_title: "Statusanzeigen", menutitle: "Status HK 1", title: "Status HK 1", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Aus Heizgrenze","Aus TI","Gesperrt TPO","Aus WW-Vorrang","Ein","Frostschutz","K\u00fchlen","Vorhaltezeit","Heizbetrieb","Komfortbetrieb","Absenkbetrieb","Aus TSB","Gesperrt","Normal","Erh\u00f6ht","WW-Modus","Estrich trocknen","K\u00fchlbetrieb"]};
+    parameters["Status Zirkulation_undefined"] = {systaindex: 249, parameter_menu_title: "Statusanzeigen", menutitle: "Status Zirkulation", title: "Status Zirkulation", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Nachlauf","Sperrzeit","Gesperrt","Aus F\u00fchler TZR","Ein","Frost"]};
+    parameters["Status HK 2_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "Status HK 2", title: "Status HK 2", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Aus Heizgrenze","Aus TI","Gesperrt TPO","Aus WW-Vorrang","Ein","Frostschutz","K\u00fchlen","Vorhaltezeit","Heizbetrieb","Komfortbetrieb","Absenkbetrieb","Aus TSB","Gesperrt","Normal","Erh\u00f6ht","WW-Modus","Estrich trocknen","K\u00fchlbetrieb"]};
+    parameters["Status HK 3_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "Status HK 3", title: "Status HK 3", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Aus Heizgrenze","Aus TI","Gesperrt TPO","Aus WW-Vorrang","Ein","Frostschutz","K\u00fchlen","Vorhaltezeit","Heizbetrieb","Komfortbetrieb","Absenkbetrieb","Aus TSB","Gesperrt","Normal","Erh\u00f6ht","WW-Modus","Estrich trocknen","K\u00fchlbetrieb"]};
+    parameters["Status Schwimmbad_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "Status Schwimmbad", title: "Status Schwimmbad", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Aus Heizgrenze","Aus TI","Gesperrt TPO","Aus WW-Vorrang","Ein","Frostschutz","K\u00fchlen","Vorhaltezeit","Heizbetrieb","Komfortbetrieb","Absenkbetrieb","Aus TSB","Gesperrt","Normal","Erh\u00f6ht"]};
+    parameters["Status Ofen_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "Status Ofen", title: "Status Ofen", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Standby","Anheizen","Leistungsbrand","Abgasklappe","Nachlauf","Reinigen","St\u00f6rung","Unbekannt"]};
+    parameters["St\u00f6rung Ofen Klasse 1_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "St\u00f6rung Ofen Klasse 1", title: "St\u00f6rung Ofen Klasse 1", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Keine St\u00f6rung"]};
+    parameters["St\u00f6rung Ofen Klasse 2_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "St\u00f6rung Ofen Klasse 2", title: "St\u00f6rung Ofen Klasse 2", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Keine St\u00f6rung"]};
+    parameters["Pumpe HK1 % (PHK)_undefined"] = {systaindex: 221, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Pumpe HK1 % (PHK)", title: "Pumpe HK1 % (PHK)", unit: "%", factor: 5, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Mischer HK 1_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Mischer HK 1", title: "Mischer HK 1", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Warm","Kalt"]};
+    parameters["Pumpe HK2 % (PHK2)_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Pumpe HK2 % (PHK2)", title: "Pumpe HK2 % (PHK2)", unit: "%", factor: 5, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Mischer HK 2_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Mischer HK 2", title: "Mischer HK 2", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Warm","Kalt"]};
+    parameters["Pumpe HK3 % (PHK3)_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Pumpe HK3 % (PHK3)", title: "Pumpe HK3 % (PHK3)", unit: "%", factor: 5, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Mischer HK 3_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Mischer HK 3", title: "Mischer HK 3", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Warm","Kalt"]};
+    parameters["Pumpe SB % (PHK SB)_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Pumpe SB % (PHK SB)", title: "Pumpe SB % (PHK SB)", unit: "%", factor: 5, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Mischer SB_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Mischer SB", title: "Mischer SB", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Warm","Kalt"]};
+    parameters["Sollleistung Ofen_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Sollleistung Ofen", title: "Sollleistung Ofen", unit: "kW", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["SystaExpresso online_Allgemeine Statusanzeigen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "SystaExpresso online", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["SystaComfort online_Allgemeine Statusanzeigen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "SystaComfort online", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["SystaSolar II online_Allgemeine Statusanzeigen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "SystaSolar II online", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["SystaExpresso reagiert nicht mehr_Allgemeine Statusanzeigen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "SystaExpresso reagiert nicht mehr", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["SystaComfort reagiert nicht mehr_Allgemeine Statusanzeigen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "SystaComfort reagiert nicht mehr", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["SystaSolar II reag. nicht mehr_Allgemeine Statusanzeigen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "SystaSolar II reag. nicht mehr", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Solarpumpe (PSO)_Ausg\u00e4nge SystaSolar Aqua II"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Solarpumpe (PSO)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Zonenventil (ZV)_Ausg\u00e4nge SystaSolar Aqua II"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Zonenventil (ZV)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Umlenkventil (ULV SPE)_Ausg\u00e4nge SystaSolar Aqua II"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Umlenkventil (ULV SPE)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Speicherpumpe (PSP)_Ausg\u00e4nge SystaExpresso"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Speicherpumpe (PSP)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Pumpe Zirkulation (PZI)_Ausg\u00e4nge SystaExpresso"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Pumpe Zirkulation (PZI)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Pumpe HK1 (PHK)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Pumpe HK1 (PHK)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Pumpe HK2 (PHK2)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Pumpe HK2 (PHK2)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Pumpe Zirkulation (PZI)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Pumpe Zirkulation (PZI)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Pumpe Kessel (PK)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Pumpe Kessel (PK)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Pumpe SB (PHK SB)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Pumpe SB (PHK SB)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Taster_Taster"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Taster", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Umw\u00e4lzpumpe_Umw\u00e4lzpumpe"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Umw\u00e4lzpumpe", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Warmwasser Sollwert_Betrieb SystaSolar Aqua II"] = {systaindex: 22, parameter_menu_title: null, menutitle: null, title: "Warmwasser Sollwert", unit: null, factor: 0.1, decimals: 1, minimum: 10, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Betriebsart_Betrieb SystaSolar Aqua II"] = {systaindex: 36, parameter_menu_title: null, menutitle: null, title: "Betriebsart", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Auto","Aus","Test","Hand"]};
+    parameters["Beladestrategie_Betrieb SystaSolar Aqua II"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Beladestrategie", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Vorrang W\u00e4rmesenke 1","Max. W\u00e4rmesenke 1","Vorrang W\u00e4rmesenke 2","Max. W\u00e4rmesenke 2"]};
+    parameters["Max. Speichertemp._Anlagendaten SystaSolar AquaII"] = {systaindex: 159, parameter_menu_title: null, menutitle: null, title: "Max. Speichertemp.", unit: null, factor: 0.1, decimals: 1, minimum: 30, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Max. Speichertemp. 2_Anlagendaten SystaSolar AquaII"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Max. Speichertemp. 2", unit: null, factor: 0.1, decimals: 1, minimum: 30, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Zusatzfunktion_Anlagendaten SystaSolar AquaII"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Zusatzfunktion", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Keine","2-Speichersystem","Heizungsunterst\u00fctzung"]};
+    parameters["Max. Speichersolltemp._Anlagendaten SystaExpresso"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Max. Speichersolltemp.", unit: null, factor: 0.1, decimals: 1, minimum: 40, maximum: 85, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Nachlaufzeit PZI_Anlagedaten Zirkulation"] = {systaindex: 169, parameter_menu_title: null, menutitle: null, title: "Nachlaufzeit PZI", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 60, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Sperrzeit Taster_Anlagedaten Zirkulation"] = {systaindex: 170, parameter_menu_title: null, menutitle: null, title: "Sperrzeit Taster", unit: null, factor: 1, decimals: 0, minimum: 0, maximum: 60, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Schaltdifferenz PZI_Anlagedaten Zirkulation"] = {systaindex: 171, parameter_menu_title: null, menutitle: null, title: "Schaltdifferenz PZI", unit: null, factor: 0.1, decimals: 1, minimum: 2, maximum: 50, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Max. Puffertemp._Anlagedaten Kessel/Puffer"] = {systaindex: 159, parameter_menu_title: null, menutitle: null, title: "Max. Puffertemp.", unit: null, factor: 0.1, decimals: 1, minimum: 10, maximum: 110, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Min. Puffertemp._Anlagedaten Kessel/Puffer"] = {systaindex: 160, parameter_menu_title: null, menutitle: null, title: "Min. Puffertemp.", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Schaltdiff. Kessel_Anlagedaten Kessel/Puffer"] = {systaindex: 161, parameter_menu_title: null, menutitle: null, title: "Schaltdiff. Kessel", unit: null, factor: 0.1, decimals: 1, minimum: 2, maximum: 20, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Abschalt TA Kessel_Anlagedaten Kessel/Puffer"] = {systaindex: 163, parameter_menu_title: null, menutitle: null, title: "Abschalt TA Kessel", unit: null, factor: 0.1, decimals: 1, minimum: -10, maximum: 50, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumtemp. Heizen_Heizkreis 1"] = {systaindex: 39, parameter_menu_title: null, menutitle: null, title: "Raumtemp. Heizen", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 50, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumtemp. Komfort_Heizkreis 1"] = {systaindex: 40, parameter_menu_title: null, menutitle: null, title: "Raumtemp. Komfort", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 50, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumtemp. Absenken_Heizkreis 1"] = {systaindex: 41, parameter_menu_title: null, menutitle: null, title: "Raumtemp. Absenken", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 50, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Betriebsart_Heizkreis 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Betriebsart", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Automatik 1","Automatik 2","Automatik 3","Dauernd Heizen","Dauernd Komfort","Dauernd Absenken","Sommer","Aus","Party"]};
+    parameters["Warmwasser Normal_Warmwasser HK1"] = {systaindex: 149, parameter_menu_title: null, menutitle: null, title: "Warmwasser Normal", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Warmwasser erh\u00f6ht_Warmwasser HK1"] = {systaindex: 150, parameter_menu_title: null, menutitle: null, title: "Warmwasser erh\u00f6ht", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Schaltdifferenz Warmw._Warmwasser HK1"] = {systaindex: 155, parameter_menu_title: null, menutitle: null, title: "Schaltdifferenz Warmw.", unit: null, factor: 0.1, decimals: 1, minimum: 2, maximum: 20, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Fu\u00dfpunkt_Anlagedaten HK1 Teil 1"] = {systaindex: 48, parameter_menu_title: null, menutitle: null, title: "Fu\u00dfpunkt", unit: null, factor: 0.1, decimals: 1, minimum: 20, maximum: 70, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Steilheit_Anlagedaten HK1 Teil 1"] = {systaindex: 50, parameter_menu_title: null, menutitle: null, title: "Steilheit", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 3, step: 0.1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Max. Vorlauftemp._Anlagedaten HK1 Teil 1"] = {systaindex: 52, parameter_menu_title: null, menutitle: null, title: "Max. Vorlauftemp.", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Heizgrenze Heizen_Anlagedaten HK1 Teil 1"] = {systaindex: 53, parameter_menu_title: null, menutitle: null, title: "Heizgrenze Heizen", unit: null, factor: 0.1, decimals: 1, minimum: -9, maximum: 50, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Heizgrenze Absenken_Anlagedaten HK1 Teil 1"] = {systaindex: 54, parameter_menu_title: null, menutitle: null, title: "Heizgrenze Absenken", unit: null, factor: 0.1, decimals: 1, minimum: -9, maximum: 50, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Frostschutz Au\u00dfentemp._Anlagedaten HK1 Teil 1"] = {systaindex: 55, parameter_menu_title: null, menutitle: null, title: "Frostschutz Au\u00dfentemp.", unit: null, factor: 0.1, decimals: 1, minimum: -9, maximum: 20, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Vorhaltezeit Aufheizen_Anlagedaten HK1 Teil 1"] = {systaindex: 56, parameter_menu_title: null, menutitle: null, title: "Vorhaltezeit Aufheizen", unit: null, factor: 1, decimals: 0, minimum: 0, maximum: 480, step: 2, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumeinfluss_Anlagedaten HK1 Teil 1"] = {systaindex: 57, parameter_menu_title: null, menutitle: null, title: "Raumeinfluss", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 20, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["\u00dcberh\u00f6hung Kessel_Anlagedaten HK1 Teil 2"] = {systaindex: 58, parameter_menu_title: null, menutitle: null, title: "\u00dcberh\u00f6hung Kessel", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 30, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Spreizung Heizkreis_Anlagedaten HK1 Teil 2"] = {systaindex: 59, parameter_menu_title: null, menutitle: null, title: "Spreizung Heizkreis", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 40, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Min. Drehzahl PHK_Anlagedaten HK1 Teil 2"] = {systaindex: 60, parameter_menu_title: null, menutitle: null, title: "Min. Drehzahl PHK", unit: null, factor: 1, decimals: 0, minimum: 20, maximum: 100, step: 5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Mischerlaufzeit_Anlagedaten HK1 Teil 2"] = {systaindex: 62, parameter_menu_title: null, menutitle: null, title: "Mischerlaufzeit", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 8, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Proportionalbereich_Anlagedaten HK1 Teil 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Proportionalbereich", unit: null, factor: 0.1, decimals: 1, minimum: 1, maximum: 10, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Nachstellzeit_Anlagedaten HK1 Teil 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Nachstellzeit", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 240, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumtemperatur Abgleich_Anlagedaten HK1 Teil 2"] = {systaindex: 65, parameter_menu_title: null, menutitle: null, title: "Raumtemperatur Abgleich", unit: null, factor: 0.1, decimals: 1, minimum: -4, maximum: 4, step: 0.1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Regelung HK nach_Anlagedaten HK1 Teil 2"] = {systaindex: 47, parameter_menu_title: null, menutitle: null, title: "Regelung HK nach", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Au\u00dfentemperatur","Raumtemperatur","Kombiniert","Dezentrale HK"]};
+    parameters["Raumtemp. Heizen_Heizkreis 2"] = {systaindex: 78, parameter_menu_title: null, menutitle: null, title: "Raumtemp. Heizen", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 50, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumtemperatur Komfort_Heizkreis 2"] = {systaindex: 79, parameter_menu_title: null, menutitle: null, title: "Raumtemperatur Komfort", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 50, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumtemperatur Absenken_Heizkreis 2"] = {systaindex: 80, parameter_menu_title: null, menutitle: null, title: "Raumtemperatur Absenken", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 50, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Betriebsart_Heizkreis 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Betriebsart", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Automatik 1","Automatik 2","Automatik 3","Dauernd Heizen","Dauernd Komfort","Dauernd Absenken","Sommer","Aus","Party"]};
+    parameters["Warmwasser Normal_Warmwasser HK2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Warmwasser Normal", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Warmwasser Erh\u00f6ht_Warmwasser HK2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Warmwasser Erh\u00f6ht", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Fu\u00dfpunkt_Anlagedaten HK2 Teil 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Fu\u00dfpunkt", unit: null, factor: 0.1, decimals: 1, minimum: 20, maximum: 70, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Steilheit_Anlagedaten HK2 Teil 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Steilheit", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 3, step: 0.1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Max. Vorlauftemp._Anlagedaten HK2 Teil 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Max. Vorlauftemp.", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Heizgrenze Heizen_Anlagedaten HK2 Teil 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Heizgrenze Heizen", unit: null, factor: 0.1, decimals: 1, minimum: -9, maximum: 50, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Heizgrenze Absenken_Anlagedaten HK2 Teil 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Heizgrenze Absenken", unit: null, factor: 0.1, decimals: 1, minimum: -9, maximum: 50, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Frostschutz Au\u00dfentemp._Anlagedaten HK2 Teil 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Frostschutz Au\u00dfentemp.", unit: null, factor: 0.1, decimals: 1, minimum: -9, maximum: 20, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Vorhaltezeit Aufheizen_Anlagedaten HK2 Teil 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Vorhaltezeit Aufheizen", unit: null, factor: 1, decimals: 0, minimum: 0, maximum: 480, step: 2, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumeinfluss_Anlagedaten HK2 Teil 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Raumeinfluss", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 20, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["\u00dcberh\u00f6hung Kessel_Anlagedaten HK2 Teil 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "\u00dcberh\u00f6hung Kessel", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 30, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Spreizung Heizkreis_Anlagedaten HK2 Teil 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Spreizung Heizkreis", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 40, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Min. Drehzahl PHK_Anlagedaten HK2 Teil 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Min. Drehzahl PHK", unit: null, factor: 1, decimals: 0, minimum: 20, maximum: 100, step: 5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Mischerlaufzeit_Anlagedaten HK2 Teil 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Mischerlaufzeit", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 8, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Proportionalbereich_Anlagedaten HK2 Teil 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Proportionalbereich", unit: null, factor: 0.1, decimals: 1, minimum: 1, maximum: 10, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Nachstellzeit_Anlagedaten HK2 Teil 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Nachstellzeit", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 240, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumtemperatur Abgleich_Anlagedaten HK2 Teil 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Raumtemperatur Abgleich", unit: null, factor: 0.1, decimals: 1, minimum: -4, maximum: 4, step: 0.1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Regelung HK nach_Anlagedaten HK2 Teil 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Regelung HK nach", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Au\u00dfentemperatur","Raumtemperatur","Kombiniert","Dezentrale HK"]};
+    parameters["Raumtemp. Heizen_Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Raumtemp. Heizen", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 50, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumtemp. Komfort_Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Raumtemp. Komfort", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 50, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumtemp. Absenken_Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Raumtemp. Absenken", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 50, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Betriebsart_Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Betriebsart", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Automatik 1","Automatik 2","Automatik 3","Dauernd Heizen","Dauernd Komfort","Dauernd Absenken","Sommer","Aus","Party"]};
+    parameters["Fu\u00dfpunkt_Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Fu\u00dfpunkt", unit: null, factor: 0.1, decimals: 1, minimum: 20, maximum: 70, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Steilheit_Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Steilheit", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 3, step: 0.1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Max. Vorlauftemp._Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Max. Vorlauftemp.", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Heizgrenze Heizen_Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Heizgrenze Heizen", unit: null, factor: 0.1, decimals: 1, minimum: -9, maximum: 50, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Heizgrenze Absenken_Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Heizgrenze Absenken", unit: null, factor: 0.1, decimals: 1, minimum: -9, maximum: 50, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Frostschutz Au\u00dfentemp._Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Frostschutz Au\u00dfentemp.", unit: null, factor: 0.1, decimals: 1, minimum: -9, maximum: 20, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Vorhaltezeit Aufheizen_Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Vorhaltezeit Aufheizen", unit: null, factor: 1, decimals: 0, minimum: 0, maximum: 480, step: 2, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["\u00dcberh\u00f6hung Kessel_Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "\u00dcberh\u00f6hung Kessel", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 30, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Spreizung Heizkreis_Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Spreizung Heizkreis", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 40, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Min. Drehzahl PHK_Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Min. Drehzahl PHK", unit: null, factor: 1, decimals: 0, minimum: 20, maximum: 100, step: 5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Mischerlaufzeit_Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Mischerlaufzeit", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 8, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["SB-Temp. Normal_Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "SB-Temp. Normal", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 90, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["SB-Temp Erh\u00f6ht_Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "SB-Temp Erh\u00f6ht", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 90, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Betriebsart_Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Betriebsart", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Automatik 1","Automatik 2","Automatik 3","Dauernd Normal","Dauernd Erh\u00f6ht","Dauernd Gesperrt"]};
+    parameters["Max. Vorlauftemp._Anlagedaten Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Max. Vorlauftemp.", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["\u00dcberh\u00f6hung Kessel_Anlagedaten Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "\u00dcberh\u00f6hung Kessel", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 30, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Spreizung Heizkreis_Anlagedaten Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Spreizung Heizkreis", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 40, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Min. Drehzahl PHK_Anlagedaten Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Min. Drehzahl PHK", unit: null, factor: 1, decimals: 0, minimum: 20, maximum: 100, step: 5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Mischerlaufzeit_Anlagedaten Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Mischerlaufzeit", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 8, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Proportionalbereich_Anlagedaten Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Proportionalbereich", unit: null, factor: 0.1, decimals: 1, minimum: 1, maximum: 30, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Nachstellzeit_Anlagedaten Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Nachstellzeit", unit: null, factor: 1, decimals: 0, minimum: 0, maximum: 240, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Offset Raumtemp._Anlagedaten Pelletofen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Offset Raumtemp.", unit: null, factor: 0.1, decimals: 1, minimum: 1, maximum: 10, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Verz\u00f6gerung 1. Kessel_Anlagedaten Pelletofen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Verz\u00f6gerung 1. Kessel", unit: null, factor: 1, decimals: 0, minimum: 0, maximum: 120, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Mindestlaufzeit Ofen_Anlagedaten Pelletofen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Mindestlaufzeit Ofen", unit: null, factor: 1, decimals: 0, minimum: 15, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Prop.-Bereich Ofen_Anlagedaten Pelletofen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Prop.-Bereich Ofen", unit: null, factor: 0.1, decimals: 1, minimum: 1, maximum: 60, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Nachstellzeit Ofen_Anlagedaten Pelletofen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Nachstellzeit Ofen", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 120, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Betriebsweise_Anlagedaten Pelletofen"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Betriebsweise", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Automatik","1. Kessel nur WW","Nur Pelletsofen","Nur 1. Kessel"]};
+    parameters["Warmwasser wie Heizung_Schalter HK 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Warmwasser wie Heizung", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Zirkulation wie WW_Schalter HK 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Zirkulation wie WW", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Optimierung HKL_Schalter HK 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Optimierung HKL", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Warmwasservorrang_Schalter HK 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Warmwasservorrang", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Warmwasser wie Heizung_Schalter HK 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Warmwasser wie Heizung", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Zirkulation wie WW_Schalter HK 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Zirkulation wie WW", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Optimierung HKL_Schalter HK 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Optimierung HKL", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Warmwasservorrang_Schalter HK 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Warmwasservorrang", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Warmwasservorrang_Schalter HK 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Warmwasservorrang", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["\u00dcberschuss abf\u00fchren_Schalter Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "\u00dcberschuss abf\u00fchren", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Warmwasservorrang_Schalter Schwimmbad"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Warmwasservorrang", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["St\u00f6rung l\u00f6schen_Schalter SystaSolar Aqua II"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "St\u00f6rung l\u00f6schen", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Solargewinn l\u00f6schen_Schalter SystaSolar Aqua II"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Solargewinn l\u00f6schen", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["St\u00f6rung l\u00f6schen_Schalter SystaExpresso"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "St\u00f6rung l\u00f6schen", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Meldung l\u00f6schen_Schalter SystaExpresso"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Meldung l\u00f6schen", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Schaltdiff. PZI_Anlagendaten SystaExpresso"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Schaltdiff. PZI", unit: null, factor: 0.1, decimals: 1, minimum: 0, maximum: 30, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Nachlaufzeit PZI_Anlagendaten SystaExpresso"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Nachlaufzeit PZI", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 30, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Sperrzeit PZI_Anlagendaten SystaExpresso"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Sperrzeit PZI", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 15, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Puffer unten (TPU)_undefined"] = {systaindex: 5, parameter_menu_title: "Werte SystaComfort", menutitle: "Puffer unten (TPU)", title: "Puffer unten (TPU)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    //parameters["Status Zirkulation_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "Status Zirkulation", title: "Status Zirkulation", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Nachlauf","Sperrzeit","Gesperrt","Aus F\u00fchler TZR","Ein","Frost"]};
+    parameters["Kesselpumpe % (PK)_undefined"] = {systaindex: 227, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Kesselpumpe % (PK)", title: "Kesselpumpe % (PK)", unit: "%", factor: 5, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Umlenkventil/Ladepumpe_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Umlenkventil/Ladepumpe", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Max. WW-Temp_Anlagedaten Kessel/Puffer"] = {systaindex: 156, parameter_menu_title: null, menutitle: null, title: "Max. WW-Temp", unit: null, factor: 0.1, decimals: 1, minimum: 10, maximum: 90, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Min. Drehzahl PK_Anlagedaten Kessel/Puffer"] = {systaindex: 164, parameter_menu_title: null, menutitle: null, title: "Min. Drehzahl PK", unit: null, factor: 1, decimals: 0, minimum: 10, maximum: 100, step: 5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Puffertyp_Anlagedaten Kessel/Puffer"] = {systaindex: 157, parameter_menu_title: null, menutitle: null, title: "Puffertyp", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: {0: "OPTIMA/EXPRESSO",1: "TITAN",2: "Puffer und ULV",3: "Puffer + LP",4: "Expressino",5: "Puffer u. Frischwasserstation"}};
+    parameters["Vorlauf Holzk. (TV KH)_undefined"] = {systaindex: 14, parameter_menu_title: "Werte SystaComfort", menutitle: "Vorlauf Holzk. (TV KH)", title: "Vorlauf Holzk. (TV KH)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["R\u00fccklauf Holzk. (TR KH)_undefined"] = {systaindex: 15, parameter_menu_title: "Werte SystaComfort", menutitle: "R\u00fccklauf Holzk. (TR KH)", title: "R\u00fccklauf Holzk. (TR KH)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Puffer Holzk. (TPO KH)_undefined"] = {systaindex: 16, parameter_menu_title: "Werte SystaComfort", menutitle: "Puffer Holzk. (TPO KH)", title: "Puffer Holzk. (TPO KH)", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Status Holzkessel_undefined"] = {systaindex: 247, parameter_menu_title: "Statusanzeigen", menutitle: "Status Holzkessel", title: "Status Holzkessel", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Aus","Anheizen","Leistungsbrand","Ausbrand","Abschalten","Nachk\u00fchlen","Anschieben"]};
+    parameters["Pumpe Holzkessel % (PKH)_undefined"] = {systaindex: 246, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Pumpe Holzkessel % (PKH)", title: "Pumpe Holzkessel % (PKH)", unit: "%", factor: 5, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Pumpe Holzk. (PKH)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Pumpe Holzk. (PKH)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Umlenkv. Holzk. (ULV KH)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Umlenkv. Holzk. (ULV KH)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["LED Boiler_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "LED Boiler", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Min. Puffertemp KH_Anlagedaten Holzkessel"] = {systaindex: 189, parameter_menu_title: null, menutitle: null, title: "Min. Puffertemp KH", unit: null, factor: 0.1, decimals: 1, minimum: 10, maximum: 75, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Min. Kesseltemp. KH_Anlagedaten Holzkessel"] = {systaindex: 190, parameter_menu_title: null, menutitle: null, title: "Min. Kesseltemp. KH", unit: null, factor: 0.1, decimals: 1, minimum: 40, maximum: 75, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Min. Spreizung KH_Anlagedaten Holzkessel"] = {systaindex: 191, parameter_menu_title: null, menutitle: null, title: "Min. Spreizung KH", unit: null, factor: 0.1, decimals: 1, minimum: 5, maximum: 10, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Min. Drehzahl PKH_Anlagedaten Holzkessel"] = {systaindex: 192, parameter_menu_title: null, menutitle: null, title: "Min. Drehzahl PKH", unit: null, factor: 1, decimals: 0, minimum: 25, maximum: 100, step: 5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Heizen nur mit Holzk._Schalter Holzkessel"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Heizen nur mit Holzk.", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Parallelbetrieb_Schalter Holzkessel"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Parallelbetrieb", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["1.Kessel heizt Puffer_Schalter Holzkessel"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "1.Kessel heizt Puffer", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Pumpe HK3 (PHK3)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Pumpe HK3 (PHK3)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Soll Zirk. (ab V. 2.06 WWsoll)_Zirkulation SystaExpresso"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Soll Zirk. (ab V. 2.06 WWsoll)", unit: null, factor: 0.1, decimals: 1, minimum: 30, maximum: 70, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Regelung HK nach_Anlagendaten Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Regelung HK nach", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: {0: "Au\u00dfentemperatur",3: "Dezentrale HK"}};
+    parameters["Warmwassertemp. oben TWE_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "Warmwassertemp. oben TWE", title: "Warmwassertemp. oben TWE", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Warmwassertemp. unten TWA_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "Warmwassertemp. unten TWA", title: "Warmwassertemp. unten TWA", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Einschichttemp._undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "Einschichttemp.", title: "Einschichttemp.", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Vorlauftemp. SI TVSI_undefined"] = {systaindex: -1, parameter_menu_title: "Werte SystaComfort", menutitle: "Vorlauftemp. SI TVSI", title: "Vorlauftemp. SI TVSI", unit: "\u00b0C", factor: 0.1, decimals: 1, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Status SI-Speicher_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "Status SI-Speicher", title: "Status SI-Speicher", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Brenner ext (B1)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Brenner ext (B1)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Brenner ext (B2)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Brenner ext (B2)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Ladepumpe (LP)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Ladepumpe (LP)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Schichtladepumpe (PSL)_Ausg\u00e4nge SystaComfort"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Schichtladepumpe (PSL)", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "led", value_list: null};
+    parameters["Min. Drehzahl Pumpe PSL_Anlagendaten SI-Speicher"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Min. Drehzahl Pumpe PSL", unit: null, factor: 1, decimals: 0, minimum: 25, maximum: 100, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Ansteuerung PK_Anlagendaten 2-stufiger Kessel"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Ansteuerung PK", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Impulspaket","PWM"]};
+    parameters["Abschalt TA 2. Stufe_Anlagendaten 2-stufiger Kessel"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Abschalt TA 2. Stufe", unit: null, factor: 0.1, decimals: 1, minimum: -20, maximum: 50, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Einschaltverz\u00f6gerung 2. Stufe_Anlagendaten 2-stufiger Kessel"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Einschaltverz\u00f6gerung 2. Stufe", unit: null, factor: 1, decimals: 0, minimum: 1, maximum: 99, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["2. Stufe ein f\u00fcr WW-Erw\u00e4rmung_Schalter 2.st. Kessel"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "2. Stufe ein f\u00fcr WW-Erw\u00e4rmung", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Speicherpumpe % (PSL)_undefined"] = {systaindex: -1, parameter_menu_title: "Ausg\u00e4nge", menutitle: "Speicherpumpe % (PSL)", title: "Speicherpumpe % (PSL)", unit: "%", factor: 5, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "value", value_list: null};
+    parameters["Kesseltyp_Anlagedaten Kessel/Puffer"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Kesseltyp", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Einstufig","Gasbrennwert","Pellets","Zweistufig","W\u00e4rmepumpe","Pellets ModBus","Kaskade"]};
+    parameters["Raumoffset_Heizkreis 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Raumoffset", unit: null, factor: 0.1, decimals: 1, minimum: -4, maximum: 4, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumoffset_Heizkreis 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Raumoffset", unit: null, factor: 0.1, decimals: 1, minimum: -4, maximum: 4, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Raumoffset_Heizkreis 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Raumoffset", unit: null, factor: 0.1, decimals: 1, minimum: -4, maximum: 4, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["St\u00f6rung Kessel_undefined"] = {systaindex: 228, parameter_menu_title: "Statusanzeigen", menutitle: "St\u00f6rung Kessel", title: "St\u00f6rung Kessel", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: {0: "Kein Bus",65531: "Kein MOD-Bus",65532: "Kein LON-Bus",65533: "Kein OT-Bus",65534: "Keine Info da Fremdkessel",65535: "Keine St\u00f6rung"}};
+    parameters["Betriebsart_Betriebsart SystaExpresso"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Betriebsart", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: ["Auto","Aus","Hand","Test"]};
+    parameters["Nachlauf PK / LP_Anlagedaten Kessel/Puffer"] = {systaindex: 158, parameter_menu_title: null, menutitle: null, title: "Nachlauf PK / LP", unit: null, factor: 0.1, decimals: 1, minimum: 0.5, maximum: 60, step: 0.5, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Min. Laufzeit Kessel_Anlagedaten Kessel/Puffer"] = {systaindex: 162, parameter_menu_title: null, menutitle: null, title: "Min. Laufzeit Kessel", unit: null, factor: 1, decimals: 0, minimum: 0, maximum: 60, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Versionen_undefined"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Versionen", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "version", value_list: null};
+    //parameters["Schaltdiff. Kessel_Anlagedaten Kessel/Puffer"] = {systaindex: 161, parameter_menu_title: null, menutitle: null, title: "Schaltdiff. Kessel", unit: null, factor: 0.1, decimals: 1, minimum: 2, maximum: 20, step: 1, parameter_type: "variable", display_type: "range", value_list: null};
+    parameters["Warmwasser einmal erw\u00e4rmen_Schalter HK 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Warmwasser einmal erw\u00e4rmen", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["\u00dcberschuss abf\u00fchren_Schalter HK 1"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "\u00dcberschuss abf\u00fchren", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Warmwasser einmal erw\u00e4rmen_Schalter HK 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "Warmwasser einmal erw\u00e4rmen", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["\u00dcberschuss abf\u00fchren_Schalter HK 2"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "\u00dcberschuss abf\u00fchren", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["\u00dcberschuss abf\u00fchren_Schalter HK 3"] = {systaindex: -1, parameter_menu_title: null, menutitle: null, title: "\u00dcberschuss abf\u00fchren", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "bit", display_type: "switch", value_list: null};
+    parameters["Detaillierter Typ Kessel_undefined"] = {systaindex: -1, parameter_menu_title: "Statusanzeigen", menutitle: "Detaillierter Typ Kessel", title: "Detaillierter Typ Kessel", unit: null, factor: 1, decimals: 0, minimum: null, maximum: null, step: 1, parameter_type: "variable", display_type: "enum", value_list: {0: "Fremdkessel",1: "Peleo",2: "Modula II",3: "ModuVario",4: "ModuVario Aqua",5: "Modula NT",6: "Tzerra",7: "PMI",8: "Pelletti III",9: "Pelletti Touch",10: "Peleo",11: "\u00d6kofen PESK",12: "\u00d6kofen SMART V1",13: "\u00d6kofen SMART V2",14: "Peleo Optima"}};
+    
+    
+    class ParameterView extends React.Component {
+      constructor(props) {
+        super(props);
+        this.state = {
+          data: [],
+          lastupdated: -1
+        };
+      }
+    
+      render() {
+        return React.createElement("table", {border: "0"},
+          React.createElement("tbody", null,
+            React.createElement("tr", null,
+              this.createParameterGroups()))); //always recreate the groups, so React updates to the new values
+      }
+    
+      createParameterGroups() {
+        let parameterGroups = [];
+        let k = 0;
+        let parametersWerteSystaComfort = [
+          React.createElement(Parameter, Object.assign(parameters["Puffer Sollwert_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Puffer oben (TPO)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Betriebsstunden_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Kesselvorlauf (TV)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Kesselr\u00fccklauf (TR)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Kesselstarts_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Puffer unten (TPU)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Au\u00dfen (TA)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raum 1_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raum 1 Soll_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasser (TWO)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasser Soll_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorlauf (TV)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorlauf Soll_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["R\u00fccklauf (TR)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Zirkulation (TZR)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raum 2_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raum 2 Soll_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorlauf 2 (TV2)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorlauf 2 Soll_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["R\u00fccklauf 2 (TR2)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raum 3 Soll_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorlauf 3 (TV3)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorlauf 3 Soll_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["R\u00fccklauf 3 (TR3)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Schwimmbadtemp. (TSB)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorlauf SB (TV SB)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorlauf SB Soll_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["R\u00fccklauf SB (TR SB)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorlauf Holzk. (TV KH)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["R\u00fccklauf Holzk. (TR KH)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Puffer Holzk. (TPO KH)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Betriebsstunden Ofen_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pelletsverbrauch Ofen_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwassertemp. oben TWE_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwassertemp. unten TWA_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Einschichttemp._undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorlauftemp. SI TVSI_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Umw\u00e4lzpumpe:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Umw\u00e4lzpumpe_Umw\u00e4lzpumpe"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Taster:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Taster_Taster"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          //React.createElement(Parameter, Object.assign(parameters[""], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+        ];
+        let parametersEinstellerSystaComfort = [
+          React.createElement(SectionTitle, {title: "Anlagedaten Zirkulation:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Nachlaufzeit PZI_Anlagedaten Zirkulation"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Sperrzeit Taster_Anlagedaten Zirkulation"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Schaltdifferenz PZI_Anlagedaten Zirkulation"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagedaten Kessel/Puffer:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Nachlauf PK / LP_Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Max. Puffertemp._Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Puffertemp._Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Max. WW-Temp_Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Schaltdiff. Kessel_Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          //React.createElement(Parameter, Object.assign(parameters["Schaltdiff. Kessel_Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Laufzeit Kessel_Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Abschalt TA Kessel_Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Drehzahl PK_Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Kesseltyp_Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Puffertyp_Anlagedaten Kessel/Puffer"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Heizkreis 1:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemp. Heizen_Heizkreis 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemp. Komfort_Heizkreis 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemp. Absenken_Heizkreis 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumoffset_Heizkreis 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Betriebsart_Heizkreis 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Warmwasser HK1:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasser Normal_Warmwasser HK1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasser erh\u00f6ht_Warmwasser HK1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Schaltdifferenz Warmw._Warmwasser HK1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagedaten HK1 Teil 1:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Fu\u00dfpunkt_Anlagedaten HK1 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Steilheit_Anlagedaten HK1 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Max. Vorlauftemp._Anlagedaten HK1 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Heizgrenze Heizen_Anlagedaten HK1 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Heizgrenze Absenken_Anlagedaten HK1 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Frostschutz Au\u00dfentemp._Anlagedaten HK1 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorhaltezeit Aufheizen_Anlagedaten HK1 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumeinfluss_Anlagedaten HK1 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagedaten HK1 Teil 2:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["\u00dcberh\u00f6hung Kessel_Anlagedaten HK1 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Spreizung Heizkreis_Anlagedaten HK1 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Drehzahl PHK_Anlagedaten HK1 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Mischerlaufzeit_Anlagedaten HK1 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Proportionalbereich_Anlagedaten HK1 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Nachstellzeit_Anlagedaten HK1 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemperatur Abgleich_Anlagedaten HK1 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Regelung HK nach_Anlagedaten HK1 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Heizkreis 2:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemp. Heizen_Heizkreis 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemperatur Komfort_Heizkreis 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemperatur Absenken_Heizkreis 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumoffset_Heizkreis 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Betriebsart_Heizkreis 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Warmwasser HK2:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasser Normal_Warmwasser HK2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasser Erh\u00f6ht_Warmwasser HK2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagedaten HK2 Teil 1:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Fu\u00dfpunkt_Anlagedaten HK2 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Steilheit_Anlagedaten HK2 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Max. Vorlauftemp._Anlagedaten HK2 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Heizgrenze Heizen_Anlagedaten HK2 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Heizgrenze Absenken_Anlagedaten HK2 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Frostschutz Au\u00dfentemp._Anlagedaten HK2 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorhaltezeit Aufheizen_Anlagedaten HK2 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumeinfluss_Anlagedaten HK2 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["\u00dcberh\u00f6hung Kessel_Anlagedaten HK2 Teil 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagedaten HK2 Teil 2:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Spreizung Heizkreis_Anlagedaten HK2 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Drehzahl PHK_Anlagedaten HK2 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Mischerlaufzeit_Anlagedaten HK2 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Proportionalbereich_Anlagedaten HK2 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Nachstellzeit_Anlagedaten HK2 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemperatur Abgleich_Anlagedaten HK2 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Regelung HK nach_Anlagedaten HK2 Teil 2"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Heizkreis 3:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemp. Heizen_Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemp. Komfort_Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumtemp. Absenken_Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Raumoffset_Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Betriebsart_Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagendaten Heizkreis 3:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Fu\u00dfpunkt_Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Steilheit_Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Max. Vorlauftemp._Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Heizgrenze Heizen_Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Heizgrenze Absenken_Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Frostschutz Au\u00dfentemp._Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Vorhaltezeit Aufheizen_Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["\u00dcberh\u00f6hung Kessel_Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Spreizung Heizkreis_Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Drehzahl PHK_Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Mischerlaufzeit_Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Regelung HK nach_Anlagendaten Heizkreis 3"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Schwimmbad:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["SB-Temp. Normal_Schwimmbad"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["SB-Temp Erh\u00f6ht_Schwimmbad"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Betriebsart_Schwimmbad"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagedaten Schwimmbad:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Max. Vorlauftemp._Anlagedaten Schwimmbad"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["\u00dcberh\u00f6hung Kessel_Anlagedaten Schwimmbad"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Spreizung Heizkreis_Anlagedaten Schwimmbad"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Drehzahl PHK_Anlagedaten Schwimmbad"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Mischerlaufzeit_Anlagedaten Schwimmbad"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Proportionalbereich_Anlagedaten Schwimmbad"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Nachstellzeit_Anlagedaten Schwimmbad"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagedaten Holzkessel:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Puffertemp KH_Anlagedaten Holzkessel"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Kesseltemp. KH_Anlagedaten Holzkessel"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Spreizung KH_Anlagedaten Holzkessel"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Drehzahl PKH_Anlagedaten Holzkessel"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagedaten Pelletofen:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Offset Raumtemp._Anlagedaten Pelletofen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Verz\u00f6gerung 1. Kessel_Anlagedaten Pelletofen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Mindestlaufzeit Ofen_Anlagedaten Pelletofen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Prop.-Bereich Ofen_Anlagedaten Pelletofen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Nachstellzeit Ofen_Anlagedaten Pelletofen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Betriebsweise_Anlagedaten Pelletofen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagendaten SI-Speicher:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Min. Drehzahl Pumpe PSL_Anlagendaten SI-Speicher"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagendaten 2-stufiger Kessel:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Abschalt TA 2. Stufe_Anlagendaten 2-stufiger Kessel"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Einschaltverz\u00f6gerung 2. Stufe_Anlagendaten 2-stufiger Kessel"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Ansteuerung PK_Anlagendaten 2-stufiger Kessel"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+        ];
+        let parametersWerteSystaSolarAquaII = [
+          React.createElement(Parameter, Object.assign(parameters["Kollektor (TSA)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Kollektor Maximum_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Solare Leistung_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Tagesgewinn_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Solargewinn_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Au\u00dfentemperatur (TAM)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Solarr\u00fccklauf (TSE)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Solarvorlauf (TSV)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Speicher Oben (TW)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Volumenstrom_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Speicher Oben (TW2)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Kollektor 1 (TSA 1)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Kollektor 2 (TSA 2)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Au\u00dfentemperatur 2 (TAM2)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Laufzeit Pumpe_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Zeit TSA > MAX_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+        ];
+        let parametersEinstellerSystaSolarAquaII = [
+          React.createElement(SectionTitle, {title: "Betrieb SystaSolar Aqua II", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasser Sollwert_Betrieb SystaSolar Aqua II"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Betriebsart_Betrieb SystaSolar Aqua II"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Beladestrategie_Betrieb SystaSolar Aqua II"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagendaten SystaSolar AquaII", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Max. Speichertemp._Anlagendaten SystaSolar AquaII"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Max. Speichertemp. 2_Anlagendaten SystaSolar AquaII"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Zusatzfunktion_Anlagendaten SystaSolar AquaII"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+        ];
+        let parametersWerteSystaExpresso = [
+          React.createElement(Parameter, Object.assign(parameters["Speicher (TSP)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasser (TWW)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Kaltwasser (TKW)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Volumenstrom Kaltwasser_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Volumenstrom Speicher_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Speicher Soll_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["W\u00e4rmemenge Warmwasser_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["W\u00e4rmemenge Zirkulation_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+        ];
+        let parametersEinstellerSystaExpresso = [
+          React.createElement(SectionTitle, {title: "Zirkulation SystaExpresso:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Soll Zirk. (ab V. 2.06 WWsoll)_Zirkulation SystaExpresso"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Betriebsart SystaExpresso:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Betriebsart_Betriebsart SystaExpresso"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Anlagendaten SystaExpresso:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Schaltdiff. PZI_Anlagendaten SystaExpresso"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Nachlaufzeit PZI_Anlagendaten SystaExpresso"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Sperrzeit PZI_Anlagendaten SystaExpresso"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Max. Speichersolltemp._Anlagendaten SystaExpresso"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+        ];
+        let parametersStatusanzeigen = [
+          React.createElement(Parameter, Object.assign(parameters["Detaillierter Typ Kessel_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["St\u00f6rung Kessel_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["St\u00f6rung F\u00fchler_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status Kessel_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status Zirkulation_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status HK 1_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status Zirkulation_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status HK 2_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status HK 3_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status Schwimmbad_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status Holzkessel_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status Ofen_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["St\u00f6rung Ofen Klasse 1_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["St\u00f6rung Ofen Klasse 2_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status SI-Speicher_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["St\u00f6rcode SystaSolar Aqua II_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Status SystaSolar Aqua II_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["St\u00f6rcode SystaExpresso_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Meldung SystaExpresso_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Allgemeine Statusanzeigen:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["SystaExpresso online_Allgemeine Statusanzeigen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["SystaComfort online_Allgemeine Statusanzeigen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["SystaSolar II online_Allgemeine Statusanzeigen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["SystaExpresso reagiert nicht mehr_Allgemeine Statusanzeigen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["SystaComfort reagiert nicht mehr_Allgemeine Statusanzeigen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["SystaSolar II reag. nicht mehr_Allgemeine Statusanzeigen"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+        ];
+        let parametersAusgaenge = [
+          React.createElement(Parameter, Object.assign(parameters["Kesselpumpe % (PK)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe HK1 % (PHK)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Mischer HK 1_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe HK2 % (PHK2)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Mischer HK 2_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe HK3 % (PHK3)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Mischer HK 3_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe SB % (PHK SB)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Mischer SB_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Sollleistung Ofen_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe Holzkessel % (PKH)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Speicherpumpe % (PSL)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Ausg\u00e4nge SystaSolar Aqua II:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Solarpumpe (PSO)_Ausg\u00e4nge SystaSolar Aqua II"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Zonenventil (ZV)_Ausg\u00e4nge SystaSolar Aqua II"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Umlenkventil (ULV SPE)_Ausg\u00e4nge SystaSolar Aqua II"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Ausg\u00e4nge SystaExpresso:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Speicherpumpe (PSP)_Ausg\u00e4nge SystaExpresso"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe Zirkulation (PZI)_Ausg\u00e4nge SystaExpresso"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Ausg\u00e4nge SystaComfort:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe HK1 (PHK)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe HK2 (PHK2)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe HK3 (PHK3)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Umlenkventil/Ladepumpe_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe Zirkulation (PZI)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe Kessel (PK)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe Holzk. (PKH)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Umlenkv. Holzk. (ULV KH)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["LED Boiler_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Pumpe SB (PHK SB)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Brenner ext (B1)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Brenner ext (B2)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Ladepumpe (LP)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Schichtladepumpe (PSL)_Ausg\u00e4nge SystaComfort"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Solarpumpe % (PSO)_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Speicherpumpe % PSP_undefined"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+        ];
+        let parametersSchalter = [
+          React.createElement(SectionTitle, {title: "Schalter HK 1:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasser einmal erw\u00e4rmen_Schalter HK 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasservorrang_Schalter HK 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Warmwasser wie Heizung_Schalter HK 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Zirkulation wie WW_Schalter HK 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["\u00dcberschuss abf\u00fchren_Schalter HK 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Optimierung HKL_Schalter HK 1"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Schalter SystaSolar Aqua II:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["St\u00f6rung l\u00f6schen_Schalter SystaSolar Aqua II"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Solargewinn l\u00f6schen_Schalter SystaSolar Aqua II"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(SectionTitle, {title: "Schalter SystaExpresso:", key: k++}, null),
+          React.createElement(Parameter, Object.assign(parameters["St\u00f6rung l\u00f6schen_Schalter SystaExpresso"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+          React.createElement(Parameter, Object.assign(parameters["Meldung l\u00f6schen_Schalter SystaExpresso"], {lastupdated: this.state.lastupdated, getvalue: this.getValue.bind(this), key: k++}), null),
+        ];
+    
+    
+    
+        let groupWerteSystaComfort = React.createElement(ParameterGroup, {title: "Werte SystaComfort", lastupdated: this.state.lastupdated, key: k++}, parametersWerteSystaComfort);
+        parameterGroups[parameterGroups.length] = groupWerteSystaComfort;
+        let groupEinstellerSystaComfort = React.createElement(ParameterGroup, {title: "Einsteller SystaComfort", lastupdated: this.state.lastupdated, key: k++}, parametersEinstellerSystaComfort);
+        parameterGroups[parameterGroups.length] = groupEinstellerSystaComfort;
+        let groupWerteSystaSolarAquaII = React.createElement(ParameterGroup, {title: "Werte SystaSolar Aqua II", lastupdated: this.state.lastupdated, key: k++}, parametersWerteSystaSolarAquaII);
+        parameterGroups[parameterGroups.length] = groupWerteSystaSolarAquaII;
+        let groupEinstellerSystaSolarAquaII = React.createElement(ParameterGroup, {title: "Einsteller SystaSolar Aqua II", lastupdated: this.state.lastupdated, key: k++}, parametersEinstellerSystaSolarAquaII);
+        parameterGroups[parameterGroups.length] = groupEinstellerSystaSolarAquaII;
+        let groupWerteSystaExpresso = React.createElement(ParameterGroup, {title: "Werte SystaExpresso", lastupdated: this.state.lastupdated, key: k++}, parametersWerteSystaExpresso);
+        parameterGroups[parameterGroups.length] = groupWerteSystaExpresso;
+        let groupEinstellerSystaExpresso = React.createElement(ParameterGroup, {title: "Einsteller SystaExpresso", lastupdated: this.state.lastupdated, key: k++}, parametersEinstellerSystaExpresso);
+        parameterGroups[parameterGroups.length] = groupEinstellerSystaExpresso;
+        let groupStatusanzeigen = React.createElement(ParameterGroup, {title: "Statusanzeigen", lastupdated: this.state.lastupdated, key: k++}, parametersStatusanzeigen);
+        parameterGroups[parameterGroups.length] = groupStatusanzeigen;
+        let groupAusgaenge = React.createElement(ParameterGroup, {title: "Ausg\u00e4nge", lastupdated: this.state.lastupdated, key: k++}, parametersAusgaenge);
+        parameterGroups[parameterGroups.length] = groupAusgaenge;
+        let groupSchalter = React.createElement(ParameterGroup, {title: "Schalter", lastupdated: this.state.lastupdated, key: k++}, parametersSchalter);
+        parameterGroups[parameterGroups.length] = groupSchalter;
+        
+        return parameterGroups;
+      }
+    
+      componentDidMount() {
+        this.updateEntries();
+        //set a timer to periodically update the component
+        //the SystaComfort sends new values each minute, so scheduling it with a few seconds should be good enough
+        this.timer = setInterval(() => this.updateEntries(), 5000);
+      }
+    
+      componentWillUnmount() {
+        clearInterval(this.timer);
+        this.timer = null;
+      }  
+      
+      fetchRawData() {
+        fetch("http://systapi:1337/SystaREST/rawdata")
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw response;
+            }
+          })
+          .then(result => {
+            //put it into state, as it should trigger an update of the 
+            //whole component
+            this.setState({data: result.rawData, lastupdated: result.timestamp})
+          })
+          .catch(error => {
+            console.error("Error fetching data: ", error);
+          })
+          .finally(() => {
+            //cleanup?;
+          })
+      }
+      
+      updateEntries() {
+        this.fetchRawData();
+        //nothing else to do
+        //update of the components is triggered by setting
+        //setState({data: ...}) inside fetchRawData()
+      }
+    
+      getValue(systaindex, factor, decimals, parameter_type, display_type, value_list) {
+        if(systaindex >= 0 && systaindex < this.state.data.length) {
+          let value = this.state.data[systaindex];
+          if (factor == 0) {
+            factor = 1;
+          }
+          if (!decimals) {
+            decimals = 0;
+          }
+          switch (display_type) {
+            case "switch":
+            case "led":
+              value = parseInt(value);
+              if (value) {
+                value = "on";
+              } else {
+                value = "off";
+              }
+              break;
+            case "enum":
+              value = value_list[value];
+              break;
+            default:
+              value = (value * factor).toFixed(decimals);
+              break;
+          }
+          return value;
+        } else {
+          return "?";
+        } 
+      }
+    
+    }
+    
+    class ParameterGroup extends React.Component {
+      //title
+      
+      constructor(props) {
+        super(props);
+        this.state = {
+        };
+      }
+      
+      render() {
+        return React.createElement("td", {className: "group"},
+                 React.createElement("table", {className: "elementList", width: "200"},
+                   React.createElement("colgroup", null,
+                     React.createElement("col", {width: "100"}),
+                     React.createElement("col", {width: "80"}),
+                     React.createElement("col", {width: "20"})),
+                   React.createElement("thead", null, 
+                     React.createElement("tr", null,
+                       React.createElement("th", {colSpan: "3"}, this.props.title))),
+                   React.createElement("tbody", {lastupdated: this.props.lastupdated},
+                     this.props.children)));
+      }
+    }
+    
+    class Parameter extends React.Component {
+      //systaindex
+      //title
+      //unit
+      //factor
+      //decimals
+      //minimum
+      //maximum
+      //step
+      //maximum
+      //parameter_type "variable", "bit"
+      //display_type "value","enum","version", "switch", "range", "led"
+      //value_list only for display_type "enum"
+      //lastupdated
+      //getvalue
+      //key
+      
+      constructor(props) {
+        super(props);
+        this.state = {
+          value: this.getDefaultValue(this.props.display_type)
+        };
+      }
+    
+      getDefaultValue(display_type) {
+        switch(display_type) {
+          case "switch":
+          case "led":
+          case "enum":
+            return "---";
+          case "value":
+          case "version":
+          case "range":
+            return "?";
+          default:
+            return null;
+        }
+      }
+    
+      render() {
+        this.state.value = this.props.getvalue(this.props.systaindex, this.props.factor, this.props.decimals, this.props.parameter_type, this.props.display_type, this.props.value_list);
+        return React.createElement("tr", {className: "parameter", lastupdated: this.props.lastupdated}, 
+                 React.createElement("td", {className: "title right"}, this.props.title),
+                 React.createElement("td", {className: "value right"}, this.state.value),
+                 React.createElement("td", {className: "unit center"},(this.props.unit==null)?"":this.props.unit,
+                   React.createElement("br", null)
+                 )
+               );
+      }
+    
+    }
+    
+    class SectionTitle extends React.Component {
+      constructor(props) {
+        super(props);
+      }
+    
+      render() {
+        return React.createElement("tr", {className: "parameter"}, 
+                 React.createElement("td", {className: "sectiontitle left", colSpan: 3}, this.props.title)
+               );
+      }
+    
+    }
+    
+    const domContainer = document.querySelector('#parameterview');
+    ReactDOM.render(React.createElement(ParameterView), domContainer);
+  </script>
+</html>

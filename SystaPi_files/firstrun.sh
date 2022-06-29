@@ -39,6 +39,13 @@ echo "START firstrun.sh"
 
 # which hostname do you want to give your raspberry pi?
 HOSTNAME=systapi
+#username: beep, password: projects
+#you can change the password if you want and generate a new password with
+#Linux: mkpasswd --method=SHA-256
+#Windows: you can use an online generator like https://www.dcode.fr/crypt-hasing-function
+USERNAME=beep
+# shellcheck disable=SC2016
+PASSWD='$5$oLShbrSnGq$nrbeFyt99o2jOsBe1XRNqev5sWccQw8Uvyt8jK9mFR9' #keep single quote to avoid expansion of $
 # configure the wifi connection
 # the example WPA_PASSPHRASE is generated via
 #     wpa_passphrase MY_WIFI passphrase
@@ -64,14 +71,39 @@ ENABLE_ENC28J60=true
 
 #copy the IP_PREFIX into secondrun.sh and remove a trailing . if present
 sed -i "s/^IP_PREFIX=.*/IP_PREFIX=${IP_PREFIX%.}/" /boot/secondrun.sh
-
-echo "setting hostname"
+#copy the USERNAME into secondrun.sh 
+sed -i "s/^USERNAME=.*/USERNAME=${USERNAME}/" /boot/secondrun.sh
 
 CURRENT_HOSTNAME=$( </etc/hostname tr -d " \t\n\r" )
+echo "set hostname to ${HOSTNAME} (was ${CURRENT_HOSTNAME})"
 echo $HOSTNAME >/etc/hostname
 sed -i "s/127.0.1.1.*$CURRENT_HOSTNAME/127.0.1.1\t$HOSTNAME/g" /etc/hosts
 
+FIRSTUSER=$( getent passwd 1000 | cut -d: -f1 )
+echo "set default user to ${USERNAME} (was ${FIRSTUSER})"
+#FIRSTUSERHOME=$( getent passwd 1000 | cut -d: -f6 )
+if [ -f /usr/lib/userconf-pi/userconf ]; then
+   /usr/lib/userconf-pi/userconf "${USER}" "${PASSWD}"
+else
+   echo "${FIRSTUSER}:${PASSWD}" | chpasswd -e
+   if [ "${FIRSTUSER}" != "${USERNAME}" ]; then
+      usermod -l "${USERNAME}" "${FIRSTUSER}"
+      usermod -m -d "/home/${USERNAME}" "${USERNAME}"
+      groupmod -n "${USERNAME}" "${FIRSTUSER}"
+      if grep -q "^autologin-user=" /etc/lightdm/lightdm.conf ; then
+         sed /etc/lightdm/lightdm.conf -i -e "s/^autologin-user=.*/autologin-user=${USERNAME}/"
+      fi
+      if [ -f /etc/systemd/system/getty@tty1.service.d/autologin.conf ]; then
+         sed /etc/systemd/system/getty@tty1.service.d/autologin.conf -i -e "s/${FIRSTUSER}/${USERNAME}/"
+      fi
+      if [ -f /etc/sudoers.d/010_pi-nopasswd ]; then
+         sed -i "s/^${FIRSTUSER} /${USERNAME} /" /etc/sudoers.d/010_pi-nopasswd
+      fi
+   fi
+fi
+
 echo "setting network options"
+sed -i "s/^REGDOMAIN=.*/REGDOMAIN=${COUNTRY}/" /etc/default/crda
 
 systemctl enable ssh
 cat >/etc/wpa_supplicant/wpa_supplicant.conf <<WPAEOF
@@ -112,8 +144,8 @@ if $ENABLE_ENC28J60; then
 fi
 
 #clean up
-echo "removing firstrun.sh from the system"
-rm -f /boot/firstrun.sh
+#echo "removing firstrun.sh from the system"
+#rm -f /boot/firstrun.sh
 sed -i "s| systemd.run.*||g" /boot/cmdline.txt
 
 echo "installing secondrun.service"

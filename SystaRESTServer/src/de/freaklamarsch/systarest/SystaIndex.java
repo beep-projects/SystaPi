@@ -225,7 +225,7 @@ public final class SystaIndex {
 	/**
 	 * Steilheit
 	 */
-	final static int HEATING_CURVE_GRADIENT = 50;
+	final static int HEATING_CURVE_GRADIENT = 50; // K/K
 	/**
 	 * Heizkurvenoptimierung?
 	 */
@@ -247,21 +247,21 @@ public final class SystaIndex {
 	 */
 	final static int ANTI_FREEZE_OUTSIDE_TEMP = 55;
 	/**
-	 * Vorhaltezeit Aufheizen minuten
+	 * Vorhaltezeit Aufnormal minuten
 	 */
 	final static int HEAT_UP_TIME = 56; // in minutes
 	/**
 	 * Raumeinfluss
 	 */
-	final static int ROOM_IMPACT = 57;
+	final static int ROOM_IMPACT = 57; // in K/K
 	/**
 	 * Ueberhoehung Kessel
 	 */
-	final static int BOILER_SUPERELEVATION = 58;
+	final static int BOILER_SUPERELEVATION = 58; // in K
 	/**
 	 * Spreizung Heizkreis
 	 */
-	final static int HEATING_CIRCUIT_SPREADING = 59;
+	final static int HEATING_CIRCUIT_SPREADING = 59; // in K
 	/**
 	 * Minimale Drehzahl Pumpe PHK %
 	 */
@@ -271,8 +271,8 @@ public final class SystaIndex {
 	 * Mischer Laufzeit (minuten)
 	 */
 	final static int MIXER_RUNTIME = 62; // in minutes
-	// final static int = 63
-	// final static int = 64
+	// final static int = 63 //(proportionalbereich?)
+	// final static int = 64 //(nachstellzeit?)
 	/**
 	 * (Raumtemperatur Abgleich (* 10, neg. Werte sind um 1 zu hoch, 0 und -1 werden
 	 * beide als 0 geliefert))
@@ -396,7 +396,12 @@ public final class SystaIndex {
 	 * Maximale Warmwassertemperatur
 	 */
 	final static int HOT_WATER_TEMP_MAX = 156;
-	// final static int = 157
+	/**
+	 * 0 = "OPTIMA/EXPRESSO" 1 = "TITAN" 2 = "Puffer und ULV" 3 = "Puffer + LP" 4 =
+	 * "Expressino" 5 = "Puffer u. Frischwasserstation"
+	 */
+	// TODO add this
+	final static int BUFFER_TYPE = 157;
 	/**
 	 * Nachlauf Pumpe PK/LP
 	 */
@@ -433,7 +438,10 @@ public final class SystaIndex {
 	 * (Nachlaufzeit Pumpe PZ)
 	 */
 	final static int CIRCULATION_PUMP_OVERRUN = 169;
-	// final static int = 170
+	/**
+	 * (Sperrzeit Taster)
+	 */
+	final static int CIRCULATION_LOCKOUT_TIME_PUSH_BUTTON = 170; // in min
 	/**
 	 * (Zirkulation Schaltdifferenz)
 	 */
@@ -461,7 +469,7 @@ public final class SystaIndex {
 	 */
 	final static int BURNER_NUMBER_OF_STARTS = 181;
 	/**
-	 * Solare Leistung 
+	 * Solare Leistung
 	 */
 	final static int SOLAR_POWER_ACTUAL = 182;
 	/**
@@ -493,7 +501,7 @@ public final class SystaIndex {
 	 */
 	final static int LOG_BOILER_BUFFER_TEMP_MIN = 189;
 	/**
-	 * Minimale Temperatur des Scheitholzkessels 
+	 * Minimale Temperatur des Scheitholzkessels
 	 */
 	final static int LOG_BOILER_TEMP_MIN = 190;
 	/**
@@ -555,11 +563,12 @@ public final class SystaIndex {
 	// final static int = 225
 	// final static int = 226
 	/**
-	 * ???
+	 * Kesselpumpe Geschwindigkeit x*5%
 	 */
-	// final static int = 227
+	// TODO add this
+	final static int BOILER_PUMP_SPEED_ACTUAL = 227;
 	/**
-	 * Fehlerstatus (255 = OK)
+	 * Fehlerstatus (65535 = OK)
 	 */
 	final static int ERROR = 228;
 	// final static int = 229
@@ -572,9 +581,14 @@ public final class SystaIndex {
 	 */
 	final static int HEATING_OPERATION_MODE_X = 231;
 	/**
-	 * Status ???
+	 * Status HK 1 0="Aus" 1="Aus Heizgrenze" 2="Aus TI" 3="Gesperrt TPO" 4="Aus
+	 * WW-Vorrang" 5="Ein" 6="Frostschutz" 7=,"K\u00fchlen" 8="Vorhaltezeit"
+	 * 9="Heizbetrieb" 10="Komfortbetrieb" 11="Absenkbetrieb" 12="Aus TSB"
+	 * 13="Gesperrt" 14="Normal" 15="Erh\u00f6ht" 16="WW-Modus" 17="Estrich
+	 * trocknen" 18="K\u00fchlbetrieb"
 	 */
-	// final static int = 232
+	// TODO add this to status
+	final static int CIRCUIT_1_OPERATION_MODE = 232;
 	// final static int = 233
 	// final static int = 234
 	// final static int = 235
@@ -592,10 +606,17 @@ public final class SystaIndex {
 	 * Ofenpumpe Geschwindigkeit x*5%
 	 */
 	final static int LOG_BOILER_PUMP_SPEED_ACTUAL = 246;
-	// final static int = 247
+	/**
+	 * Status Holzkessel
+	 */
+	final static int LOG_BOILER_OPERATION_MODE = 247;
 	/**
 	 * Status Kessel
 	 */
-	final static int BOILER_STATUS = 248;
-	// final static int = 249
+	final static int BOILER_OPERATION_MODE = 248;
+	/**
+	 * Status Zirkulation 0="Aus" 1="Nachlauf" 2="Sperrzeit" 3="Gesperrt" 4="Aus
+	 * F\u00fchler TZR" 5="Ein" 6="Frost"
+	 */
+	final static int CIRCULATION_OPERATION_MODE = 249;
 }

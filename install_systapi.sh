@@ -46,14 +46,18 @@ else
   SD_CARD_PATH="/dev/mmcblk0"
 fi
 
+RPI_IMAGE_URL="https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-04-07/2022-04-04-raspios-bullseye-armhf-lite.img.xz"
+USE_LATEST_RASPI_OS=false
 RASPI_OS_TYPE="lite" # or "desktop"
 RASPI_OS_ID="raspios_armhf" #or "raspios_lite" 
 if [[ "${RASPI_OS_TYPE}" == "lite" ]]; then
-	RASPI_OS_ID="raspios_lite"
+	RASPI_OS_ID="raspios_lite_armhf"
 fi
 
 #get HOSTNAME for raspberry pi from firstrun.sh
 RPI_HOST_NAME=$( grep "^HOSTNAME=" SystaPi_files/firstrun.sh | cut -d "=" -f 2 )
+#get USERNAME for raspberry pi from firstrun.sh
+RPI_USER_NAME=$( grep "^USERNAME=" SystaPi_files/firstrun.sh | cut -d "=" -f 2 )
 
 echo "SD_CARD_PATH = ${SD_CARD_PATH}"
 echo "RPI_HOST_NAME = ${RPI_HOST_NAME}"
@@ -101,43 +105,47 @@ if [[ ! "${REPLY}" =~ ^[Yy]$ ]]; then
     exit 1
 fi 
 
-echo 
-echo "=============================================================="
-echo " get latest raspbian 32bit os image"
-echo "=============================================================="
-echo 
+if [[ ${USE_LATEST_RASPI_OS} == true ]] ; then
+  echo 
+  echo "=============================================================="
+  echo " get latest Raspberry Pi OS 32bit image"
+  echo "=============================================================="
+  echo 
 
-echo "get rasbian os information data from server";
-rm operating-systems-categories.json
-wget https://downloads.raspberrypi.org/operating-systems-categories.json
+  echo "get rasbian os information data from server";
+  rm operating-systems-categories.json
+  wget https://downloads.raspberrypi.org/operating-systems-categories.json
 
-RPI_IMAGE_URL=$( <operating-systems-categories.json grep "${RASPI_OS_ID}" | grep urlHttp | sed -e 's/.*\: \"\(.*\)\".*/\1/' )
+  RPI_IMAGE_URL=$( <operating-systems-categories.json grep "${RASPI_OS_ID}" | grep urlHttp | sed -e 's/.*\: \"\(.*\)\".*/\1/' )
+fi
 RPI_IMAGE_HASH_URL="${RPI_IMAGE_URL}.sha256"
 
 echo 
 echo "=============================================================="
-echo " check downloaded file"
+echo " download and check Raspberry Pi OS"
 echo "=============================================================="
 echo 
 
-RPI_IMAGE_ZIP=$(basename "${RPI_IMAGE_URL}")
+RPI_IMAGE_XZ=$(basename "${RPI_IMAGE_URL}")
 RPI_IMAGE_HASH=$(basename "${RPI_IMAGE_HASH_URL}")
-RPI_IMAGE="${RPI_IMAGE_ZIP//.zip/.img}"
+RPI_IMAGE="${RPI_IMAGE_XZ//.xz/}"
 
-if [ -f "${RPI_IMAGE_ZIP}" ]; then
-  echo "${RPI_IMAGE_ZIP} file found. Skipping download."
+if [ -f "${RPI_IMAGE}" ]; then
+  echo "${RPI_IMAGE} file found. Skipping download."
+elif [ -f "${RPI_IMAGE_XZ}" ]; then
+  echo "${RPI_IMAGE_XZ} file found. Skipping download."
 else
   echo "downloading Raspberry Pi OS image from server. please wait ..."
-  rm   "${RPI_IMAGE_ZIP}.downloading"
-  wget "${RPI_IMAGE_URL}" -O "${RPI_IMAGE_ZIP}.downloading"
-  mv   "${RPI_IMAGE_ZIP}.downloading" "${RPI_IMAGE_ZIP}"
+  rm   "${RPI_IMAGE_XZ}.downloading"
+  wget "${RPI_IMAGE_URL}" -O "${RPI_IMAGE_XZ}.downloading"
+  mv   "${RPI_IMAGE_XZ}.downloading" "${RPI_IMAGE_XZ}"
 
   echo "downloading hash file for image file from server. please wait ..."
   rm "${RPI_IMAGE_HASH}"
   wget "${RPI_IMAGE_HASH_URL}"
 
   echo "checking hash value of image file"
-  HASH_OK=$( sha256sum -c "${RPI_IMAGE_HASH}" | grep "${RPI_IMAGE_ZIP}: OK" )
+  HASH_OK=$( sha256sum -c "${RPI_IMAGE_HASH}" | grep "${RPI_IMAGE_XZ}: OK" )
   if [ -z "${HASH_OK}" ]; then
     echo "hash does not match, aborting"
     exit
@@ -148,17 +156,17 @@ fi
 
 echo 
 echo "=============================================================="
-echo " unzip image file"
+echo " extract image file"
 echo "=============================================================="
 echo 
 
-echo "unzip the Raspberry Pi OS image"
+echo "extract the Raspberry Pi OS image"
 if [ -f "${RPI_IMAGE}" ]; then
-  echo "file found, skip the zip"
+  echo "file found, skip the extract"
 else
-  echo "unzipping file. please wait a few minutes ..."
-  echo "unzip -o ${RPI_IMAGE_ZIP} ${RPI_IMAGE}"
-  unzip -o "${RPI_IMAGE_ZIP}" "${RPI_IMAGE}"
+  echo "extracting file. please wait a few minutes ..."
+  echo "unxz ${RPI_IMAGE_XZ}"
+  unxz "${RPI_IMAGE_XZ}"
 fi
 
 echo 
@@ -220,8 +228,8 @@ echo
 
 echo "the UUID of the root partition might have changed for the downloaded image. Updating the entry in cmdline.txt"
 PARTUUID=$( sudo blkid | grep rootfs | grep -oP '(?<=PARTUUID=\").*(?=\")' )
-echo "set PARTUUID=$PARTUUID for rootfs in cmdline.txt"
-sed -i "s/\(.*PARTUUID=\)[^ ]*\( .*\)/\1$PARTUUID\2/" cmdline.txt
+echo "set PARTUUID=$PARTUUID for rootfs in SystaPi_files/cmdline.txt"
+sed -i "s/\(.*PARTUUID=\)[^ ]*\( .*\)/\1$PARTUUID\2/" SystaPi_files/cmdline.txt
 
 echo 
 echo "=============================================================="
@@ -240,8 +248,11 @@ echo "cp SystaPi_files/thirdrun.sh ${RPI_PATH}"
 cp SystaPi_files/thirdrun.sh "${RPI_PATH}"
 echo
 echo "copy SystaRESTServer to ${RPI_PATH}"
-echo "cp -r SystaRESTServer ${RPI_PATH}"
-cp -r SystaRESTServer "${RPI_PATH}"
+echo "cp -rL SystaRESTServer ${RPI_PATH}"
+cp -rL SystaRESTServer "${RPI_PATH}"
+echo "copy helpers to ${RPI_PATH}"
+echo "cp -r helpers ${RPI_PATH}"
+cp -r helpers "${RPI_PATH}"
 
 echo "press any key to continue..."
 read -rn 1 -s
@@ -262,7 +273,7 @@ echo "NOTE: when starting up, your raspberry pi should reboot 4 times until all 
 echo
 echo "///////////////////////////////////////////////////////////////"
 echo
-echo "               ssh -x pi@${RPI_HOST_NAME}.local"
+echo "               ssh -x ${RPI_USER_NAME}@${RPI_HOST_NAME}.local"
 echo
 echo "///////////////////////////////////////////////////////////////"
 echo

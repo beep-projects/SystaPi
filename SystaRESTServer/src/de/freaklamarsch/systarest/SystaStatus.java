@@ -195,13 +195,13 @@ public class SystaStatus {
 	 * <br/>
 	 * Swimming pool temperature
 	 */
-	public double swimmingpoolFlowTemp;
+	public double swimmingpoolTemp;
 	/**
 	 * Vorlauf Schwimmbad<br/>
 	 * <br/>
 	 * Flow swimmingpool
 	 */
-	public double swimmingpoolFlowTeamp;
+	public double swimmingpoolFlowTemp;
 	/**
 	 * Rücklauf Schwimmbad<br/>
 	 * <br/>
@@ -431,6 +431,9 @@ public class SystaStatus {
 	 * 11 = heating circuit (slave)<br/>
 	 * 12 = minimum running time<br/>
 	 * 13 = start delay active
+	 * 
+	 * TODO clarify why SystaWeb uses
+	 * "Aus","Ein","Ein Warmwasser","Ein Heizung","Gesperrt Holzkessel","Gesperrt Ofen","Gesperrt TA","Kühlbetrieb"]
 	 */
 	public int boilerOperationMode;
 	/**
@@ -440,7 +443,7 @@ public class SystaStatus {
 	 * (slave)", "cooling mode (slave)", "heating circuit (slave)", "minimum running
 	 * time", "start delay active" };
 	 */
-	public final String[] boilerOperationModes = { "off", "manual", "hot water", "heating circuit",
+	public final String[] boilerOperationModeNames = { "off", "manual", "hot water", "heating circuit",
 			"blocked (log boiler)", "blocked (pellet stove)", "blocked (outside temperature)", "cooling mode",
 			"hot water (combi boiler)", "hot water (slave)", "cooling mode (slave)", "heating circuit (slave)",
 			"minimum running time", "start delay active" };
@@ -664,6 +667,23 @@ public class SystaStatus {
 	 */
 	public double bufferTempMin;
 	/**
+	 * 0 = "OPTIMA/EXPRESSO"
+	 * 1 = "TITAN"
+	 * 2 = "Puffer und ULV"
+	 * 3 = "Puffer + LP"
+	 * 4 = "Expressino"
+	 * 5 = "Puffer u. Frischwasserstation"
+	 * 	 
+	 * 0 = "OPTIMA/EXPRESSO"
+	 * 1 = "TITAN"
+	 * 2 = "Buffer with DV"
+	 * 3 = "Buffer + LP"
+	 * 4 = "Expressino"
+	 * 5 = "Buffer with fresh water statio"
+	 */
+	public int bufferType;
+	public final String[] bufferTypeNames = {"OPTIMA/EXPRESSO","TITAN","Buffer with DV","Buffer + LP","Expressino","Buffer with fresh water station"};
+	/**
 	 * SchaltDifferenz Kessel<br/>
 	 * <br/>
 	 * Hysteresis boiler
@@ -688,6 +708,12 @@ public class SystaStatus {
 	 */
 	public int boilerPumpSpeedMin;
 	/**
+	 * Kesselpumpe in %<br/>
+	 * <br/>
+	 * Boiler pump in %
+	 */
+	public int boilerPumpSpeedActual;
+	/**
 	 * Nachlaufzeit Pumpe PZ<br/>
 	 * <br/>
 	 * Overrun pump PZ
@@ -699,6 +725,12 @@ public class SystaStatus {
 	 * Circulation hysteresis
 	 */
 	public double circulationHysteresis;
+	/**
+	 * Zirkulation Sperrzeit Taster<br/>
+	 * <br/>
+	 * Circulation lockout time push button
+	 */
+	public int circulationLockoutTimePushButton;
 	/**
 	 * Raumtemperatur ändern um<br/>
 	 * <br/>
@@ -791,23 +823,23 @@ public class SystaStatus {
 	 * Circulation Pump = Relay &amp; 0x0100<br/>
 	 * Boiler = Relay &amp; 0x0200<br/>
 	 * Relay &amp; 0x0800<br/>
-	 * Burner = Boiler &amp;&amp; (FLOW_TEMP_BOILER - RETURN_TEMP_BOILER > 2) || ((Relay &amp; 0x0004) != 0)<br/>
+	 * Burner = Relay &amp; 0x0004<br/>
 	 * Charge pump log boiler = Relay &amp; 0x1000<br/>
 	 * LED Boiler = Relay &amp; 0x2000
 	 */
 	public int relay;
-	public static final int HEATING_PUMP_MASK = 0x0001;
-	public static final int UNKNOWN_1_MASK = 0x0002;
-	public static final int UNKNOWN_2_MASK = 0x0003;
-	public static final int BURNER_MASK = 0x0004; // TODO verify this assumption
-	public static final int MIXER_WARM_MASK = 0x0008;
-	public static final int MIXER_COLD_MASK = 0x0010;
-	public static final int CHARGE_PUMP_MASK = 0x0080;
-	public static final int CIRCULATION_PUMP_MASK = 0x0100;
-	public static final int BOILER_MASK = 0x0200;
-	public static final int UNKNOWN_5_MASK = 0x0800;
-	public static final int CHARGE_PUMP_LOG_BOILER_MASK = 0x1000; // TODO verify this assumption
-	public static final int LED_BOILER_MASK = 0x2000; // TODO verify this assumption
+	public static final int HEATING_PUMP_MASK = 0x0001;//bit 0
+	public static final int UNKNOWN_1_MASK = 0x0002;//bit 1
+	public static final int UNKNOWN_2_MASK = 0x0003;//bit 0 & 1
+	public static final int BURNER_MASK = 0x0004;//bit 2
+	public static final int MIXER_WARM_MASK = 0x0008;//bit 3
+	public static final int MIXER_COLD_MASK = 0x0010;//bit 4
+	public static final int CHARGE_PUMP_MASK = 0x0080;//bit 7
+	public static final int CIRCULATION_PUMP_MASK = 0x0100;//bit 8
+	public static final int BOILER_MASK = 0x0200; //bit 9
+	public static final int UNKNOWN_5_MASK = 0x0800; //bit 11
+	public static final int CHARGE_PUMP_LOG_BOILER_MASK = 0x1000; //bit 12 TODO verify this assumption
+	public static final int LED_BOILER_MASK = 0x2000; //bit 13 TODO verify this assumption
 
 	/**
 	 * Heating circuit pump = relay &amp; 0x0001
@@ -818,13 +850,17 @@ public class SystaStatus {
 	 */
 	public boolean chargePumpIsOn;
 	/**
-	 * Charge pump = Relay &amp; 0x1000
+	 * log bioler charge pump = Relay &amp; 0x1000
 	 */
 	public boolean logBoilderChargePumpIsOn;
 	/**
-	 * Charge pump = Relay &amp; 0x2000
+	 * LED boiler = Relay &amp; 0x2000
+	 * 
+	 * Ladezustand des Speichers 
+	 * Ein - Der Speicher ist voll, kein Holz mehr nachlegen.
+	 * Aus - Der Speicher kann Wärme aufnehmen.
 	 */
-	public boolean ledBoilerIsOn;
+	public boolean boilerLedIsOn;
 	/**
 	 * Circulation Pump = Relay &amp; 0x0100
 	 */
@@ -834,8 +870,7 @@ public class SystaStatus {
 	 */
 	public boolean boilerIsOn;
 	/**
-	 * Burner = Boiler &amp;&amp; (FLOW_TEMP_BOILER - RETURN_TEMP_BOILER &gt; 2) ||
-	 * ((relay &amp; BURNER_MASK) != 0 )
+	 * Burner = relay &amp; 0x0004
 	 */
 	public boolean burnerIsOn;
 	/**
@@ -955,6 +990,73 @@ public class SystaStatus {
 	 * Yes - the main boiler is not blocked when the log boiler is in operation.
 	 */
 	public boolean logBoilerParallelOperation;
+	
+	/**
+	 * 0 = "Aus"
+     * 1 = "Anheizen"
+     * 2 = "Leistungsbrand"
+     * 3 = "Ausbrand"
+     * 4 = "Abschalten"
+     * 5 = "Nachkühlen"
+     * 6 = "Anschieben"
+	 * Aus
+	 * Der Scheitholzkessel liefert keine Wärme.
+	 * - Pumpe des Scheitholzkessels ist ausgeschaltet
+	 * - Hauptkessel ist freigegeben Wenn der Scheitholzkessel die minimale Kesseltemperatur erreicht hat, erfolgt der Übergang in den Status Anheizen.
+	 * Anheizen
+	 * Der Scheitholzkessel liefert noch nicht genügend Wärme.
+	 * - Hauptkessel ist gesperrt, wenn
+	 *   - Hauptkessel heizt Pufferspeicher: Ja
+	 *   - Parallelbetrieb: Nein
+	 * Wenn der Scheitholzkessel die minimale Kesseltemperatur plus Spreizung erreicht hat, erfolgt der Übergang in den Status Leistungsbrand.
+	 * Leistungsbrand
+	 * Der Scheitholzkessel liefert Wärme.
+	 * - Pumpe des Scheitholzkessels (PKH) schaltet ein
+	 * - Pumpe des Scheitholzkessels (PKH) schaltet aus, wenn die Spreizung zu klein ist
+	 * Wenn der Scheitholzkessel die minimale Kesseltemperatur unterschreitet, erfolgt der Übergang in den Status Ausbrand.
+	 * Ausbrand
+	 * Der Scheitholzkessel liefert zu wenig Wärme.
+	 * - Pumpe des Scheitholzkessels (PKH) schaltet aus Nach 15 Minuten erfolgt der Übergang in den Status Aus.
+	 * Anschieben
+	 * Die Pumpe des Scheitholzkessels (PKH) schaltet kurz ein, damit die Kesseltemperatur am Temperaturfühler (TVKH) korrekt gemessen werden kann.
+	 * Nachkühlen
+	 * Wenn der Scheitholzkessel in der Anheizphase die geforderte Temperatur über einen bestimmten Zeitraum nicht erreicht, schaltet die Pumpe des Scheitholzkessels (PKH) für 15 Minuten ein. Die Wärme wird aus dem Scheitholzkessel transportiert.
+	 * 
+	 * 0 = "off"
+	 * 1 = "heat-up"
+	 * 2 = "power firing"
+	 * 3 = "burnout"
+	 * 4 = "switch off"
+	 * 5 = "post-cooling"
+	 * 6 = "push"
+	 * Off
+	 * The log boiler does not supply heat.
+	 * - Pump of the log boiler is switched off.
+	 * - Main boiler is enabled When the log boiler has reached the minimum boiler temperature, the transition to the heat-up status takes place.
+	 * Heat-up
+	 * The log boiler does not provide enough heat yet.
+	 * - Main boiler is blocked if
+	 *   - Main boiler is heating buffer: Yes
+	 *   - Parallel operation: No
+	 * When the log boiler has reached the minimum boiler temperature plus spread, the transition to the power fire status occurs.
+	 * Power firing
+	 * The log boiler supplies heat.
+	 * - Pump of the log boiler (PKH) switches on.
+	 * - Pump of the log boiler (PKH) switches off when the spreading is too small.
+	 * When the log boiler falls below the minimum boiler temperature, the transition to the burnout status takes place.
+	 * Burnout
+	 * The log boiler provides too little heat.
+	 * - Pump of the log boiler (PKH) switches off After 15 minutes the transition to the Off status takes place.
+	 * Push
+	 * The pump of the log boiler (PKH) switches on briefly so that the boiler temperature can be measured correctly at the temperature sensor (TVKH).
+	 * Post-cooling
+	 * If the log boiler does not reach the required temperature for a certain period of time during the heating-up phase, the pump of the log boiler (PKH) switches on for 15 minutes. The heat is transported from the log boiler.
+     */
+	public int logBoilerOperationMode;
+	/**
+	 * logBoilerOperationModeNames = {"off","heat-up","power firing","burnout","switch off","post-cooling","push"}
+	 */
+	public final String[] logBoilerOperationModeNames = {"off","heat-up","power firing","burnout","switch off","post-cooling","push"};
 	/**
 	 * Einstellung, welche Anlagenvariante verwendet wird<br/>
 	 * Nein - Anlagen mit Pufferspeicher, bei denen ausschließlich der Scheitholzkessel den Speicher erwärmt<br/>
@@ -965,7 +1067,73 @@ public class SystaStatus {
 	 * Yes - systems with storage tank/combined storage tank, where the main boiler heats the storage tank.
 	 */
 	public boolean boilerHeatsBuffer;
-    /**
+	
+	/**
+	 * 0 = "Aus"
+	 * 1 = "Aus Heizgrenze"
+     * 2 = "Aus TI"
+     * 3 = "Gesperrt TPO"
+     * 4 = "Aus WW-Vorrang"
+     * 5 = "Ein"
+     * 6 = "Frostschutz"
+     * 7 = "Kühlen"
+     * 8 = "Vorhaltezeit"
+     * 9 = "Heizbetrieb"
+     * 10 = "Komfortbetrieb"
+     * 11 = "Absenkbetrieb"
+     * 12 = "Aus TSB"
+     * 13 = "Gesperrt"
+     * 14 = "Normal"
+     * 15 = "Erhöht"
+     * 16 = "WW-Modus"
+     * 17 = "Estrich trocknen"
+     * 18 = "Kühlbetrieb"
+     * 
+     * 0 = "off"
+     * 1 = "off (heating limit)"
+     * 2 = "off (room temperature)"
+     * 3 = "locked (buffer temp top)"
+     * 4 = "off (yield hot water)"
+     * 5 = "on"
+     * 6 = "anti freeze"
+     * 7 = "cooling"
+     * 8 = "lead time heat up"
+     * 9 = "heating"
+     * 10 = "comfort"
+     * 11 = "lowering"
+     * 12 = "off (temp swimming pool)"
+     * 13 = "locked"
+     * 14 = "normal"
+     * 15 = "raised"
+     * 16 = "hot water"
+     * 17 = "screed heating"
+     * 18 = "cooling mode"
+	 */
+	public int circuit1OperationMode;
+	public final String[] circuit1OperationModeNames = {"off","off (heating limit)","off (room temperature)","locked (buffer temp top)","off (yield hot water)","on","anti freeze","cooling","lead time heat up","heating","comfort","lowering","off (temp swimming pool)","locked","normal","raised","hot water","screed heating","cooling mode"};
+
+	/**
+	 * Status Zirkulation
+	 * 0="Aus"
+	 * 1="Nachlauf"
+	 * 2="Sperrzeit"
+	 * 3="Gesperrt"
+	 * 4="Aus F\u00fchler TZR"
+	 * 5="Ein"
+	 * 6="Frost"
+	 * 
+	 * 0="off"
+	 * 1="overrun"
+	 * 2="locked (time)"
+	 * 3="locked"
+	 * 4="off (temperature)"
+	 * 5="on"
+	 * 6="anti freeze"
+	 */
+	public int circulationOperationMode;
+	public final String[] circulationOperationModeNames = {"off","overrun","locked (time)","locked","off (temperature)","on","anti freeze"};
+
+	/**
      * timestamp for this status in number of seconds from the epoch of 1970-01-01T00:00:00Z (UTC)
      */
 	public long timestamp;

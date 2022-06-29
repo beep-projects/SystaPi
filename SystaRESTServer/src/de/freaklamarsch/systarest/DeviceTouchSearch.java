@@ -116,8 +116,8 @@ public class DeviceTouchSearch {
 	private static String getDeviceTouchPassword(DeviceTouchDeviceInfo deviceInfo, InterfaceAddress ia,
 			DatagramSocket searchSocket, DatagramPacket receivePacket) throws IOException {
 		String rxMessage;
-		// broadcast to trigger info response from a SystaComfort on this network MAC+"
-		// 6 R UDP Pass"
+		// broadcast to trigger info response from a SystaComfort on this network 
+		// MAC+" 6 R UDP Pass"
 		byte[] passwordMessage = (deviceInfo.mac + " 6 R UDP Pass").getBytes();
 		DatagramPacket packet = new DatagramPacket(passwordMessage, passwordMessage.length, ia.getBroadcast(),
 				BCAST_PORT);
@@ -168,8 +168,8 @@ public class DeviceTouchSearch {
 	 */
 	private static String getDeviceTouchInfo(InterfaceAddress ia, DatagramSocket searchSocket,
 			DatagramPacket receivePacket) throws IOException {
-		// broadcast to trigger info response from a SystaComfort on this network "0 1
-		// A"
+		// broadcast to trigger info response from a SystaComfort on this network 
+		// "0 1 A"
 		byte[] searchMessage = "0 1 A".getBytes();
 		DatagramPacket packet = new DatagramPacket(searchMessage, searchMessage.length, ia.getBroadcast(), BCAST_PORT);
 		searchSocket.send(packet);

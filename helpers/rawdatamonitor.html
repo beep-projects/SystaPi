@@ -1,0 +1,318 @@
+<!--
+ Copyright (c) 2022, The beep-projects contributors
+ this file originated from https://github.com/beep-projects
+ Do not remove the lines above.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see https://www.gnu.org/licenses/
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>SystaPi Data Monitor</title>
+    <style>
+      .systapi-rawdata-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+        grid-gap: 10px;
+        font-family: “Playfair Display”, “Didot”, "Times New Roman", Times, serif;
+      }
+
+      .systaentry-card {
+        display: grid;
+        grid-template-columns: 1fr 1.1fr;
+        word-wrap: break-word;
+        word-break: break-all;
+        padding: .5rem 1.0rem;
+        background-color: #ffffff;
+        background-clip: border-box;
+        border: 1px solid rgba(26,54,126,0.125);
+        border-radius: .25rem;
+        box-shadow: 0 0.46875rem 2.1875rem rgb(4 9 20 / 3%), 0 0.9375rem 1.40625rem rgb(4 9 20 / 3%), 0 0.25rem 0.53125rem rgb(4 9 20 / 5%), 0 0.125rem 0.1875rem rgb(4 9 20 / 3%);
+      }
+
+      .systaentry-card-known {
+        display: grid;
+        grid-template-columns: 1fr 1.1fr;
+        word-wrap: break-word;
+        word-break: break-all;
+        padding: .5rem 1.0rem;
+        background-color: #ffffff;
+        background-clip: border-box;
+        border: 1px solid rgba(26,54,126,1.0);
+        border-radius: .25rem;
+        box-shadow: 0 0.46875rem 2.1875rem rgb(4 9 20 / 3%), 0 0.9375rem 1.40625rem rgb(4 9 20 / 3%), 0 0.25rem 0.53125rem rgb(4 9 20 / 5%), 0 0.125rem 0.1875rem rgb(4 9 20 / 3%);
+      }
+
+      .systaentry-value {
+        opacity: 1.0;
+        font-size: 2rem;
+        font-weight: 700;
+        word-break: normal;
+        color: #3ac47d !important;
+        text-align: right;
+        vertical-align: middle;
+        align-self: center;
+        justify-self: right;
+        grid-column-start: 2;
+        grid-column-end: 3;
+        grid-row-start: 1;
+        grid-row-end: 3;
+      }
+
+      .systaentry-unknown {
+        opacity: .5;
+        color: #495057 !important;
+      }
+
+      .systaentry-dwordnum {
+        opacity: .5;
+        font-size: 0.8rem;
+        font-weight: 400;
+        font-family: Roboto, "Arial black", Arial, Helvetica, sans-serif;
+        text-align: left;
+        padding: 0rem;
+        grid-column-start: 1;
+        grid-column-end: 2;
+        grid-row-start: 1;
+        grid-row-end: 2;
+      }
+
+      .systaentry-name {
+        opacity: .8;
+        font-size: 0.8rem;
+        font-weight: 500;
+        font-family: Roboto, "Arial black", Arial, Helvetica, sans-serif;
+        text-align: left;
+        padding: 0rem;
+        grid-column-start: 1;
+        grid-column-end: 2;
+        grid-row-start: 2;
+        grid-row-end: 3;
+      }
+      
+    </style>
+    <!-- Load React. -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+  </head>
+  <body>
+    <!-- add the React components into this -->
+    <div id="systapirawdata"></div>
+    <!-- Load the SystaPi component. -->
+    <script>
+/**
+ * Class to represent one entry from the raw data packets sent by the SystaComfort
+ */
+class SystaEntry extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: null,
+    };
+  }
+  
+  //function called to render this component in the browser
+  render() {
+    this.value = this.props.getvalue(this.props.dwordnum);
+    return (
+      React.createElement("div", {className: "systaentry-card"+((this.props.known==false) ? "" : " systaentry-card-known")}, 
+        React.createElement("div", {className: "systaentry-value"+((this.props.known==true) ? "" : " systaentry-unknown")},
+          ((this.value=="?") ? "?" : eval(this.props.conversion.replace("x",this.value)))),
+        React.createElement("div", {className: "systaentry-dwordnum"}, "#"+this.props.dwordnum),
+        React.createElement("div", {className: "systaentry-name"}, this.props.name)
+      )
+    );
+  }
+}
+
+/**
+ * Class to represent all entrie from the raw data packets sent by the SystaComfort
+ */
+class SystaPiRawData extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: []
+    };
+    this.elements = this.createElementsArray();
+  }
+  
+
+  render() {
+    return (React.createElement("div", {className: "systapi-rawdata-container"}, this.createElements()));
+  }
+
+  createElements() {
+      var elems = [];
+      var entry;
+      for(let i=0; i<this.elements.length; i++) {
+        entry = this.elements[i];
+        elems.push(React.createElement(SystaEntry, {key: entry.i, dwordnum: entry.i, name: entry.name, known: entry.known, conversion: entry.conversion, getvalue: this.getValue.bind(this)}, null));
+      }
+      return elems;
+  }
+  
+  componentDidMount() {
+    this.updateEntries();
+    //set a timer to periodically update the component
+    //the SystaComfort sends new values each minute, so scheduling it with a few seconds should be good enough
+    this.timer = setInterval(() => this.updateEntries(), 5000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    this.timer = null;
+  }  
+  
+  fetchRawData() {
+    fetch("http://systapi:1337/SystaREST/rawdata")
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw response;
+        }
+      })
+      .then(result => {
+        //put it into state, as it should trigger an update of the 
+        //whole component
+        this.setState({data: result.rawData})
+      })
+      .catch(error => {
+        console.error("Error fetching data: ", error);
+      })
+      .finally(() => {
+        //cleanup?;
+      })
+  }
+  
+  updateEntries() {
+    this.fetchRawData();
+    //nothing else to do
+    //update of the components is treiggered by setting
+    //setState({data: ...}) inside fetchRawData()
+  }
+  
+  getValue(dwordnum) {
+    if(dwordnum < this.state.data.length) {
+      return this.state.data[dwordnum];
+    } else {
+      return "?";
+    } 
+  }
+  
+  createElementsArray() {
+    //initialize the array with unknown entries
+    var e = new Array(256);
+    for(let i=0;i<e.length;i++) {
+      e[i] = {"i": i, "name": "", "known": false, conversion: "x"};
+    }
+    //add the known entries (this list is generated from SystaIndex.java)
+    e[0] = {"i": 0, "name": "OUTSIDE_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[1] = {"i": 1, "name": "CIRCUIT_1_FLOW_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[2] = {"i": 2, "name": "CIRCUIT_1_RETURN_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[3] = {"i": 3, "name": "HOT_WATER_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[4] = {"i": 4, "name": "BUFFER_TEMP_TOP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[5] = {"i": 5, "name": "BUFFER_TEMP_BOTTOM", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[6] = {"i": 6, "name": "CIRCULATION_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[7] = {"i": 7, "name": "CIRCUIT_2_FLOW_TEMP", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[8] = {"i": 8, "name": "CIRCUIT_2_RETURN_TEMP", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[9] = {"i": 9, "name": "ROOM_TEMP_ACTUAL_1", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[10] = {"i": 10, "name": "ROOM_TEMP_ACTUAL_2", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[11] = {"i": 11, "name": "COLLECTOR_TEMP_ACTUAL", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[12] = {"i": 12, "name": "BOILER_FLOW_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[13] = {"i": 13, "name": "BOILER_RETURN_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[14] = {"i": 14, "name": "LOG_BOILER_FLOW_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[15] = {"i": 15, "name": "LOG_BOILER_RETURN_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[16] = {"i": 16, "name": "LOG_BOILER_BUFFER_TEMP_TOP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[17] = {"i": 17, "name": "SWIMMINGPOOL_TEMP", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[18] = {"i": 18, "name": "SWIMMINGPOOL_FLOW_TEMP", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[19] = {"i": 19, "name": "SWIMMINGPOOL_RETURN_TEMP", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[22] = {"i": 22, "name": "HOT_WATER_TEMP_SET", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[23] = {"i": 23, "name": "ROOM_TEMP_SET_1", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[24] = {"i": 24, "name": "CIRCUIT_1_FLOW_TEMP_SET", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[25] = {"i": 25, "name": "CIRCUIT_2_FLOW_TEMP_SET", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[26] = {"i": 26, "name": "ROOM_TEMP_SET_2", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[33] = {"i": 33, "name": "BUFFER_TEMP_SET", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[34] = {"i": 34, "name": "BOILER_TEMP_SET", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[36] = {"i": 36, "name": "OPERATION_MODE", "known": true, conversion: "x"};
+    e[39] = {"i": 39, "name": "ROOM_TEMP_SET_NORMAL", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[40] = {"i": 40, "name": "ROOM_TEMP_SET_COMFORT", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[41] = {"i": 41, "name": "ROOM_TEMP_SET_LOWERING", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[42] = {"i": 42, "name": "HEATING_OPERATION_MODE", "known": true, conversion: "x"};
+    e[47] = {"i": 47, "name": "CONTROLLED_BY", "known": true, conversion: "x"};
+    e[48] = {"i": 48, "name": "HEATING_CURVE_BASE_POINT", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[50] = {"i": 50, "name": "HEATING_CURVE_GRADIENT", "known": true, conversion: "x/10.0 + \" K/K\""};
+    e[52] = {"i": 52, "name": "MAX_FLOW_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[53] = {"i": 53, "name": "HEATING_LIMIT_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[54] = {"i": 54, "name": "HEATING_LIMIT_TEMP_LOWERING", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[55] = {"i": 55, "name": "ANTI_FREEZE_OUTSIDE_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[56] = {"i": 56, "name": "HEAT_UP_TIME", "known": true, conversion: "x/10.0 +\" min\""};
+    e[57] = {"i": 57, "name": "ROOM_IMPACT", "known": true, conversion: "x/10.0 +\" K/K\""};
+    e[58] = {"i": 58, "name": "BOILER_SUPERELEVATION", "known": true, conversion: "x +\" K\""};
+    e[59] = {"i": 59, "name": "HEATING_CIRCUIT_SPREADING", "known": true, conversion: "x/10.0 +\" K\""};
+    e[60] = {"i": 60, "name": "HEATING_PUMP_SPEED_MIN", "known": true, conversion: "x + \" %\""};
+    e[62] = {"i": 62, "name": "MIXER_RUNTIME", "known": true, conversion: "x + \" min\""};
+    e[65] = {"i": 65, "name": "ROOM_TEMP_CORRECTION", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[87] = {"i": 87, "name": "UNDERFLOOR_HEATING_BASE_POINT", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[89] = {"i": 89, "name": "UNDERFLOOR_HEATING_GRADIENT", "known": false, conversion: "x/10.0 +\" K/K\""};
+    e[149] = {"i": 149, "name": "HOT_WATER_TEMP_NORMAL", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[150] = {"i": 150, "name": "HOT_WATER_TEMP_COMFORT", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[151] = {"i": 151, "name": "HOT_WATER_OPERATION_MODE", "known": true, conversion: "x"};
+    e[155] = {"i": 155, "name": "HOT_WATER_HYSTERESIS", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[156] = {"i": 156, "name": "HOT_WATER_TEMP_MAX", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[158] = {"i": 158, "name": "PUMP_OVERRUN", "known": true, conversion: "x +\" min \""};
+    e[159] = {"i": 159, "name": "BUFFER_TEMP_MAX", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[160] = {"i": 160, "name": "BUFFER_TEMP_MIN", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[161] = {"i": 161, "name": "BOILER_HYSTERESIS", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[162] = {"i": 162, "name": "BOILER_RUNTIME_MIN", "known": true, conversion: "x + \" min\""};
+    e[163] = {"i": 163, "name": "BOILER_SHUTDOWN_TEMP", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[164] = {"i": 164, "name": "BOILER_PUMP_SPEED_MIN", "known": true, conversion: "x + \" %\""};
+    e[169] = {"i": 169, "name": "CIRCULATION_PUMP_OVERRUN", "known": false, conversion: "x +\" min\""};
+    e[170] = {"i": 170, "name": "CIRCULATION_LOCKOUT_TIME_PUSH_BUTTON", "known": false, conversion: "x +\" min\""};
+    e[171] = {"i": 171, "name": "CIRCULATION_HYSTERESIS", "known": false, conversion: "x/10.0 +\" \xB0C\""};
+    e[175] = {"i": 175, "name": "LOG_BOILER_SETTINGS", "known": true, conversion: "(x).toString(2).padStart(8, '0')"};
+    e[176] = {"i": 176, "name": "ADJUST_ROOM_TEMP_BY", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[179] = {"i": 179, "name": "BOILER_OPERATION_TIME_HOURS", "known": true, conversion: "x +\" hr\""};
+    e[180] = {"i": 180, "name": "BOILER_OPERATION_TIME_MINUTES", "known": true, conversion: "x +\" min\""};
+    e[181] = {"i": 181, "name": "BURNER_NUMBER_OF_STARTS", "known": true, conversion: "x"};
+    e[182] = {"i": 182, "name": "SOLAR_POWER_ACTUAL", "known": false, conversion: "x/10.0"};
+    e[183] = {"i": 183, "name": "SOLAR_GAIN_DAY", "known": false, conversion: "x/10.0"};
+    e[184] = {"i": 184, "name": "SOLAR_GAIN_TOTAL", "known": false, conversion: "x/10.0"};
+    e[185] = {"i": 185, "name": "SYSTEM_NUMBER_OF_STARTS", "known": true, conversion: "x"};
+    e[186] = {"i": 186, "name": "CIRCUIT_1_LEAD_TIME", "known": true, conversion: "x + \" min\""};
+    e[187] = {"i": 187, "name": "CIRCUIT_2_LEAD_TIME", "known": false, conversion: "x + \" min\""};
+    e[188] = {"i": 188, "name": "CIRCUIT_3_LEAD_TIME", "known": false, conversion: "x + \" min\""};
+    e[189] = {"i": 189, "name": "LOG_BOILER_BUFFER_TEMP_MIN", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[190] = {"i": 190, "name": "LOG_BOILER_TEMP_MIN", "known": true, conversion: "x/10.0 +\" \xB0C\""};
+    e[191] = {"i": 191, "name": "LOG_BOILER_SPREADING_MIN", "known": true, conversion: "x/10.0 +\" K\""};
+    e[192] = {"i": 192, "name": "LOG_BOILER_PUMP_SPEED_MIN", "known": true, conversion: "x + \"%\""};
+    e[220] = {"i": 220, "name": "RELAY", "known": true, conversion: "(x).toString(2).padStart(8, '0')"};
+    e[221] = {"i": 221, "name": "HEATING_PUMP_SPEED_ACTUAL", "known": true, conversion: "x*5 + \" %\""};
+    e[228] = {"i": 228, "name": "ERROR", "known": true, conversion: "x"};
+    e[246] = {"i": 246, "name": "LOG_BOILER_PUMP_SPEED_ACTUAL", "known": true, conversion: "x*5 + \"%\""};
+    e[248] = {"i": 248, "name": "BOILER_STATUS", "known": true, conversion: "x"};
+    return e;
+  }  
+}
+
+
+const domContainer = document.querySelector('#systapirawdata');
+ReactDOM.render(React.createElement(SystaPiRawData), domContainer);
+
+    </script>
+  </body>
+</html>

@@ -1,36 +1,46 @@
 /*
-* Copyright (c) 2021, The beep-projects contributors
-* this file originated from https://github.com/beep-projects
-* Do not remove the lines above.
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see https://www.gnu.org/licenses/
-*
-*/
+ * Copyright (c) 2021, The beep-projects contributors
+ * this file originated from https://github.com/beep-projects
+ * Do not remove the lines above.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see https://www.gnu.org/licenses/
+ *
+ */
 package de.freaklamarsch.systarest;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import de.freaklamarsch.systarest.DataLogger.DataLoggerStatus;
 import de.freaklamarsch.systarest.DeviceTouchSearch.DeviceTouchDeviceInfo;
@@ -43,10 +53,14 @@ import de.freaklamarsch.systarest.SystaWaterHeaterStatus.tempUnit;
  */
 public class FakeSystaWeb implements Runnable {
 
+	enum MessageType {
+		NONE, DATA0, DATA1, DATA2, DATA3, OK, ERR
+	}
+
 	/**
 	 * Inner class for representing the status of this @see FakeSystaWeb
 	 */
-	public class FakeSystaWebStatus {
+	public static class FakeSystaWebStatus {
 		public final boolean running;
 		public final boolean connected;
 		public final String lastTimestamp;
@@ -62,11 +76,12 @@ public class FakeSystaWeb implements Runnable {
 		public final String loggerFileRootPath;
 		public final int loggerFileCount;
 		public final int loggerBufferedEntries;
+		public final String commitDate;
 
 		public FakeSystaWebStatus(boolean running, boolean connected, long dataPacketsReceived, String timestamp,
 				String localAddress, int localPort, InetAddress remoteAddress, int remotePort, boolean saveLoggedData,
 				int capacity, String logFilePrefix, String logEntryDelimiter, String logFileRootPath,
-				int writerFileCount, int bufferedEntries) {
+				int writerFileCount, int bufferedEntries, String commitDate) {
 
 			this.running = running;
 			this.connected = connected;
@@ -83,6 +98,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
+			this.commitDate = "2022-06-17T21:06:24+00:00";
 		}
 	}
 
@@ -133,22 +149,36 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
+	private final String commitDate = "2022-06-17T21:06:24+00:00";
+	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
 	private InetAddress remoteAddress;
 	private int remotePort;
 	private final int PORT = 22460;
-	private final int MAX_DATA_LENGTH = 1024;
-	private final int MAX_NUMBER_ENTRIES = 250;
-	private final int COUNTER_OFFSET = 0x3FBF;
-	private final int MAC_OFFSET = 0x8E83;
-	private final int REPLY_MSG_LENGTH = 20;
+	private final int MAX_DATA_LENGTH = 1048;
+	private final int MAX_NUMBER_ENTRIES = 256;
+	private final int COUNTER_OFFSET_REPLY = 0x3FBF;
+	private final int COUNTER_OFFSET_REPLY_2 = 0x3FC0;
+	private final int COUNTER_OFFSET_PWD = 0x10F9;
+	private final int COUNTER_OFFSET_CHANGE = 0x3FBF;
+	private final int MAC_OFFSET_REPLY = 0x8E82;
+	private final int MAC_OFFSET_REPLY_VDR = 0x8E83;
+	// private final int MAC_OFFSET_PWD = 0x8E83;
+	// private final int MAC_OFFSET_PWD = 0x8E81;
+	// private final int MAC_OFFSET_PWD = 0x8E82;
+	private final int MAC_OFFSET_CHANGE = 0x8E7E;
+	// private final int REPLY_MSG_LENGTH = 20;
 
+	// the SystaComfort sends burst of 3 to 4 messages every minute
+	// at the moment only packets of type 0x01 are processed, so 2 buffers should be
+	// enough
+	// TODO adjust this value if more packet types are processed
 	private final int RING_BUFFER_SIZE = 2;
 	private int readIndex = -1;
 	private int writeIndex = -1;
 	private long dataPacketsReceived = 0;
-	private byte[][] mac = new byte[RING_BUFFER_SIZE][6];
+	private byte[][] replyHeader = new byte[RING_BUFFER_SIZE][8];
 	private Integer[][] intData = new Integer[RING_BUFFER_SIZE][MAX_NUMBER_ENTRIES];
-	private byte[] reply = new byte[REPLY_MSG_LENGTH];
+	// private byte[] reply = new byte[REPLY_MSG_LENGTH];
 	private long[] timestamp = new long[RING_BUFFER_SIZE];
 
 	private String inetAddress = "192.186.1.1";
@@ -160,10 +190,19 @@ public class FakeSystaWeb implements Runnable {
 
 	private final String[] WATER_HEATER_OPERATION_MODES = { "off", "normal", "comfort", "locked" };
 
-	private int WRITER_MAX_DATA = 60;
-	private DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;//ofPattern("E-dd.MM.yy-HH:mm:ss");
-	private DataLogger<Integer> logInt = new DataLogger<>("data", WRITER_MAX_DATA);
-	private DataLogger<Byte> logRaw = new DataLogger<>("raw", WRITER_MAX_DATA);
+	private static final int WRITER_MAX_DATA = 60;
+	private static final String DELIMITER = ";";
+	private static final String PREFIX = "SystaREST";
+	private static final String LOG_PATH = System.getProperty("user.home") + File.separator + "logs";
+	private static final String logFileFilterString = ".*-(raw|data)-[0-9]+\\.txt";
+	private static final FilenameFilter logFileFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			return name.matches(logFileFilterString);
+		}
+	};
+	private DataLogger<Integer> logInt = new DataLogger<>(PREFIX, "data", DELIMITER, WRITER_MAX_DATA, LOG_PATH);
+	private DataLogger<Byte> logRaw = new DataLogger<>(PREFIX, "raw", DELIMITER, WRITER_MAX_DATA, LOG_PATH);
 
 	// constructor
 	public FakeSystaWeb() {
@@ -176,17 +215,47 @@ public class FakeSystaWeb implements Runnable {
 		DataLoggerStatus dls = logRaw.getStatus();
 		// if we have received data within the last 120 seconds, we are considered being
 		// connected
+		// boolean connected = (readIndex < 0) ? false
+		// : (timestamp[readIndex] > 0
+		// && (LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - timestamp[readIndex]
+		// < 120));
 		boolean connected = (readIndex < 0) ? false
-				: (timestamp[readIndex] > 0
-						&& (LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - timestamp[readIndex] < 120));
+				: (timestamp[readIndex] > 0 && (Instant.now().getEpochSecond() - timestamp[readIndex] < 120));
 		return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.getTimestampString(),
 				this.inetAddress, this.PORT, this.remoteAddress, this.remotePort, dls.saveLoggedData, dls.capacity,
-				dls.logFilePrefix, dls.logEntryDelimiter, dls.logFileRootPath, dls.writerFileCount,
-				dls.bufferedEntries);
+				dls.logFilePrefix, dls.logEntryDelimiter, dls.logFileRootPath, dls.writerFileCount, dls.bufferedEntries,
+				this.commitDate);
 	}
 
 	public DeviceTouchDeviceInfo findSystaComfort() {
 		return DeviceTouchSearch.search();
+	}
+
+	/**
+	 * TODO Make this method work
+	 *
+	 * @param mode the intended operation mode 0 = Auto Prog. 1 1 = Auto Prog. 2 2 =
+	 *             Auto Prog. 3 3 = Continuous Normal 4 = Continuous Comfort 5 =
+	 *             Continuous Lowering 6 = Summer 7 = Off 8 = Party 14= Test or
+	 *             chimney sweep
+	 */
+	public void setOperationMode(int mode) {
+		System.out.println("setOperationMode to " + mode);
+		synchronized (typeOfLastReceivedMessage) {
+			try {
+				sendPassword();
+				// wait 1s for the reply
+				typeOfLastReceivedMessage.wait(1000);
+				// TODO handle error
+				sendOperationModeChange(mode);
+				// wait 1s for the reply
+				typeOfLastReceivedMessage.wait(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		System.out.println("setOperationMode to " + mode + " DONE!");
 	}
 
 	/**
@@ -216,14 +285,27 @@ public class FakeSystaWeb implements Runnable {
 	/**
 	 * get the timestamp for the current measurement as human readable string
 	 *
-	 * @return the timestamp as a LocalDateTime string, which is a date-time without
-	 *         a time-zone in the ISO-8601 calendar system
+	 * @return the timestamp as a LocalDateTime string, which is a date-time with a
+	 *         time-zone offset in the ISO-8601 calendar system e.g.
+	 *         2021-12-24T14:49:27+01:00 or "never"
 	 */
 	public String getTimestampString() {
-		return (readIndex < 0) ? "never"
-				: formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
-		//: formatter.format(ZonedDateTime.ofInstant(Instant.ofEpochSecond(timestamp[readIndex]), ZoneOffset.UTC));
-		//: formatter.format(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC));
+		return (readIndex < 0) ? "never" : getFormattedTimeString(timestamp[readIndex]);
+	}
+
+	/**
+	 * get the timestamp (epoch seconds) as formatted string for the local timezone
+	 *
+	 * @return the timestamp as a LocalDateTime string, which is a date-time with a
+	 *         time-zone offset in the ISO-8601 calendar system e.g.
+	 *         2021-12-24T14:49:27+01:00
+	 */
+	public String getFormattedTimeString(long timestamp) {
+		// return
+		// DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp,
+		// 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+		return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(
+				LocalDateTime.ofEpochSecond(timestamp, 0, OffsetDateTime.now().getOffset()), ZoneId.systemDefault()));
 	}
 
 	/**
@@ -264,9 +346,7 @@ public class FakeSystaWeb implements Runnable {
 		status.supportedFeatures = new String[] {}; // TODO check what supported features are
 		status.is_away_mode_on = false; // TODO match with ferien mode if possible
 		status.timestamp = timestamp[i];
-		//status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
-		status.timestampString = formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
-		//formatter.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault()))
+		status.timestampString = getFormattedTimeString(timestamp[readIndex]);
 		return status;
 	}
 
@@ -280,6 +360,7 @@ public class FakeSystaWeb implements Runnable {
 		status.outsideTemp = intData[i][SystaIndex.OUTSIDE_TEMP] / 10.0;
 		status.circuit1FlowTemp = intData[i][SystaIndex.CIRCUIT_1_FLOW_TEMP] / 10.0;
 		status.circuit1ReturnTemp = intData[i][SystaIndex.CIRCUIT_1_RETURN_TEMP] / 10.0;
+		status.circuit1OperationMode = intData[i][SystaIndex.CIRCUIT_1_OPERATION_MODE];
 		status.hotWaterTemp = intData[i][SystaIndex.HOT_WATER_TEMP] / 10.0;
 		status.bufferTempTop = intData[i][SystaIndex.BUFFER_TEMP_TOP] / 10.0;
 		status.bufferTempBottom = intData[i][SystaIndex.BUFFER_TEMP_BOTTOM] / 10.0;
@@ -294,8 +375,8 @@ public class FakeSystaWeb implements Runnable {
 		status.logBoilerFlowTemp = intData[i][SystaIndex.LOG_BOILER_FLOW_TEMP] / 10.0;
 		status.logBoilerReturnTemp = intData[i][SystaIndex.LOG_BOILER_RETURN_TEMP] / 10.0;
 		status.logBoilerBufferTempTop = intData[i][SystaIndex.LOG_BOILER_BUFFER_TEMP_TOP] / 10.0;
-		status.swimmingpoolFlowTemp = intData[i][SystaIndex.SWIMMINGPOOL_TEMP] / 10.0;
-		status.swimmingpoolFlowTeamp = intData[i][SystaIndex.SWIMMINGPOOL_FLOW_TEMP] / 10.0;
+		status.swimmingpoolTemp = intData[i][SystaIndex.SWIMMINGPOOL_TEMP] / 10.0;
+		status.swimmingpoolFlowTemp = intData[i][SystaIndex.SWIMMINGPOOL_FLOW_TEMP] / 10.0;
 		status.swimmingpoolReturnTemp = intData[i][SystaIndex.SWIMMINGPOOL_RETURN_TEMP] / 10.0;
 		status.hotWaterTempSet = intData[i][SystaIndex.HOT_WATER_TEMP_SET] / 10.0;
 		status.roomTempSet1 = intData[i][SystaIndex.ROOM_TEMP_SET_1] / 10.0;
@@ -331,15 +412,18 @@ public class FakeSystaWeb implements Runnable {
 		status.hotWaterHysteresis = intData[i][SystaIndex.HOT_WATER_HYSTERESIS] / 10.0;
 		status.hotWaterTempMax = intData[i][SystaIndex.HOT_WATER_TEMP_MAX] / 10.0;
 		status.heatingPumpOverrun = intData[i][SystaIndex.PUMP_OVERRUN];
-		status.heatingPumpSpeedActual = intData[i][SystaIndex.HEATING_PUMP_SPEED_ACTUAL] * 5;
+		status.heatingPumpSpeedActual = intData[i][SystaIndex.HEATING_PUMP_SPEED_ACTUAL] * 5; // in %
 		status.bufferTempMax = intData[i][SystaIndex.BUFFER_TEMP_MAX] / 10.0;
 		status.bufferTempMin = intData[i][SystaIndex.BUFFER_TEMP_MIN] / 10.0;
 		status.boilerHysteresis = intData[i][SystaIndex.BOILER_HYSTERESIS] / 10.0;
-		status.boilerOperationTime = intData[i][SystaIndex.BOILER_RUNTIME_MIN];
+		status.boilerOperationTime = intData[i][SystaIndex.BOILER_RUNTIME_MIN]; // in min
 		status.boilerShutdownTemp = intData[i][SystaIndex.BOILER_SHUTDOWN_TEMP] / 10.0;
-		status.boilerPumpSpeedMin = intData[i][SystaIndex.BOILER_PUMP_SPEED_MIN];
-		status.boilerOperationMode = intData[i][SystaIndex.BOILER_STATUS];
-		status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN];
+		status.boilerPumpSpeedMin = intData[i][SystaIndex.BOILER_PUMP_SPEED_MIN]; // in %
+		status.boilerPumpSpeedActual = intData[i][SystaIndex.BOILER_PUMP_SPEED_ACTUAL] * 5;// 0=0%, 20=100%
+		status.boilerOperationMode = intData[i][SystaIndex.BOILER_OPERATION_MODE];
+		status.circulationOperationMode = intData[i][SystaIndex.CIRCULATION_OPERATION_MODE];
+		status.circulationPumpOverrun = intData[i][SystaIndex.CIRCULATION_PUMP_OVERRUN]; // in min
+		status.circulationLockoutTimePushButton = intData[i][SystaIndex.CIRCULATION_LOCKOUT_TIME_PUSH_BUTTON]; // in min
 		status.circulationHysteresis = intData[i][SystaIndex.CIRCULATION_HYSTERESIS] / 10.0;
 		status.adjustRoomTempBy = intData[i][SystaIndex.ADJUST_ROOM_TEMP_BY] / 10.0;
 		status.boilerOperationTimeHours = intData[i][SystaIndex.BOILER_OPERATION_TIME_HOURS];
@@ -349,9 +433,9 @@ public class FakeSystaWeb implements Runnable {
 		status.solarGainDay = intData[i][SystaIndex.SOLAR_GAIN_DAY] / 10.0;
 		status.solarGainTotal = intData[i][SystaIndex.SOLAR_GAIN_TOTAL] / 10.0;
 		status.systemNumberOfStarts = intData[i][SystaIndex.SYSTEM_NUMBER_OF_STARTS];
-		status.circuit1LeadTime = intData[i][SystaIndex.CIRCUIT_1_LEAD_TIME];
-		status.circuit2LeadTime = intData[i][SystaIndex.CIRCUIT_2_LEAD_TIME];
-		status.circuit3LeadTime = intData[i][SystaIndex.CIRCUIT_3_LEAD_TIME];
+		status.circuit1LeadTime = intData[i][SystaIndex.CIRCUIT_1_LEAD_TIME]; // in min
+		status.circuit2LeadTime = intData[i][SystaIndex.CIRCUIT_2_LEAD_TIME]; // in min
+		status.circuit3LeadTime = intData[i][SystaIndex.CIRCUIT_3_LEAD_TIME]; // in min
 		status.relay = intData[i][SystaIndex.RELAY];
 		status.heatingPumpIsOn = (status.relay & SystaStatus.HEATING_PUMP_MASK) != 0;
 		status.chargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_MASK) != 0;
@@ -359,9 +443,8 @@ public class FakeSystaWeb implements Runnable {
 		status.circulationPumpIsOn = (status.relay & SystaStatus.CIRCULATION_PUMP_MASK) != 0;
 		status.boilerIsOn = ((status.relay & SystaStatus.BOILER_MASK) != 0)
 				|| (List.of(1, 2, 3, 8, 9, 11, 12).contains(status.boilerOperationMode));
-		status.burnerIsOn = (status.boilerIsOn && ((status.boilerFlowTemp - status.boilerReturnTemp) > 0.2))
-				|| ((status.relay & SystaStatus.BURNER_MASK) != 0); // TODO verify this assumption
-		status.ledBoilerIsOn = (status.relay & SystaStatus.LED_BOILER_MASK) != 0; // TODO verify this assumption
+		status.burnerIsOn = ((status.relay & SystaStatus.BURNER_MASK) != 0);
+		status.boilerLedIsOn = (status.relay & SystaStatus.LED_BOILER_MASK) != 0;
 		status.unknowRelayState1IsOn = (status.relay & SystaStatus.UNKNOWN_1_MASK) != 0;
 		status.unknowRelayState2IsOn = (status.relay & SystaStatus.UNKNOWN_2_MASK) != 0;
 		status.mixer1IsOnWarm = (status.relay & SystaStatus.MIXER_WARM_MASK) != 0;
@@ -375,16 +458,17 @@ public class FakeSystaWeb implements Runnable {
 		status.heatingOperationModeX = intData[i][SystaIndex.HEATING_OPERATION_MODE_X];
 		status.logBoilerBufferTempMin = intData[i][SystaIndex.LOG_BOILER_BUFFER_TEMP_MIN] / 10.0;
 		status.logBoilerTempMin = intData[i][SystaIndex.LOG_BOILER_TEMP_MIN] / 10.0;
-		status.logBoilerSpreadingMin = intData[i][SystaIndex.LOG_BOILER_SPREADING_MIN];
+		status.logBoilerSpreadingMin = intData[i][SystaIndex.LOG_BOILER_SPREADING_MIN] / 10.0;
 		status.logBoilerPumpSpeedMin = intData[i][SystaIndex.LOG_BOILER_PUMP_SPEED_MIN];// it is already in %
 		status.logBoilerPumpSpeedActual = intData[i][SystaIndex.LOG_BOILER_PUMP_SPEED_ACTUAL] * 5;// 0=0%, 20=100%
 		status.logBoilerSettings = intData[i][SystaIndex.LOG_BOILER_SETTINGS];
 		status.logBoilerParallelOperation = (status.logBoilerSettings
 				& SystaStatus.LOG_BOILER_PARALLEL_OPERATION_MASK) != 0;
+		status.logBoilerOperationMode = intData[i][SystaIndex.LOG_BOILER_OPERATION_MODE];
 		status.boilerHeatsBuffer = (status.logBoilerSettings & SystaStatus.BOILER_HEATS_BUFFER_MASK) != 0;
+		status.bufferType = intData[i][SystaIndex.BUFFER_TYPE];
 		status.timestamp = timestamp[i];
-		//status.timestampString = formatter.format(LocalDateTime.ofEpochSecond(timestamp[i], 0, ZoneOffset.UTC));
-		status.timestampString = formatter.format(ZonedDateTime.of(LocalDateTime.ofEpochSecond(timestamp[readIndex], 0, ZoneOffset.UTC), ZoneId.systemDefault()));
+		status.timestampString = getFormattedTimeString(timestamp[readIndex]);
 		return status;
 	}
 
@@ -399,7 +483,8 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	/**
-	 * start the communication with a Paradigma SystaComfort II
+	 * start the communication with a Paradigma SystaComfort II requires the globals
+	 * inetAddress and PORT to be properly configured
 	 */
 	@Override // from the Runnable interface
 	public void run() {
@@ -438,7 +523,8 @@ public class FakeSystaWeb implements Runnable {
 			}
 			// calculate the buffer id for writing
 			writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
-			timestamp[writeIndex] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+			// timestamp[writeIndex] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
+			timestamp[writeIndex] = Instant.now().getEpochSecond();
 			remoteAddress = receivePacket.getAddress();
 			remotePort = receivePacket.getPort();
 			logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);
@@ -446,31 +532,61 @@ public class FakeSystaWeb implements Runnable {
 			ByteBuffer data = ByteBuffer.wrap(receivePacket.getData()).order(ByteOrder.LITTLE_ENDIAN);
 			// parse it
 			// 0..5: MAC address of paradigma control board:
-			mac[writeIndex][3] = data.get();
-			mac[writeIndex][2] = data.get();
-			mac[writeIndex][1] = data.get();
-			mac[writeIndex][0] = data.get();
-			mac[writeIndex][5] = data.get();
-			mac[writeIndex][4] = data.get();
+			replyHeader[writeIndex][0] = data.get();
+			replyHeader[writeIndex][1] = data.get();
+			replyHeader[writeIndex][2] = data.get();
+			replyHeader[writeIndex][3] = data.get();
+			replyHeader[writeIndex][4] = data.get();
+			replyHeader[writeIndex][5] = data.get();
 			// 6..7: counter, incremented by 1 for each packet
+			replyHeader[writeIndex][6] = data.get();
+			replyHeader[writeIndex][7] = data.get();
 			// 8..15: always "09 09 0C 00 32 DA 00 00"
+			// byte 12, 13 are the protocol version 32 DA, or 32 DC or 33 DF
 			// 16: packet type (00 = empty intial packet, 01 = actual data packet, 02 =
-			// short final packet)
+			// short final packet, FF = parameter change ok)
 			data.position(16);
 			byte type = data.get();
 			if (type == 0x00) {
 				// processType0(data, currentWriteBuffer);
+				typeOfLastReceivedMessage = MessageType.DATA0;
+				sendDataReply(writeIndex);
+				// sendOperationModeChange(2);
 			} else if (type == 0x01) {
 				processType1(data);
-				// writing done, release the buffer for reading
+				typeOfLastReceivedMessage = MessageType.DATA1;
 				// readIndex = writeIndex;
+				// sendPassword();
+				// System.out.println("WI: "+writeIndex);
+				// if(writeIndex==1) {
+				// sendPassword();
+				// } else {
+				sendDataReply(writeIndex);
+				// }
+				logInt.addData(intData[readIndex], timestamp[readIndex]);
 			} else if (type == 0x02) {
 				// processType2(data, currentWriteBuffer);
+				typeOfLastReceivedMessage = MessageType.DATA2;
+				sendDataReply(writeIndex);
+				// readIndex = writeIndex;
+			} else if (type == 0x03) {
+				// processType2(data, currentWriteBuffer);
+				typeOfLastReceivedMessage = MessageType.DATA3;
+				// readIndex = writeIndex;
+				// sendPassword();
+				sendDataReply(writeIndex);
+			} else if (type == 0xFF) {
+				// processType2(data, currentWriteBuffer);
+				typeOfLastReceivedMessage = MessageType.OK;
+			} else {
+				typeOfLastReceivedMessage = MessageType.ERR;
 			}
-			// send the reply for the received data
-			sendReply(socket, data, remoteAddress, remotePort);
-			if (type == 0x01) {
-				logInt.addData(intData[readIndex], timestamp[readIndex]);
+			if (typeOfLastReceivedMessage != MessageType.ERR) {
+				// update readIndex
+				// readIndex = writeIndex;
+			}
+			synchronized (typeOfLastReceivedMessage) {
+				typeOfLastReceivedMessage.notifyAll();
 			}
 		}
 		System.out.println("[FakeSystaWeb] UDP communication with Paradigma SystaComfort II stopped");
@@ -494,15 +610,110 @@ public class FakeSystaWeb implements Runnable {
 	 * function to reply the messages received from a Paradigma SystaComfort II, for
 	 * keeping the communication alive
 	 *
-	 * @param socket        local socket used for communication with the Paradigma
-	 *                      SystaComfort II
-	 * @param data          ByteBuffer holding the message for which the reply is
-	 *                      sent
-	 * @param remoteAddress IP address of the Paradigma SystaComfort II
-	 * @param remotePort    Port of the Paradigma SystaComfort II
 	 */
-	private void sendReply(DatagramSocket socket, ByteBuffer data, InetAddress remoteAddress, int remotePort) {
-		createReply(data);
+	private void sendPassword() {
+		byte[] reply = Arrays.copyOf(replyHeader[readIndex], 28);
+		// Always constant:
+		reply[8] = 0x01;
+		reply[12] = 0x02;
+		reply[14] = 0x08;
+		reply[19] = 0x31;
+		reply[20] = 0x32;
+		reply[21] = 0x31;
+		reply[22] = 0x32;
+		// Generate reply ID from MAC address:
+		// int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF)
+		// + ((reply[20] & 0xFF) << 8) + (reply[19] & 0xFF)
+		// + MAC_OFFSET_PWD) & 0xFFFF;
+		int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) + 0xBFB5) & 0xFFFF;
+
+		reply[24] = (byte) (m & 0xFF);
+		reply[25] = (byte) (m >> 8);
+		// Generate reply counter with offset:
+		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_PWD) & 0xFFFF;
+		reply[26] = (byte) (n & 0xFF);
+		reply[27] = (byte) (n >> 8);
+		send(reply);
+	}
+
+	private void sendOperationModeChange(int mode) {
+		byte[] reply = Arrays.copyOf(replyHeader[readIndex], 28);
+		// Always constant:
+		reply[8] = 0x01;
+		reply[12] = 0x02;
+		reply[14] = 0x11;
+		reply[15] = 0x01;
+		reply[16] = 0x1F;
+		reply[20] = (byte) (mode & 0xFF);
+		reply[21] = (byte) (mode >> 8 & 0xFF);
+		// Generate reply ID from MAC address:
+		int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) + ((reply[21] & 0xFF) << 8) + (reply[20] & 0xFF)
+				+ MAC_OFFSET_CHANGE) & 0xFFFF;
+		reply[24] = (byte) (m & 0xFF);
+		reply[25] = (byte) (m >> 8);
+		// Generate reply counter with offset:
+		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + (reply[14] & 0xFF) + 0x100 // TODO check if it is 0x200,
+		// 0x300
+				+ COUNTER_OFFSET_CHANGE) & 0xFFFF;
+		reply[26] = (byte) (n & 0xFF);
+		reply[27] = (byte) (n >> 8);
+		send(reply);
+	}
+
+	/**
+	 * function to reply the messages received from a Paradigma SystaComfort II, for
+	 * keeping the communication alive
+	 *
+	 * @param index index in replyHeader where the current message is stored
+	 */
+	private void sendDataReply(int index) {
+		byte[] reply = Arrays.copyOf(replyHeader[index], 16);
+		// Generate reply ID from MAC address:
+		int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) + MAC_OFFSET_REPLY) & 0xFFFF;
+		reply[12] = (byte) (m & 0xFF);
+		reply[13] = (byte) (m >> 8);
+		// Generate reply counter with offset:
+		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY) & 0xFFFF;
+		// System.out.println("maccount: "+((int)reply[5]+(int)reply[4]));
+		if ((reply[5] + reply[4]) == 57 || (reply[5] + reply[4]) == 313) {// TODO this is just a
+			// hack to support a
+			// specific unit.
+			// Make it generic
+			n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY_2) & 0xFFFF;
+			// System.out.println("SpecialSysta");
+		}
+		reply[14] = (byte) (n & 0xFF);
+		reply[15] = (byte) (n >> 8);
+		send(reply);
+	}
+
+	/**
+	 * function to reply the messages received from a Paradigma SystaComfort II, for
+	 * keeping the communication alive
+	 *
+	 * @param index index in replyHeader where the current message is stored
+	 */
+	private void sendDataReplyVDR(int index) {
+		byte[] reply = Arrays.copyOf(replyHeader[index], 20);
+		// Always constant:
+		reply[12] = 0x01;
+		// Generate reply ID from MAC address:
+		int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) + MAC_OFFSET_REPLY_VDR) & 0xFFFF;
+		reply[16] = (byte) (m & 0xFF);
+		reply[17] = (byte) (m >> 8);
+		// Generate reply counter with offset:
+		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY) & 0xFFFF;
+		reply[18] = (byte) (n & 0xFF);
+		reply[19] = (byte) (n >> 8);
+		send(reply);
+	}
+
+	/**
+	 * send a message to the SystaComfort II unit
+	 *
+	 * @param reply byte[] holding the message to be sent
+	 */
+	private void send(byte[] reply) {
 		// send out the reply
 		DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, remoteAddress, remotePort);
 		try {
@@ -511,28 +722,6 @@ public class FakeSystaWeb implements Runnable {
 			// do nothing
 			System.out.println("[FakeSystaWeb] could not send reply");
 		}
-	}
-
-	private void createReply(ByteBuffer data) {
-		data.position(0);
-		// copy the first reply.length bytes from the data buffer into the reply byte
-		// array
-		data.get(reply, 0, reply.length - 1);
-		// keep the first 8 bytes and fill the rest with 0
-		for (int i = 8; i < reply.length; i++) {
-			reply[i] = 0;
-		}
-		// Always constant:
-		reply[12] = 0x01;
-		// Generate reply ID from MAC address:
-
-		int m = (((data.getInt(5) & 0xFF) << 8) + (data.getInt(4) & 0xFF) + MAC_OFFSET) & 0xFFFF;
-		reply[16] = (byte) (m & 0xFF);
-		reply[17] = (byte) (m >> 8);
-		// Generate reply counter with offset:
-		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET) & 0xFFFF;
-		reply[18] = (byte) (n & 0xFF);
-		reply[19] = (byte) (n >> 8);
 	}
 
 	/**
@@ -596,6 +785,61 @@ public class FakeSystaWeb implements Runnable {
 	public void stopLoggingRawData() {
 		logRaw.stopSavingLoggedData();
 		logInt.stopSavingLoggedData();
+	}
+
+	public File getAllLogs() {
+		String zipFileName = LOG_PATH + File.separator + "SystaPiLogs_"
+				+ new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) + ".zip";
+		File zippedLogs = new File(zipFileName);
+		if (zippedLogs.exists()) {
+			zippedLogs.delete();
+		}
+		try {
+			FileOutputStream fos = new FileOutputStream(zippedLogs);
+			ZipOutputStream zos = new ZipOutputStream(fos);
+			// no checked needed, if the folder does not exist, it is empty
+			File folderToBeZipped = new File(LOG_PATH);
+
+			File[] files = folderToBeZipped.listFiles(logFileFilter);
+			System.out.println("[FakeSystaWeb] found " + files.length + " files to be zipped");
+			for (File file : files) {
+				if (file.isDirectory()) {
+					// ignore directories
+					continue;
+				}
+				FileInputStream fis = new FileInputStream(file);
+				ZipEntry zipEntry = new ZipEntry(file.getName());
+				zos.putNextEntry(zipEntry);
+				byte[] bytes = new byte[1024];
+				while (fis.read(bytes) >= 0) {
+					zos.write(bytes, 0, bytes.length);
+				}
+				zos.closeEntry();
+				fis.close();
+			}
+			zos.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		// zippedLogs.delete();
+		return zippedLogs;
+	}
+
+	public int deleteAllLogs() {
+		AtomicInteger i = new AtomicInteger(0);
+		Arrays.stream(new File(LOG_PATH).listFiles(logFileFilter)).forEach(file -> {
+			if (file.delete()) {
+				System.out.println("[FakeSystaWeb] deleted "+file.getName());
+				i.incrementAndGet();
+			}
+		});
+		if(i.get() != (logRaw.getWriterFileCount()+logInt.getWriterFileCount())) {
+			System.out.println("[FakeSystaWeb] missmatch in numbers. Deteled "+i.get()+" files, but loggers had counted "+(logRaw.getWriterFileCount()+logInt.getWriterFileCount())+" files.");
+		}
+		logRaw.setWriterFileCount(0);
+		logInt.setWriterFileCount(0);
+		return i.get();
 	}
 
 	/*

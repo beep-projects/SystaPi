@@ -2,6 +2,5 @@
 .settings/
 .classpath
 .project
-
-#logs from test runs
-bin/*.txt
+#ignore test files
+/SystaLogs/

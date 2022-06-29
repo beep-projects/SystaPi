@@ -3,5 +3,3 @@
 .classpath
 .project
 
-#logs from test runs
-bin/*.txt

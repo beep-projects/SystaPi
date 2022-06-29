@@ -38,6 +38,24 @@ function waitForApt() {
   done
 }
 
+#######################################
+# Checks if internet cann be accessed
+# and waits until they become available. 
+# Warning, you might get stuck forever in here
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   None
+#######################################
+function waitForInternet() {
+  until nc -zw1 google.com 443 >/dev/null 2>&1;  do
+   echo waiting for internet access ...
+   sleep 1
+  done
+}
+
 # redirect output to 'secondrun.log':
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
@@ -46,6 +64,11 @@ exec 1>/boot/secondrun.log 2>&1
 echo "START secondrun.sh"
 #the following variables should be set by firstrun.sh
 IP_PREFIX="192.168.1"
+#configured user name
+USERNAME=beep
+
+#internet connectivity is required for installing required packages and updating the system
+waitForInternet
 
 #network should be up, update the system
 echo "updating the system"
@@ -118,15 +141,22 @@ sudo rm zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz
 sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf/bin/java 1
 sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf/bin/javac 1
 
-#copy SystaRESTServer to the pi homefolder for easy access
-echo "copy SystaRESTServer from /boot to /home/pi"
-cp -R /boot/SystaRESTServer /home/pi/
+#copy SystaRESTServer to the ${USERNAME} home folder for easy access
+echo "copy SystaRESTServer from /boot to /home/${USERNAME}"
+cp -R /boot/SystaRESTServer /home/${USERNAME}/
 
 echo "build SystaRESTServer from source files"
-(cd /home/pi/SystaRESTServer || exit 1 ; ./build.sh)
+(cd /home/${USERNAME}/SystaRESTServer || exit 1 ; ./build.sh)
 
-#make sure all the files belong to the user pi
-sudo chown -R pi:pi /home/pi/SystaRESTServer
+#make sure all the files belong to the user ${USERNAME}
+sudo chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/SystaRESTServer
+
+#copy helpers to the ${USERNAME} home folder for easy access
+echo "copy helpers from /boot to /home/${USERNAME}"
+cp -R /boot/helpers /home/${USERNAME}/
+
+#make sure all the files belong to the user ${USERNAME}
+sudo chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}/helpers
 
 #create service file
 echo "create service file /etc/systemd/system/SystaRESTServer.service"
@@ -138,9 +168,9 @@ After=network-online.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/SystaRESTServer
-ExecStart=/usr/bin/java -Dfile.encoding=UTF-8 -classpath /home/pi/SystaRESTServer/bin:/home/pi/SystaRESTServer/lib/* de.freaklamarsch.systarest.SystaRESTServer
+User=${USERNAME}
+WorkingDirectory=/home/${USERNAME}/SystaRESTServer
+ExecStart=/usr/bin/java -Dfile.encoding=UTF-8 -classpath /home/${USERNAME}/SystaRESTServer/bin:/home/${USERNAME}/SystaRESTServer/lib/* de.freaklamarsch.systarest.SystaRESTServer
 Restart=on-failure
 RestartSec=30s
 

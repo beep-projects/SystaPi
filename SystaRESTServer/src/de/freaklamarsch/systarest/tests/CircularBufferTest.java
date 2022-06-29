@@ -18,7 +18,10 @@
 */
 package de.freaklamarsch.systarest.tests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Field;
 
@@ -45,10 +48,11 @@ public class CircularBufferTest {
 			e.printStackTrace();
 		}
 		cb = new CircularBuffer<>(testCapacity);
+		assertFalse(cb.getOverwrite());
 		assertEquals(testCapacity, cb.capacity());
 		assertEquals(0, cb.size());
-		assertEquals(true, cb.isEmpty());
-		assertEquals(false, cb.isFull());
+		assertTrue(cb.isEmpty());
+		assertFalse(cb.isFull());
 		assertEquals(null, cb.peek());
 		assertEquals(null, cb.remove());
 		// test constructor with negative capacity
@@ -56,16 +60,16 @@ public class CircularBufferTest {
 		cb = new CircularBuffer<>(-1);
 		assertEquals(defaultCapacity, cb.capacity());
 		assertEquals(0, cb.size());
-		assertEquals(true, cb.isEmpty());
-		assertEquals(false, cb.isFull());
+		assertTrue(cb.isEmpty());
+		assertFalse(cb.isFull());
 		assertEquals(null, cb.peek());
 		assertEquals(null, cb.remove());
 		// test constructor with 0 capacity
 		cb = new CircularBuffer<>(0);
 		assertEquals(defaultCapacity, cb.capacity());
 		assertEquals(0, cb.size());
-		assertEquals(true, cb.isEmpty());
-		assertEquals(false, cb.isFull());
+		assertTrue(cb.isEmpty());
+		assertFalse(cb.isFull());
 		assertEquals(null, cb.peek());
 		assertEquals(null, cb.remove());
 	}
@@ -73,7 +77,10 @@ public class CircularBufferTest {
 	@Test
 	public void testAdd() {
 		cb = new CircularBuffer<>(testCapacity);
+		cb.setOverwrite(true);
+		assertTrue(cb.getOverwrite());
 		cb.setOverwrite(false);
+		assertFalse(cb.getOverwrite());
 		int i = 0;
 		// fill the buffer to testCapacity-1 elements
 		for (i = 0; i < testCapacity - 1; i++) {
