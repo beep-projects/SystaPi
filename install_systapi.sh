@@ -46,7 +46,7 @@ else
   SD_CARD_PATH="/dev/mmcblk0"
 fi
 
-RPI_IMAGE_URL="https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-04-07/2022-04-04-raspios-bullseye-armhf-lite.img.xz"
+RPI_IMAGE_URL="https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-09-07/2022-09-06-raspios-bullseye-armhf-lite.img.xz"
 USE_LATEST_RASPI_OS=false
 RASPI_OS_TYPE="lite" # or "desktop"
 RASPI_OS_ID="raspios_armhf" #or "raspios_lite" 
@@ -257,7 +257,6 @@ cp -r helpers "${RPI_PATH}"
 echo "press any key to continue..."
 read -rn 1 -s
 echo
-
 
 echo 
 echo "=============================================================="

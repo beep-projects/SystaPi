@@ -894,7 +894,7 @@ function(a,b,c,d){if(!Qd(c))throw Error(m(200));if(null==a||void 0===a._reactInt
       }
 
       fetchData() {
-        fetch("http://systapi:1337/SystaREST/status")
+        fetch("http://"+location.host+"/SystaREST/status")
           .then(response => {
             if (response.ok) {
               return response.json();
@@ -972,7 +972,7 @@ function(a,b,c,d){if(!Qd(c))throw Error(m(200));if(null==a||void 0===a._reactInt
       }
 
       findSystaComfort() {
-        fetch("http://systapi:1337/SystaREST/findsystacomfort")
+        fetch("http://"+location.host+"/SystaREST/findsystacomfort")
           .then(response => {
             if (response.ok) {
               return response.json();
@@ -998,7 +998,7 @@ function(a,b,c,d){if(!Qd(c))throw Error(m(200));if(null==a||void 0===a._reactInt
       }
 
       fetchServiceStatus() {
-        fetch("http://systapi:1337/SystaREST/servicestatus")
+        fetch("http://"+location.host+"/SystaREST/servicestatus")
           .then(response => {
             if (response.ok) {
               return response.json();
@@ -1259,7 +1259,7 @@ function(a,b,c,d){if(!Qd(c))throw Error(m(200));if(null==a||void 0===a._reactInt
               buttonLabels: [["log", "stop"],["del"],["zip"]],
               state: this.state.loggingData,
               onComplete: this.fetchServiceStatus.bind(this),
-              urls: [["http://systapi:1337/SystaREST/enablelogging", "http://systapi:1337/SystaREST/disablelogging"], ["http://systapi:1337/SystaREST/deletealllogs"], ["http://systapi:1337/SystaREST/getalllogs"]],
+              urls: [["http://"+location.host+"/SystaREST/enablelogging", "http://"+location.host+"/SystaREST/disablelogging"], ["http://"+location.host+"/SystaREST/deletealllogs"], ["http://"+location.host+"/SystaREST/getalllogs"]],
               methods: [["PUT", "PUT"], ["DELETE"], ["URL"]],
               backgroundColor: colorSecondaryBg,
             }, null),

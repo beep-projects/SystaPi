@@ -98,7 +98,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2022-06-17T21:06:24+00:00";
+			this.commitDate = "2022-09-09T21:36:06+00:00";
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	private final String commitDate = "2022-06-17T21:06:24+00:00";
+	private final String commitDate = "2022-09-09T21:36:06+00:00";
 	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
 	private InetAddress remoteAddress;
 	private int remotePort;
@@ -757,9 +757,14 @@ public class FakeSystaWeb implements Runnable {
 	 * @param data ByteBuffer that holds the received data
 	 */
 	private void processType2(ByteBuffer data) {
+		/*while (data.remaining() >= 4) {
+			System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.getInt());
+		}*/
+		data.position(24);
 		while (data.remaining() >= 4) {
 			System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.getInt());
 		}
+		readIndex = writeIndex;
 	}
 
 	public void logRawData() {

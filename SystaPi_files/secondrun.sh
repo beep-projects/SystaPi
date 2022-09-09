@@ -123,7 +123,7 @@ echo "${IP_PREFIX}.1 paradigma.remoteportal.de" | sudo tee -a /etc/dnsmasq.hosts
 echo "restart dnsmasq"
 sudo /etc/init.d/dnsmasq restart 
 
-#see https://www.azul.com/downloads/?package=jdk#download-openjdk for available versions
+#see https://www.azul.com/downloads/?architecture=arm-32-bit-hf&package=jdk for available versions
 echo "install OpenJDK build from Azul for Pi Zero (ARM 32-bit HF v6)"
 if [ ! -d /usr/lib/jvm ]; then
   sudo mkdir /usr/lib/jvm
@@ -135,11 +135,12 @@ cd /usr/lib/jvm || exit 1
 #sudo rm zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz
 #sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf/bin/java 1
 #sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf/bin/javac 1
-sudo wget https://cdn.azul.com/zulu-embedded/bin/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz
-sudo tar -xzvf zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz 
-sudo rm zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz
-sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf/bin/java 1
-sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf/bin/javac 1
+#sudo wget https://cdn.azul.com/zulu-embedded/bin/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz
+sudo wget https://cdn.azul.com/zulu-embedded/bin/zulu11.58.25-ca-jdk11.0.16.1-linux_aarch32hf.tar.gz
+sudo tar -xzvf zulu11.58.25-ca-jdk11.0.16.1-linux_aarch32hf.tar.gz
+sudo rm zulu11.58.25-ca-jdk11.0.16.1-linux_aarch32hf.tar.gz
+sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu11.58.25-ca-jdk11.0.16.1-linux_aarch32hf/bin/java 1
+sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.58.25-ca-jdk11.0.16.1-linux_aarch32hf/bin/javac 1
 
 #copy SystaRESTServer to the ${USERNAME} home folder for easy access
 echo "copy SystaRESTServer from /boot to /home/${USERNAME}"

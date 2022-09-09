@@ -83,10 +83,13 @@ FIRSTUSER=$( getent passwd 1000 | cut -d: -f1 )
 echo "set default user to ${USERNAME} (was ${FIRSTUSER})"
 #FIRSTUSERHOME=$( getent passwd 1000 | cut -d: -f6 )
 if [ -f /usr/lib/userconf-pi/userconf ]; then
-   /usr/lib/userconf-pi/userconf "${USER}" "${PASSWD}"
+   echo "/usr/lib/userconf-pi/userconf ${USERNAME} ${PASSWD}"
+   /usr/lib/userconf-pi/userconf "${USERNAME}" "${PASSWD}"
 else
+   echo "echo ${FIRSTUSER}:${PASSWD} | chpasswd -e"
    echo "${FIRSTUSER}:${PASSWD}" | chpasswd -e
    if [ "${FIRSTUSER}" != "${USERNAME}" ]; then
+      echo "user name has changed to: ${USERNAME}"
       usermod -l "${USERNAME}" "${FIRSTUSER}"
       usermod -m -d "/home/${USERNAME}" "${USERNAME}"
       groupmod -n "${USERNAME}" "${FIRSTUSER}"
