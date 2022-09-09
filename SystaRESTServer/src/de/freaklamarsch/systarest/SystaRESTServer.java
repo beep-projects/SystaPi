@@ -73,7 +73,7 @@ public class SystaRESTServer {
 					+ " are not configured properly. Please check your configuration. I am exiting now!");
 			System.out.println("[RESTServer] Interface for Paradigma RESTAPI: " + restAPIIPv4);
 			System.out.println("[RESTServer] Interface for connecting to Paradigma SystaComfort II: " + paradigmIPv4);
-			System.exit(0);
+			System.exit(1);
 		}
 
 		System.out.println("[RESTServer] Interface for Paradigma RESTAPI: " + restAPIIPv4);
