@@ -94,6 +94,10 @@ fi
 wget "https://github.com/beep-projects/SystaPi/archive/refs/heads/${branch}.zip"
 unzip "${branch}.zip" 
 
+# replace the helpers folder
+rm -rf ~/helpers/
+cp -r "SystaPi-${branch}/helpers" ~
+
 # build new version
 cd "SystaPi-${branch}/SystaRESTServer/" || error "Cannot cd into SystaPi-${branch}/SystaRESTServer/"
 sudo chmod 755 ./build.sh
@@ -109,6 +113,10 @@ cp -r "/home/pi/SystaPi-${branch}/SystaRESTServer/" /home/pi/
 # remove created files
 rm "${branch}.zip"
 rm -r "SystaPi-${branch}"
+
+# clear systemd logs 
+sudo journalctl --rotate
+sudo journalctl --vacuum-time=1s
 
 # restart the SystaRESTServer.service
 sudo systemctl start SystaRESTServer.service 

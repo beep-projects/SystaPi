@@ -54,7 +54,7 @@ import de.freaklamarsch.systarest.SystaWaterHeaterStatus.tempUnit;
 public class FakeSystaWeb implements Runnable {
 
 	enum MessageType {
-		NONE, DATA0, DATA1, DATA2, DATA3, OK, ERR
+		NONE, DATA0, DATA1, DATA2, DATA3, DATA4, OK, ERR
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2022-09-09T22:40:37+00:00";
+			this.commitDate = "2022-09-15T21:18:08+00:00";
 		}
 	}
 
@@ -149,13 +149,14 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	private final String commitDate = "2022-09-09T22:40:37+00:00";
+	private final String commitDate = "2022-09-15T21:18:08+00:00";
 	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
 	private InetAddress remoteAddress;
 	private int remotePort;
 	private final int PORT = 22460;
 	private final int MAX_DATA_LENGTH = 1048;
 	private final int MAX_NUMBER_ENTRIES = 256;
+	private final int MAX_NUMBER_DATA_PAKETS = 4;
 	private final int COUNTER_OFFSET_REPLY = 0x3FBF;
 	private final int COUNTER_OFFSET_REPLY_2 = 0x3FC0;
 	private final int COUNTER_OFFSET_PWD = 0x10F9;
@@ -169,15 +170,15 @@ public class FakeSystaWeb implements Runnable {
 	// private final int REPLY_MSG_LENGTH = 20;
 
 	// the SystaComfort sends burst of 3 to 4 messages every minute
-	// at the moment only packets of type 0x01 are processed, so 2 buffers should be
+	// at the moment packets of type 0x01, 0x02, 0x03, 0x04 are processed, so 4 buffers should be
 	// enough
 	// TODO adjust this value if more packet types are processed
-	private final int RING_BUFFER_SIZE = 2;
+	private final int RING_BUFFER_SIZE = 5;
 	private int readIndex = -1;
 	private int writeIndex = -1;
 	private long dataPacketsReceived = 0;
 	private byte[][] replyHeader = new byte[RING_BUFFER_SIZE][8];
-	private Integer[][] intData = new Integer[RING_BUFFER_SIZE][MAX_NUMBER_ENTRIES];
+	private Integer[][] intData = new Integer[RING_BUFFER_SIZE][MAX_NUMBER_ENTRIES*MAX_NUMBER_DATA_PAKETS];
 	// private byte[] reply = new byte[REPLY_MSG_LENGTH];
 	private long[] timestamp = new long[RING_BUFFER_SIZE];
 
@@ -206,19 +207,16 @@ public class FakeSystaWeb implements Runnable {
 
 	// constructor
 	public FakeSystaWeb() {
-		for (int i = 0; i < timestamp.length; i++) {
-			timestamp[i] = -1;
+		for (Integer[] data : intData) {
+            Arrays.fill(data, 0);
 		}
+		Arrays.fill(timestamp, -1);
 	}
 
 	public FakeSystaWebStatus getStatus() {
 		DataLoggerStatus dls = logRaw.getStatus();
 		// if we have received data within the last 120 seconds, we are considered being
 		// connected
-		// boolean connected = (readIndex < 0) ? false
-		// : (timestamp[readIndex] > 0
-		// && (LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - timestamp[readIndex]
-		// < 120));
 		boolean connected = (readIndex < 0) ? false
 				: (timestamp[readIndex] > 0 && (Instant.now().getEpochSecond() - timestamp[readIndex] < 120));
 		return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.getTimestampString(),
@@ -315,14 +313,10 @@ public class FakeSystaWeb implements Runnable {
 	public Integer[] getData() {
 		// safe readIndex, so we do not read inconsistent data, if it gets updated
 		// between calls
-		// System.out.println("[FakeSystaWeb] FSW.getData()");
 		int i = readIndex;
-		// System.out.println("FSW.getData(): i=="+i);
 		if (i >= 0 && timestamp[i] > 0) {
-			// System.out.println("[FakeSystaWeb] FSW.getData(): return rawData["+i+"]");
 			return intData[i];
 		} else {
-			// System.out.println("[FakeSystaWeb] FSW.getData(): return null");
 			return null;
 		}
 	}
@@ -430,8 +424,8 @@ public class FakeSystaWeb implements Runnable {
 		status.boilerOperationTimeMinutes = intData[i][SystaIndex.BOILER_OPERATION_TIME_MINUTES];
 		status.burnerNumberOfStarts = intData[i][SystaIndex.BURNER_NUMBER_OF_STARTS];
 		status.solarPowerActual = intData[i][SystaIndex.SOLAR_POWER_ACTUAL] / 10.0;
-		status.solarGainDay = intData[i][SystaIndex.SOLAR_GAIN_DAY] / 10.0;
-		status.solarGainTotal = intData[i][SystaIndex.SOLAR_GAIN_TOTAL] / 10.0;
+		status.solarGainDay = intData[i][SystaIndex.SOLAR_GAIN_DAY]; // in kWh
+		status.solarGainTotal = intData[i][SystaIndex.SOLAR_GAIN_TOTAL]; // in kWh
 		status.systemNumberOfStarts = intData[i][SystaIndex.SYSTEM_NUMBER_OF_STARTS];
 		status.circuit1LeadTime = intData[i][SystaIndex.CIRCUIT_1_LEAD_TIME]; // in min
 		status.circuit2LeadTime = intData[i][SystaIndex.CIRCUIT_2_LEAD_TIME]; // in min
@@ -493,7 +487,7 @@ public class FakeSystaWeb implements Runnable {
 			return;
 		}
 		running = true;
-		System.out.println("[FakeSystaWeb] trying to open DatagramSocket for UDP communication");
+		System.out.println("[FakeSystaWeb] trying to open DatagramSocket for UDP communication on "+inetAddress+":"+PORT);
 		// try to open the listening socket
 		try {
 			InetAddress ip = InetAddress.getByName(inetAddress);
@@ -517,13 +511,13 @@ public class FakeSystaWeb implements Runnable {
 					System.out.println("[FakeSystaWeb] call to receive UDP packets got interrupted");
 					break;
 				} else {
+					System.out.println("[FakeSystaWeb] IOException thrown when waiting for data on "+inetAddress+":"+PORT);
 					e.printStackTrace();
 					break;
 				}
 			}
 			// calculate the buffer id for writing
 			writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
-			// timestamp[writeIndex] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);
 			timestamp[writeIndex] = Instant.now().getEpochSecond();
 			remoteAddress = receivePacket.getAddress();
 			remotePort = receivePacket.getPort();
@@ -553,28 +547,25 @@ public class FakeSystaWeb implements Runnable {
 				sendDataReply(writeIndex);
 				// sendOperationModeChange(2);
 			} else if (type == 0x01) {
-				processType1(data);
+				processDataType1(data);
 				typeOfLastReceivedMessage = MessageType.DATA1;
-				// readIndex = writeIndex;
-				// sendPassword();
-				// System.out.println("WI: "+writeIndex);
-				// if(writeIndex==1) {
-				// sendPassword();
-				// } else {
 				sendDataReply(writeIndex);
-				// }
 				logInt.addData(intData[readIndex], timestamp[readIndex]);
 			} else if (type == 0x02) {
-				// processType2(data, currentWriteBuffer);
+				processDataType2(data);
 				typeOfLastReceivedMessage = MessageType.DATA2;
 				sendDataReply(writeIndex);
-				// readIndex = writeIndex;
+				logInt.addData(intData[readIndex], timestamp[readIndex]);
 			} else if (type == 0x03) {
-				// processType2(data, currentWriteBuffer);
+				processDataType3(data);
 				typeOfLastReceivedMessage = MessageType.DATA3;
-				// readIndex = writeIndex;
-				// sendPassword();
 				sendDataReply(writeIndex);
+				logInt.addData(intData[readIndex], timestamp[readIndex]);
+			} else if (type == 0x04) {
+				processDataType4(data);
+				typeOfLastReceivedMessage = MessageType.DATA4;
+				sendDataReply(writeIndex);
+				logInt.addData(intData[readIndex], timestamp[readIndex]);
 			} else if (type == 0xFF) {
 				// processType2(data, currentWriteBuffer);
 				typeOfLastReceivedMessage = MessageType.OK;
@@ -730,24 +721,35 @@ public class FakeSystaWeb implements Runnable {
 	 *
 	 * @param data ByteBuffer that holds the received data
 	 */
-	private void processType0(ByteBuffer data) {
+	private void processDataType0(ByteBuffer data) {
 		while (data.remaining() >= 4) {
 			System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.getInt());
 		}
 	}
 
+	private void processDataPacket(ByteBuffer data, int offset) {
+		data.position(24);
+		System.out.println("[FakeSystaWeb] processDataPacket(data["+data.remaining()/4+"], "+offset+")");
+		if(readIndex >= 0) {
+			intData[writeIndex] = intData[readIndex];
+		}
+		data.position(24);
+		while (data.remaining() >= 4) {
+			intData[writeIndex][offset + (data.position() - 24) / 4] = data.getInt();
+		}
+		readIndex = writeIndex;
+	}
+
+	
+	
 	/**
 	 * process UPD packets from Paradigma SystaComfort II with type field set to
 	 * 0x01
 	 *
 	 * @param data ByteBuffer that holds the received data
 	 */
-	private void processType1(ByteBuffer data) {
-		data.position(24);
-		while (data.remaining() >= 4) {
-			intData[writeIndex][(data.position() - 24) / 4] = data.getInt();
-		}
-		readIndex = writeIndex;
+	private void processDataType1(ByteBuffer data) {
+		processDataPacket(data, 0);
 	}
 
 	/**
@@ -756,15 +758,28 @@ public class FakeSystaWeb implements Runnable {
 	 *
 	 * @param data ByteBuffer that holds the received data
 	 */
-	private void processType2(ByteBuffer data) {
-		/*while (data.remaining() >= 4) {
-			System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.getInt());
-		}*/
-		data.position(24);
-		while (data.remaining() >= 4) {
-			System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.getInt());
-		}
-		readIndex = writeIndex;
+	private void processDataType2(ByteBuffer data) {
+		processDataPacket(data, MAX_NUMBER_ENTRIES);
+	}
+
+	/**
+	 * process UDP packets from Paradigma SystaComfort II with type field set to
+	 * 0x03
+	 *
+	 * @param data ByteBuffer that holds the received data
+	 */
+	private void processDataType3(ByteBuffer data) {
+		processDataPacket(data, 2*MAX_NUMBER_ENTRIES);
+	}
+
+	/**
+	 * process UDP packets from Paradigma SystaComfort II with type field set to
+	 * 0x04
+	 *
+	 * @param data ByteBuffer that holds the received data
+	 */
+	private void processDataType4(ByteBuffer data) {
+		processDataPacket(data, 3*MAX_NUMBER_ENTRIES);
 	}
 
 	public void logRawData() {

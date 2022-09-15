@@ -296,7 +296,7 @@ class FakeSystaWebTest {
 		// get the files created by the DataLoggers
 		File[] files = logs.listFiles(logfileFilter);
 		// for 151 logged pakets, we should see 10 files, 5 raw and 5 data
-		assertEquals(10, files.length);
+		assertEquals(9, files.length);
 		// validate the content of the zip
 		File zf = fsw.getAllLogs();
 		
@@ -305,7 +305,7 @@ class FakeSystaWebTest {
 			// open a zip file for reading
 			zipFile = new ZipFile(zf);
 			// check if we have 10 entries as expected
-			assertEquals(10, zipFile.size());
+			assertEquals(9, zipFile.size());
 			// get an enumeration of the ZIP file entries
 			Enumeration<? extends ZipEntry> e = zipFile.entries();
 			while (e.hasMoreElements()) {
@@ -359,9 +359,9 @@ class FakeSystaWebTest {
 	 */
 	private Method prepareInvokeProcessType1(FakeSystaWeb fsw) throws NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException, NoSuchMethodException {
-		Method processType1 = FakeSystaWeb.class.getDeclaredMethod("processType1", ByteBuffer.class);
-		processType1.setAccessible(true);
-		return processType1;
+		Method processDataType1 = FakeSystaWeb.class.getDeclaredMethod("processDataType1", ByteBuffer.class);
+		processDataType1.setAccessible(true);
+		return processDataType1;
 	}
 
 	/**

@@ -224,8 +224,6 @@ public class SystaRESTAPI {
 	@Path("{rawdata : (?i)rawdata}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public JsonObject getRawData() {
-		// System.out.println("[ParadigmaRESTAPI] getRawData: called");
-		// System.out.println("[ParadigmaRESTAPI] getRawData: fsw.getData()");
 		Integer[] rawData = fsw.getData();
 		if (rawData == null) {
 			return jsonFactory.createObjectBuilder().build();
@@ -236,21 +234,13 @@ public class SystaRESTAPI {
 		// FakeSystaWeb between the calls
 		long timestamp = fsw.getTimestamp();
 		String timestampString = fsw.getTimestampString();
-		// System.out.println("[ParadigmaRESTAPI] getRawData: got
-		// rawData["+rawData.length+"] from fsw");
-		// System.out.println("[ParadigmaRESTAPI] getRawData: create rawData JSON
-		// array");
 		JsonArrayBuilder jab = jsonFactory.createArrayBuilder();
-		// System.out.println("[ParadigmaRESTAPI] getRawData: populate rawData JSON
-		// array");
-		for (int i : rawData) {
-			jab.add(i);
+		for (Integer i : rawData) {
+			//rawData is initialized to all 0, so we do not have to check for null here
+		    jab.add(i.intValue());
 		}
-		// System.out.println("[ParadigmaRESTAPI] getRawData: building JSON object");
 		JsonObject jo = jsonFactory.createObjectBuilder().add("timestamp", timestamp)
 				.add("timestampString", timestampString).add("rawData", jab.build()).build();
-		// System.out.println("[ParadigmaRESTAPI] getRawData: finished building JSON
-		// object");
 		return jo;
 	}
 

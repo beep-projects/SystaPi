@@ -178,7 +178,7 @@ class SystaPiRawData extends React.Component {
   }  
   
   fetchRawData() {
-    fetch("http://systapi:1337/SystaREST/rawdata")
+    fetch("http://"+location.host+"/SystaREST/rawdata")
       .then(response => {
         if (response.ok) {
           return response.json();
@@ -216,7 +216,7 @@ class SystaPiRawData extends React.Component {
   
   createElementsArray() {
     //initialize the array with unknown entries
-    var e = new Array(256);
+    var e = new Array(1024);
     for(let i=0;i<e.length;i++) {
       e[i] = {"i": i, "name": "", "known": false, conversion: "x"};
     }

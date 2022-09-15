@@ -746,7 +746,7 @@
       }  
       
       fetchRawData() {
-        fetch("http://systapi:1337/SystaREST/rawdata")
+        fetch("http://"+location.host+"/SystaREST/rawdata")
           .then(response => {
             if (response.ok) {
               return response.json();

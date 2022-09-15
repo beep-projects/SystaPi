@@ -568,7 +568,7 @@
       }
 
       fetchData() {
-        fetch("http://systapi:1337/SystaREST/status")
+        fetch("http://"+location.host+"/SystaREST/status")
           .then(response => {
             if (response.ok) {
               return response.json();
