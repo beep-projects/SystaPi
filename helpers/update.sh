@@ -108,8 +108,8 @@ cd ~ || error "Cannot cd into ~"
 sudo systemctl stop SystaRESTServer.service 
 
 # remove old binaries and install new ones
-rm -r /home/pi/SystaRESTServer/
-cp -r "/home/pi/SystaPi-${branch}/SystaRESTServer/" /home/pi/
+rm -r ~/SystaRESTServer/
+cp -r "~/SystaPi-${branch}/SystaRESTServer/" ~
 # remove created files
 rm "${branch}.zip"
 rm -r "SystaPi-${branch}"
