@@ -80,7 +80,7 @@ while :; do
 done
 
 # make sure we are in the home directory
-cd ~ || error "Cannot cd into ~"
+cd "${HOME}" || error "Cannot cd into ${HOME}"
 
 # remove existing downloads
 if [[ -f "${branch}.zip" ]]; then
@@ -95,21 +95,22 @@ wget "https://github.com/beep-projects/SystaPi/archive/refs/heads/${branch}.zip"
 unzip "${branch}.zip" 
 
 # replace the helpers folder
-rm -rf ~/helpers/
-cp -r "SystaPi-${branch}/helpers" ~
+rm -rf "${HOME}/helpers/"
+cp -r "SystaPi-${branch}/helpers" "${HOME}"
+chmod 755 "${HOME}/helpers/update.sh"
 
 # build new version
 cd "SystaPi-${branch}/SystaRESTServer/" || error "Cannot cd into SystaPi-${branch}/SystaRESTServer/"
 sudo chmod 755 ./build.sh
 ./build.sh 2>&1
-cd ~ || error "Cannot cd into ~"
+cd "${HOME}" || error "Cannot cd into ${HOME}"
 
 # stop the SystaRESTServer.service
 sudo systemctl stop SystaRESTServer.service 
 
 # remove old binaries and install new ones
-rm -r ~/SystaRESTServer/
-cp -r "~/SystaPi-${branch}/SystaRESTServer/" ~
+rm -r "${HOME}/SystaRESTServer"
+cp -r "${HOME}/SystaPi-${branch}/SystaRESTServer" "${HOME}"
 # remove created files
 rm "${branch}.zip"
 rm -r "SystaPi-${branch}"
