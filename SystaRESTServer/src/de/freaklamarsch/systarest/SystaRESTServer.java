@@ -59,7 +59,7 @@ public class SystaRESTServer {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			System.out.println("[RESTServer] Could not load properties file: " + defaultConfigPath + ". Exiting.");
-			System.exit(0);
+			System.exit(1);
 		}
 		// load interfaces
 		String restAPIIfaceName = props.getProperty("RESTAPI_INTERFACE");
