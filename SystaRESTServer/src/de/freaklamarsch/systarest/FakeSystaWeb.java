@@ -98,7 +98,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2022-10-05T15:52:03+00:00";
+			this.commitDate = "2022-10-20T19:20:05+00:00";
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	private final String commitDate = "2022-10-05T15:52:03+00:00";
+	private final String commitDate = "2022-10-20T19:20:05+00:00";
 	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
 	private InetAddress remoteAddress;
 	private int remotePort;
@@ -348,7 +348,6 @@ public class FakeSystaWeb implements Runnable {
 		SystaStatus status = new SystaStatus();
 		int i = readIndex; // save readIndex, so we do not read inconsistent data if it gets updated
 		if (i < 0 || timestamp[i] <= 0) {
-			System.out.println("i: " + i + ", timestamp: " + timestamp[i]);
 			return null;
 		}
 		status.outsideTemp = intData[i][SystaIndex.OUTSIDE_TEMP] / 10.0;
@@ -665,13 +664,11 @@ public class FakeSystaWeb implements Runnable {
 		reply[13] = (byte) (m >> 8);
 		// Generate reply counter with offset:
 		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY) & 0xFFFF;
-		// System.out.println("maccount: "+((int)reply[5]+(int)reply[4]));
 		if ((reply[5] + reply[4]) == 57 || (reply[5] + reply[4]) == 313) {// TODO this is just a
 			// hack to support a
 			// specific unit.
-			// Make it generic
+			// TODO find out why this is needed and make it generic
 			n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY_2) & 0xFFFF;
-			// System.out.println("SpecialSysta");
 		}
 		reply[14] = (byte) (n & 0xFF);
 		reply[15] = (byte) (n >> 8);
@@ -729,7 +726,7 @@ public class FakeSystaWeb implements Runnable {
 
 	private void processDataPacket(ByteBuffer data, int offset) {
 		data.position(24);
-		System.out.println("[FakeSystaWeb] processDataPacket(data["+data.remaining()/4+"], "+offset+")");
+		//System.out.println("[FakeSystaWeb] processDataPacket(data["+data.remaining()/4+"], "+offset+")");
 		if(readIndex >= 0) {
 			intData[writeIndex] = intData[readIndex];
 		}
@@ -855,7 +852,7 @@ public class FakeSystaWeb implements Runnable {
 			}
 		});
 		if(i.get() != (logRaw.getWriterFileCount()+logInt.getWriterFileCount())) {
-			System.out.println("[FakeSystaWeb] missmatch in numbers. Deteled "+i.get()+" files, but loggers had counted "+(logRaw.getWriterFileCount()+logInt.getWriterFileCount())+" files.");
+			System.out.println("[FakeSystaWeb] missmatch in numbers. Deleted "+i.get()+" files, but loggers had counted "+(logRaw.getWriterFileCount()+logInt.getWriterFileCount())+" files.");
 		}
 		logRaw.setWriterFileCount(0);
 		logInt.setWriterFileCount(0);
