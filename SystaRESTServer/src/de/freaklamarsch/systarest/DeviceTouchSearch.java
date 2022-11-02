@@ -127,6 +127,8 @@ public class DeviceTouchSearch {
 		// 0 7 1234
 		rxMessage = new String(Arrays.copyOfRange(receivePacket.getData(), 0, receivePacket.getLength()),
 				StandardCharsets.ISO_8859_1);
+		//remove all strange characters
+		rxMessage = rxMessage.replaceAll("[^0-9 a-zA-Z]","");
 		return rxMessage.split(" ")[2];
 	}
 
@@ -152,6 +154,8 @@ public class DeviceTouchSearch {
 		// 0 7 3477\x00
 		rxMessage = new String(Arrays.copyOfRange(receivePacket.getData(), 0, receivePacket.getLength()),
 				StandardCharsets.ISO_8859_1);
+		//remove all strange characters
+		rxMessage = rxMessage.replaceAll("[^0-9 a-zA-Z]","");
 		if (rxMessage.toLowerCase().contains("unknown value")) {
 			return -1;
 		} else {
