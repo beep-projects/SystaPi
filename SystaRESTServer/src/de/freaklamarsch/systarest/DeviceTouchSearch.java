@@ -99,7 +99,6 @@ public class DeviceTouchSearch {
 				}
 			}
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;

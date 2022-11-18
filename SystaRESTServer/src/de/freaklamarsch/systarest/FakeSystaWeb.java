@@ -98,7 +98,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2022-11-02T22:23:01+00:00";
+			this.commitDate = "2022-11-18T20:17:00+00:00";
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	private final String commitDate = "2022-11-02T22:23:01+00:00";
+	private final String commitDate = "2022-11-18T20:17:00+00:00";
 	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
 	private InetAddress remoteAddress;
 	private int remotePort;
@@ -249,7 +249,6 @@ public class FakeSystaWeb implements Runnable {
 				// wait 1s for the reply
 				typeOfLastReceivedMessage.wait(1000);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -495,86 +494,69 @@ public class FakeSystaWeb implements Runnable {
 			System.out.println("[FakeSystaWeb] exception thrown when trying to open DatagramSocket");
 			e.printStackTrace();
 			running = false;
+			if (socket != null && !socket.isClosed()) {
+				socket.close();
+			}
 			return;
 		}
 		stopRequested = false;
 		dataPacketsReceived = 0;
 		System.out.println("[FakeSystaWeb] UDP communication with Paradigma SystaComfort II started");
 		while (!stopRequested) {
-			try {
-				socket.receive(receivePacket);
-				dataPacketsReceived++;
-			} catch (IOException e) {
-				if (stopRequested) {
-					// this exception should be thrown if the socket is closed on request
-					System.out.println("[FakeSystaWeb] call to receive UDP packets got interrupted");
-					break;
-				} else {
-					System.out.println("[FakeSystaWeb] IOException thrown when waiting for data on "+inetAddress+":"+PORT);
-					e.printStackTrace();
-					break;
-				}
+			receiveNextDatagram();
+			if(receivePacket.getLength() == 0) {
+				break;
 			}
-			// calculate the buffer id for writing
 			writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
 			timestamp[writeIndex] = Instant.now().getEpochSecond();
 			remoteAddress = receivePacket.getAddress();
 			remotePort = receivePacket.getPort();
 			logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);
-			// get the entire content
 			ByteBuffer data = ByteBuffer.wrap(receivePacket.getData()).order(ByteOrder.LITTLE_ENDIAN);
-			// parse it
-			// 0..5: MAC address of paradigma control board:
-			replyHeader[writeIndex][0] = data.get();
-			replyHeader[writeIndex][1] = data.get();
-			replyHeader[writeIndex][2] = data.get();
-			replyHeader[writeIndex][3] = data.get();
-			replyHeader[writeIndex][4] = data.get();
-			replyHeader[writeIndex][5] = data.get();
-			// 6..7: counter, incremented by 1 for each packet
-			replyHeader[writeIndex][6] = data.get();
-			replyHeader[writeIndex][7] = data.get();
+			for(int i=0;i<8;i++) {
+			  // 0..5: MAC address of SystaComfort Ethernet port:
+			  // 6..7: counter, incremented by 1 for each packet
+			  replyHeader[writeIndex][i] = data.get();
+			}
 			// 8..15: always "09 09 0C 00 32 DA 00 00"
 			// byte 12, 13 are the protocol version 32 DA, or 32 DC or 33 DF
 			// 16: packet type (00 = empty intial packet, 01 = actual data packet, 02 =
 			// short final packet, FF = parameter change ok)
 			data.position(16);
 			byte type = data.get();
-			if (type == 0x00) {
-				// processType0(data, currentWriteBuffer);
+			switch(type) {
+			  case 0x00:
 				typeOfLastReceivedMessage = MessageType.DATA0;
 				sendDataReply(writeIndex);
-				// sendOperationModeChange(2);
-			} else if (type == 0x01) {
+				break;
+			  case 0x01:
 				processDataType1(data);
 				typeOfLastReceivedMessage = MessageType.DATA1;
 				sendDataReply(writeIndex);
 				logInt.addData(intData[readIndex], timestamp[readIndex]);
-			} else if (type == 0x02) {
+				break;
+			  case 0x02:
 				processDataType2(data);
 				typeOfLastReceivedMessage = MessageType.DATA2;
 				sendDataReply(writeIndex);
 				logInt.addData(intData[readIndex], timestamp[readIndex]);
-			} else if (type == 0x03) {
+			  case 0x03:
 				processDataType3(data);
 				typeOfLastReceivedMessage = MessageType.DATA3;
 				sendDataReply(writeIndex);
 				logInt.addData(intData[readIndex], timestamp[readIndex]);
-			} else if (type == 0x04) {
+			  case 0x04:
 				processDataType4(data);
 				typeOfLastReceivedMessage = MessageType.DATA4;
 				sendDataReply(writeIndex);
 				logInt.addData(intData[readIndex], timestamp[readIndex]);
-			} else if (type == 0xFF) {
-				// processType2(data, currentWriteBuffer);
+			  case (byte)0xFF:
 				typeOfLastReceivedMessage = MessageType.OK;
-			} else {
+			  default:
 				typeOfLastReceivedMessage = MessageType.ERR;
 			}
-			if (typeOfLastReceivedMessage != MessageType.ERR) {
-				// update readIndex
-				// readIndex = writeIndex;
-			}
+			/*if (typeOfLastReceivedMessage != MessageType.ERR) {
+			}*/
 			synchronized (typeOfLastReceivedMessage) {
 				typeOfLastReceivedMessage.notifyAll();
 			}
@@ -585,6 +567,29 @@ public class FakeSystaWeb implements Runnable {
 		running = false;
 	}
 
+	/**
+	 * receive the next UDP {@link java.net.DatagramPacket} from the configured {@link socket} into {@link receivePacket}
+	 */
+	private void receiveNextDatagram() {
+		try {
+			socket.receive(receivePacket);
+			dataPacketsReceived++;
+		} catch (IOException e) {
+			if (stopRequested) {
+				// this exception should be thrown if the socket is closed on request
+				System.out.println("[FakeSystaWeb] call to receive UDP packets got interrupted");
+			} else {
+				System.out.println("[FakeSystaWeb] IOException thrown when waiting for data on "+inetAddress+":"+PORT);
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * private helper function to convert from {@link byte[]} to {@link Byte[]}
+	 * @param bytes
+	 * @return
+	 */
 	private Byte[] toByteArray(byte[] bytes) {
 		if (bytes == null) {
 			return null;
@@ -664,10 +669,9 @@ public class FakeSystaWeb implements Runnable {
 		reply[13] = (byte) (m >> 8);
 		// Generate reply counter with offset:
 		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY) & 0xFFFF;
-		if ((reply[5] + reply[4]) == 57 || (reply[5] + reply[4]) == 313) {// TODO this is just a
-			// hack to support a
-			// specific unit.
-			// TODO find out why this is needed and make it generic
+		if ((reply[5] + reply[4]) == 57 || (reply[5] + reply[4]) == 313) {
+			// TODO this is just a hack to support a specific unit.
+			// Find out why this is needed and make it generic
 			n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY_2) & 0xFFFF;
 		}
 		reply[14] = (byte) (n & 0xFF);

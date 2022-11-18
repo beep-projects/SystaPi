@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
@@ -32,7 +31,6 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.Arrays;
 import java.util.Enumeration;
 
 import org.glassfish.jersey.server.ResourceConfig;
@@ -44,7 +42,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import de.freaklamarsch.systarest.DataLogger;
-import de.freaklamarsch.systarest.FakeSystaWeb;
 import de.freaklamarsch.systarest.SystaRESTAPI;
 import jakarta.json.JsonObject;
 //import javax.annotation.Priority;
@@ -110,7 +107,6 @@ class SystaRESTAPITest extends JerseyTest {
 			DEFAULT_ROOT_PATH.setAccessible(true);
 			DEFAULT_ROOT_PATH.set(DataLogger.class, newDir);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
