@@ -605,4 +605,5 @@ There are some ENC28J60 modules sold with wrong jumper settings. Make sure you s
 * [Paradigma Downloads](http://www.paradigma.de/software/)
 * [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/)
 * [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter)
+* [ParadigmaHeatingReader](https://github.com/kayr7/ParadigmaHeatingReader) also read [protocols](https://github.com/beep-projects/SystaPi/blob/main/resources/protocols.md) if you want to buils anything on top of that (S-touch App)
 
