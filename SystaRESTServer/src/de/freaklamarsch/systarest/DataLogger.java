@@ -317,15 +317,13 @@ public class DataLogger<T> {
 	public synchronized void addData(T[] data, long timestamp) {
 		// access to dataBuffer and timestampBuffer has to be synchronized
 		// make sure that there is new data to write
-		// String newTimestamp = formatter.format(LocalDateTime.ofEpochSecond(timestamp,
-		// 0, ZoneOffset.UTC));
 		String newTimestamp = formatter
 				.format(LocalDateTime.ofEpochSecond(timestamp, 0, OffsetDateTime.now().getOffset()));
 		String lastTimestamp = timestampBuffer.peek();
 		if (lastTimestamp != null && newTimestamp.equals(lastTimestamp)) {
 			// check if there is already data in the buffer (lastTimestamp!=null)
 			// and make sure the timestamp is updated
-			// if no new data is available, so just return
+			// if no new data is available, just return
 			return;
 		}
 		// save new values
@@ -340,20 +338,26 @@ public class DataLogger<T> {
 	}
 
 	private synchronized boolean writeLoggedDataToFile() {
-		// access to dataBuffer and timestampBuffer has to be synchronized
-		if (timestampBuffer.isEmpty() || dataBuffer.isEmpty()) {
-			return false;
-		} else if (timestampBuffer.size() != dataBuffer.size()) {
-			System.out.println(
-					"[DataLogger] writeLoggedDataToFile: buffer sizes don't match, clearing buffers for recovery.");
-			timestampBuffer.clear();
-			dataBuffer.clear();
+		if (checkAndFixBufferSync() == false) {
 			return false;
 		}
+		String[][] fileContent = convertBuffersToStringArray();
+		// make sure the log dir exists
+		File path = new File(logFileRootPath);
+		if (!path.exists()) {
+			path.mkdirs();
+		}
+		String fileName = logFileRootPath + File.separator + logFilePrefix + "-" + logFilename + "-" + writerFileCount
+				+ ".txt";
+		return writeLogFile(fileContent, fileName);
+	}
 
+	/**
+	 * @return 
+	 */
+	private String[][] convertBuffersToStringArray() {
 		int cols = timestampBuffer.size();
 		int rows = dataBuffer.peek().length + 1; // +1 because first row will be timestamps
-
 		String[][] fileContent = new String[rows][cols];
 		int r = 0; // begin in first row/line
 		int c = 0; // begin in first column
@@ -378,18 +382,39 @@ public class DataLogger<T> {
 			c++; // move to next column for next record
 			r = 1; // keep in mind, that the first column is already filled with the timestamps
 		}
-		// make sure the log dir exists
-		File path = new File(logFileRootPath);
-		if (!path.exists()) {
-			path.mkdirs();
+		return fileContent;
+	}
+
+	/**
+	 * @return returns true, if buffers are ok, to work with. Returns false, if buffers are empty, or out of sync.
+	 */
+	private boolean checkAndFixBufferSync() {
+		// access to dataBuffer and timestampBuffer has to be synchronized
+		if (timestampBuffer.isEmpty() || dataBuffer.isEmpty()) {
+			return false;
+		} else if (timestampBuffer.size() != dataBuffer.size()) {
+			System.out.println(
+					"[DataLogger] writeLoggedDataToFile: buffer sizes don't match, clearing buffers for recovery.");
+			timestampBuffer.clear();
+			dataBuffer.clear();
+			return false;
 		}
-		String fileName = logFileRootPath + File.separator + logFilePrefix + "-" + logFilename + "-" + writerFileCount
-				+ ".txt";
+		return true;
+	}
+
+	/**
+	 * @param fileContent
+	 * @param fileName
+	 * @return true if writing the file was successful, false otherwise
+	 */
+	private boolean writeLogFile(String[][] fileContent, String fileName) {
+		int rows = fileContent.length;
+		int cols = fileContent[0].length;
 		try {
 			FileWriter myWriter = new FileWriter(fileName);
 			BufferedWriter bufferedWriter = new BufferedWriter(myWriter);
-			for (r = 0; r < rows; r++) {
-				for (c = 0; c < cols; c++) {
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
 					bufferedWriter.write(fileContent[r][c]);
 					if (c < cols - 1) { // if this is not the last entry in the row, add the logEntryDelimiter
 						bufferedWriter.write(logEntryDelimiter);

@@ -137,21 +137,4 @@ public class SystaRESTServer {
 		}
 		return null;
 	}
-
-	/**
-	 * Helper function to print information about a given {@link NetworkInterface}
-	 *
-	 * @param netint the {@link NetworkInterface} for which the information should
-	 *               be print
-	 *
-	 */
-	private static void displayInterfaceInformation(NetworkInterface netint) throws SocketException {
-		System.out.printf("Display name: %s\n", netint.getDisplayName());
-		System.out.printf("Name: %s\n", netint.getName());
-		Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-		for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-			System.out.printf("InetAddress: %s\n", inetAddress);
-		}
-		System.out.printf("\n");
-	}
 }
