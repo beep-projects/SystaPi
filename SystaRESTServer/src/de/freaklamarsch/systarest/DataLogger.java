@@ -328,7 +328,7 @@ public class DataLogger<T> {
 		}
 		// save new values
 		timestampBuffer.add(newTimestamp);
-		// save a copy of data, otherwise the stored array will change when the outside
+		// save a shallow copy of data, otherwise the stored array will change when the outside
 		// array changes
 		T[] d = Arrays.copyOf(data, data.length);
 		dataBuffer.add(d);

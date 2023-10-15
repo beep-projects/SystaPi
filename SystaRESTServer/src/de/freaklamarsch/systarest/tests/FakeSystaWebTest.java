@@ -33,10 +33,11 @@ import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Arrays;
@@ -47,6 +48,7 @@ import java.util.zip.ZipFile;
 
 import org.junit.jupiter.api.Test;
 
+import de.freaklamarsch.systarest.CircularBuffer;
 import de.freaklamarsch.systarest.DataLogger;
 import de.freaklamarsch.systarest.FakeSystaWeb;
 import de.freaklamarsch.systarest.SystaStatus;
@@ -62,10 +64,18 @@ class FakeSystaWebTest {
 	private Field readIndex;
 	private Field writeIndex;
 	private Field timestamp;
+	private Field socketField;
+	private DatagramSocket socket;
+	private Field remoteAddressField;
+	private InetAddress remoteAddress;
+	private Field remotePortField;
+	private int remotePort;
 	private Field intData;
 	private Method logRawAddData;
 	private Method logIntAddData;
 	private DataLogger<Integer> logInt;
+	private Field logIntDataBufferField;
+	private CircularBuffer<Integer> logIntDataBuffer;
 	private DataLogger<Byte> logRaw;
 
 	FakeSystaWebTest() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
@@ -92,15 +102,22 @@ class FakeSystaWebTest {
 			writeIndex.setAccessible(true);
 			timestamp = FakeSystaWeb.class.getDeclaredField("timestamp");
 			timestamp.setAccessible(true);
+            socket = new DatagramSocket();
+			socketField = FakeSystaWeb.class.getDeclaredField("socket");
+            socketField.setAccessible(true);
+            socketField.set(fsw, socket);
 			intData = FakeSystaWeb.class.getDeclaredField("intData");
 			intData.setAccessible(true);
 			Field logRawField = FakeSystaWeb.class.getDeclaredField("logRaw");
 			logRawField.setAccessible(true);
 			logRaw = (DataLogger<Byte>) logRawField.get(fsw);
 			logRawAddData = logRaw.getClass().getMethod("addData", Object[].class, long.class);
-			Field logIntField = FakeSystaWeb.class.getDeclaredField("logInt");
+			Field logIntField = fsw.getClass().getDeclaredField("logInt");
 			logIntField.setAccessible(true);
 			logInt = (DataLogger<Integer>) logIntField.get(fsw);
+			logIntDataBufferField = logInt.getClass().getDeclaredField("dataBuffer");
+			logIntDataBufferField.setAccessible(true);
+			logIntDataBuffer = (CircularBuffer<Integer>) logIntDataBufferField.get(logInt);
 			logIntAddData = logInt.getClass().getDeclaredMethod("addData", Object[].class, long.class);
 			logFileFilterStringField = FakeSystaWeb.class.getDeclaredField("logFileFilterString");
 			logFileFilterStringField.setAccessible(true);
@@ -127,19 +144,19 @@ class FakeSystaWebTest {
 	}
 
 	@Test
-	void testProcessType1() {
+	void testProcessDataType1() {
 		initialize();
 		// processType1 is only called from run(), so we have to set some
 		// variables first which usually get set by run()
 		assertTrue(updateWriteIndexAndTimestamp(fsw));
 		// now we can invoke processType1
-		Method processType1 = null;
+		Method processDataType1 = null;
 		try {
-			processType1 = prepareInvokeProcessType1(fsw);
-			processType1.invoke(fsw, data[0]);
+			processDataType1 = prepareInvokeMethod("processDataType1", ByteBuffer.class);
+			processDataType1.invoke(fsw, data[0]);
 		} catch (Exception e) {
 			e.printStackTrace();
-			fail("Exception thrown when trying to obtain method processType1");
+			fail("Exception thrown when trying to obtain method processDataType1");
 		}
 		SystaStatus status = fsw.getParadigmaStatus();
 		data[0].position(0);
@@ -256,6 +273,34 @@ class FakeSystaWebTest {
 	}
 
 	@Test
+	void testProcessDatagram() {
+		initialize();
+		// testProcessDatagram is only called from run(), so we have to set some
+		// variables first which usually get set by run()
+		assertTrue(updateWriteIndexAndTimestamp(fsw));
+		// now we can invoke processType1
+		Method processDatagram = null;
+		try {
+			processDatagram = prepareInvokeMethod("processDatagram", ByteBuffer.class);
+			processDatagram.invoke(fsw, data[1]);
+			processDatagram.invoke(fsw, data[2]);
+			processDatagram.invoke(fsw, data[3]);
+			processDatagram.invoke(fsw, data[4]);
+			processDatagram.invoke(fsw, data[5]);
+			processDatagram.invoke(fsw, data[6]);
+			processDatagram.invoke(fsw, data[7]);
+			processDatagram.invoke(fsw, data[8]);
+			System.out.println("[08] logIntDataBuffer.size(): "+logIntDataBuffer.size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Exception thrown when trying to obtain method testProcessDatagram");
+		}
+		System.out.println("At the end, logIntDataBuffer.size(): "+logIntDataBuffer.size());
+		SystaStatus status = fsw.getParadigmaStatus();
+		data[0].position(0);
+	}
+	
+	@Test
 	void testGetAllLogs() {
 		// make sure initialization is successfull
 		assertTrue(initialize());
@@ -269,7 +314,7 @@ class FakeSystaWebTest {
 		}
 		// add data packets to the logs
 		try {
-			Method processType1 = prepareInvokeProcessType1(fsw);
+			Method processType1 = prepareInvokeMethod("processDataType1", ByteBuffer.class);
 			// enable logging
 			fsw.logRawData("test", "<>", 10);
 			// prepare data
@@ -286,7 +331,7 @@ class FakeSystaWebTest {
 				logRawAddData.invoke(logRaw, Data, ((long[]) timestamp.get(fsw))[writeIndex.getInt(fsw)]);
 				if ((i % 3) == 0) {
 					// mimic the behavior that each 3rd packet is a data packet
-					processType1.invoke(fsw, data);
+					processType1.invoke(fsw, data[0]);
 					logIntAddData.invoke(logInt, ((Integer[][]) intData.get(fsw))[readIndex.getInt(fsw)],
 							((long[]) timestamp.get(fsw))[readIndex.getInt(fsw)]);
 				}
@@ -351,19 +396,37 @@ class FakeSystaWebTest {
 	}
 
 	/**
-	 * @param fsw
-	 * @return
+	 * @param methodName the name of the method, that should be retrieved from FakeSystaWeb
+	 * @return Method processDatagram from fsw
+	 * @throws NoSuchFieldException
+	 * @throws SecurityException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 * @throws NoSuchMethodException
+	 
+	private Method prepareInvokeMethod(String methodName) throws NoSuchFieldException, SecurityException,
+			IllegalArgumentException, IllegalAccessException, NoSuchMethodException {
+		//Method processDataType1 = FakeSystaWeb.class.getDeclaredMethod("processDataType1", ByteBuffer.class);
+		Method method = FakeSystaWeb.class.getDeclaredMethod(methodName, ByteBuffer.class);
+		method.setAccessible(true);
+		return method;
+	}*/
+
+	/**
+	 * @param methodName the name of the method, that should be retrieved from FakeSystaWeb
+	 * @return Method processDatagram from fsw
 	 * @throws NoSuchFieldException
 	 * @throws SecurityException
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
 	 * @throws NoSuchMethodException
 	 */
-	private Method prepareInvokeProcessType1(FakeSystaWeb fsw) throws NoSuchFieldException, SecurityException,
+	private Method prepareInvokeMethod(String methodName, Class... parameters) throws NoSuchFieldException, SecurityException,
 			IllegalArgumentException, IllegalAccessException, NoSuchMethodException {
-		Method processDataType1 = FakeSystaWeb.class.getDeclaredMethod("processDataType1", ByteBuffer.class);
-		processDataType1.setAccessible(true);
-		return processDataType1;
+		//Method processDataType1 = FakeSystaWeb.class.getDeclaredMethod("processDataType1", ByteBuffer.class);
+		Method method = FakeSystaWeb.class.getDeclaredMethod(methodName, parameters);
+		method.setAccessible(true);
+		return method;
 	}
 
 	/**
@@ -457,6 +520,7 @@ class FakeSystaWebTest {
 		for(int i=0; i<data.length;i++) {
 		    data[i] = ByteBuffer.allocate(1048).order(ByteOrder.LITTLE_ENDIAN);
 		}
+		// load a captured packets for tests
 		String testDir = "src/de/freaklamarsch/systarest/tests/";
 		readHexTextIntoByteBuffer(data[0],testDir+"data00_09_00.txt");
 		readHexTextIntoByteBuffer(data[1],testDir+"data01_09_00.txt");
@@ -484,10 +548,13 @@ class FakeSystaWebTest {
 			e.printStackTrace();
 			return;
 		}
-		System.out.print("Test Data: ");
+		System.out.print("Test Data loaded: ");
 		for (int i = 0; i < byteBuffer.limit(); i++) {
 		    System.out.format("%02x", byteBuffer.get(i));
 		}
-		System.out.println("");
+		System.out.println();
+		//reset the buffer position to 0
+		byteBuffer.position(0);
 	}
+
 }

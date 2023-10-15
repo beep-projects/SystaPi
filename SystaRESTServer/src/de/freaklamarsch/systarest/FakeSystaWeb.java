@@ -98,7 +98,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2023-10-14T14:28:30+00:00";
+			this.commitDate = "2023-10-15T07:33:31+00:00";
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	private final String commitDate = "2023-10-14T14:28:30+00:00";
+	private final String commitDate = "2023-10-15T07:33:31+00:00";
 	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
 	private InetAddress remoteAddress;
 	private int remotePort;
@@ -474,56 +474,7 @@ public class FakeSystaWeb implements Runnable {
 				// this indicates a stopRequested == true
 				break;
 			}
-			writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
-			timestamp[writeIndex] = Instant.now().getEpochSecond();
-			remoteAddress = receivePacket.getAddress();
-			remotePort = receivePacket.getPort();
-			logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);
-			ByteBuffer data = ByteBuffer.wrap(receivePacket.getData()).order(ByteOrder.LITTLE_ENDIAN);
-			for(int i=0;i<8;i++) {
-			  // 0..5: MAC address of SystaComfort Ethernet port:
-			  // 6..7: counter, incremented by 1 for each packet
-			  replyHeader[writeIndex][i] = data.get();
-			}
-			// 8..15: always "09 09 0C 00 32 DA 00 00"
-			// byte 12, 13 seem to be the protocol version 32 DA, or 32 DC or 33 DF
-			// 16: packet type (00 = empty intial packet, 01 = actual data packet, 02 =
-			// short final packet, FF = parameter change ok)
-			data.position(16);
-			byte type = data.get();
-			switch(type) {
-			  case 0x00:
-				typeOfLastReceivedMessage = MessageType.DATA0;
-				sendDataReply(writeIndex);
-				break;
-			  case 0x01:
-				processDataType1(data);
-				typeOfLastReceivedMessage = MessageType.DATA1;
-				sendDataReply(writeIndex);
-				logInt.addData(intData[readIndex], timestamp[readIndex]);
-				break;
-			  case 0x02:
-				processDataType2(data);
-				typeOfLastReceivedMessage = MessageType.DATA2;
-				sendDataReply(writeIndex);
-				logInt.addData(intData[readIndex], timestamp[readIndex]);
-			  case 0x03:
-				processDataType3(data);
-				typeOfLastReceivedMessage = MessageType.DATA3;
-				sendDataReply(writeIndex);
-				logInt.addData(intData[readIndex], timestamp[readIndex]);
-			  case 0x04:
-				processDataType4(data);
-				typeOfLastReceivedMessage = MessageType.DATA4;
-				sendDataReply(writeIndex);
-				logInt.addData(intData[readIndex], timestamp[readIndex]);
-			  case (byte)0xFF:
-				typeOfLastReceivedMessage = MessageType.OK;
-			  default:
-				typeOfLastReceivedMessage = MessageType.ERR;
-			}
-			/*if (typeOfLastReceivedMessage != MessageType.ERR) {
-			}*/
+			processDatagram(ByteBuffer.wrap(receivePacket.getData()).order(ByteOrder.LITTLE_ENDIAN));
 			synchronized (typeOfLastReceivedMessage) {
 				typeOfLastReceivedMessage.notifyAll();
 			}
@@ -532,6 +483,66 @@ public class FakeSystaWeb implements Runnable {
 		socket.close();
 		stopRequested = false;
 		running = false;
+	}
+
+	/**
+	 * @param data ByteBuffer that holds the raw data of the Datagram
+	 */
+	private void processDatagram(ByteBuffer data) {
+		writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
+		timestamp[writeIndex] = Instant.now().getEpochSecond();
+		remoteAddress = receivePacket.getAddress();
+		remotePort = receivePacket.getPort();
+		logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);
+		//ByteBuffer data = ByteBuffer.wrap(receivePacket.getData()).order(ByteOrder.LITTLE_ENDIAN);
+		for(int i=0;i<8;i++) {
+		  // 0..5: MAC address of SystaComfort Ethernet port:
+		  // 6..7: counter, incremented by 1 for each packet
+		  replyHeader[writeIndex][i] = data.get();
+		}
+		// 8..15: always "09 09 0C 00 32 DA 00 00"
+		// byte 12, 13 seem to be the protocol version 32 DA, or 32 DC or 33 DF
+		// 16: packet type (00 = empty intial packet, 01 = actual data packet, 02 =
+		// short final packet, FF = parameter change ok)
+		data.position(16);
+		byte type = data.get();
+		switch(type) {
+		  case 0x00:
+			typeOfLastReceivedMessage = MessageType.DATA0;
+			sendDataReply(writeIndex);
+			break;
+		  case 0x01:
+			processDataType1(data);
+			typeOfLastReceivedMessage = MessageType.DATA1;
+			sendDataReply(writeIndex);
+			logInt.addData(intData[readIndex], timestamp[readIndex]);
+			break;
+		  case 0x02:
+			processDataType2(data);
+			typeOfLastReceivedMessage = MessageType.DATA2;
+			sendDataReply(writeIndex);
+			logInt.addData(intData[readIndex], timestamp[readIndex]);
+			break;
+		  case 0x03:
+			processDataType3(data);
+			typeOfLastReceivedMessage = MessageType.DATA3;
+			sendDataReply(writeIndex);
+			logInt.addData(intData[readIndex], timestamp[readIndex]);
+			break;
+		  case 0x04:
+			processDataType4(data);
+			typeOfLastReceivedMessage = MessageType.DATA4;
+			sendDataReply(writeIndex);
+			logInt.addData(intData[readIndex], timestamp[readIndex]);
+			break;
+		  case (byte)0xFF:
+			typeOfLastReceivedMessage = MessageType.OK;
+			break;
+		  default:
+			typeOfLastReceivedMessage = MessageType.ERR;
+		}
+		/*if (typeOfLastReceivedMessage != MessageType.ERR) {
+		}*/
 	}
 
 	/**
@@ -656,7 +667,11 @@ public class FakeSystaWeb implements Runnable {
 			socket.send(replyPacket);
 		} catch (IOException ioe) {
 			// do nothing
-			System.out.println("[FakeSystaWeb] could not send reply");
+			System.out.println("[FakeSystaWeb] could not send reply: IOException");
+		}
+		 catch (IllegalArgumentException iae) {
+				// do nothing
+				System.out.println("[FakeSystaWeb] could not send reply: IllegalArgumentException");
 		}
 	}
 
