@@ -98,7 +98,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2023-10-15T07:33:31+00:00";
+			this.commitDate = "2023-10-15T07:51:47+00:00";
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	private final String commitDate = "2023-10-15T07:33:31+00:00";
+	private final String commitDate = "2023-10-15T07:51:47+00:00";
 	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
 	private InetAddress remoteAddress;
 	private int remotePort;
@@ -212,7 +212,7 @@ public class FakeSystaWeb implements Runnable {
 		// if we have received data within the last 120 seconds, we are considered being
 		// connected
 		boolean connected = (readIndex < 0) ? false
-				: (timestamp[readIndex] > 0 && (Instant.now().getEpochSecond() - timestamp[readIndex] < 120));
+				: (timestamp[readIndex] > 0 && (Instant.now().toEpochMilli() - timestamp[readIndex] < 120));
 		return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.getTimestampString(),
 				this.inetAddress, this.PORT, this.remoteAddress, this.remotePort, dls.saveLoggedData, dls.capacity,
 				dls.logFilePrefix, dls.logEntryDelimiter, dls.logFileRootPath, dls.writerFileCount, dls.bufferedEntries,
@@ -267,7 +267,7 @@ public class FakeSystaWeb implements Runnable {
 	 */
 	public String getFormattedTimeString(long timestamp) {
 		return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(
-				LocalDateTime.ofEpochSecond(timestamp, 0, OffsetDateTime.now().getOffset()), ZoneId.systemDefault()));
+				LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()), ZoneId.systemDefault()));
 	}
 
 	/**
@@ -490,7 +490,7 @@ public class FakeSystaWeb implements Runnable {
 	 */
 	private void processDatagram(ByteBuffer data) {
 		writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
-		timestamp[writeIndex] = Instant.now().getEpochSecond();
+		timestamp[writeIndex] = Instant.now().toEpochMilli();//.getEpochSecond();
 		remoteAddress = receivePacket.getAddress();
 		remotePort = receivePacket.getPort();
 		logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);
