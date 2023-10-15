@@ -52,8 +52,8 @@ import jakarta.ws.rs.core.Response;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // fix incompatibility with JUnit5
 class SystaRESTAPITest extends JerseyTest {
-	private static final String logDir = "./SystaLogs"; 
-	
+	private static final String logDir = "./SystaLogs";
+
 	// do not name this setup()
 	@BeforeAll // fix incompatibility with JUnit5
 	public void before() throws Exception {
@@ -84,26 +84,29 @@ class SystaRESTAPITest extends JerseyTest {
 	}
 
 	/**
-	 * Use reflection to change the hardcoded directory used for the location of log files.
-	 * As DEFAULT_ROOT_PATH is static final in DataLogger, it is officially a security risk
-	 * to change this value. This function might not work with future Java versions.
+	 * Use reflection to change the hardcoded directory used for the location of log
+	 * files. As DEFAULT_ROOT_PATH is static final in DataLogger, it is officially a
+	 * security risk to change this value. This function might not work with future
+	 * Java versions.
 	 */
 	private void changeDefaultLogDir(String newDir) {
 		Field DEFAULT_ROOT_PATH;
 		try {
-			//HACK to change the default folder to avoid that this test does any damage to the users home folder
-			//its not a nice way
-			//Field modifiersField = Field.class.getDeclaredField("modifiers");
-		    //modifiersField.setAccessible(true);
-		    //modifiersField.set(DataLogger.class, DataLogger.class.getModifiers() & ~Modifier.FINAL);
+			// HACK to change the default folder to avoid that this test does any damage to
+			// the users home folder
+			// its not a nice way
+			// Field modifiersField = Field.class.getDeclaredField("modifiers");
+			// modifiersField.setAccessible(true);
+			// modifiersField.set(DataLogger.class, DataLogger.class.getModifiers() &
+			// ~Modifier.FINAL);
 			VarHandle MODIFIERS;
 			var lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
-            MODIFIERS = lookup.findVarHandle(Field.class, "modifiers", int.class);
-		    DEFAULT_ROOT_PATH = DataLogger.class.getDeclaredField("DEFAULT_ROOT_PATH");
-		    int mods = DEFAULT_ROOT_PATH.getModifiers();
-		    if (Modifier.isFinal(mods)) {
-	            MODIFIERS.set(DEFAULT_ROOT_PATH, mods & ~Modifier.FINAL);
-	        }
+			MODIFIERS = lookup.findVarHandle(Field.class, "modifiers", int.class);
+			DEFAULT_ROOT_PATH = DataLogger.class.getDeclaredField("DEFAULT_ROOT_PATH");
+			int mods = DEFAULT_ROOT_PATH.getModifiers();
+			if (Modifier.isFinal(mods)) {
+				MODIFIERS.set(DEFAULT_ROOT_PATH, mods & ~Modifier.FINAL);
+			}
 			DEFAULT_ROOT_PATH.setAccessible(true);
 			DEFAULT_ROOT_PATH.set(DataLogger.class, newDir);
 		} catch (Exception e) {
@@ -128,7 +131,7 @@ class SystaRESTAPITest extends JerseyTest {
 		assertEquals("", json.getString("paradigmaIP"));
 		assertEquals(0, json.getInt("paradigmaPort"));
 		assertFalse(json.getBoolean("loggingData"));
-		assertEquals(180, json.getInt("logFileSize"));
+		assertEquals(60, json.getInt("logFileSize"));
 		assertEquals("SystaREST", json.getString("logFilePrefix"));
 		assertEquals(";", json.getString("logFileDelimiter"));
 		assertTrue(json.getString("logFileRootPath").endsWith(logDir));
@@ -215,7 +218,7 @@ class SystaRESTAPITest extends JerseyTest {
 		assertEquals("", json.getString("paradigmaIP"));
 		assertEquals(0, json.getInt("paradigmaPort"));
 		assertTrue(json.getBoolean("loggingData"));
-		assertEquals(30, json.getInt("logFileSize"));
+		assertEquals(10, json.getInt("logFileSize"));
 		assertEquals("test", json.getString("logFilePrefix"));
 		assertEquals("<>", json.getString("logFileDelimiter"));
 		assertTrue(json.getString("logFileRootPath").endsWith(logDir));
@@ -243,7 +246,7 @@ class SystaRESTAPITest extends JerseyTest {
 		assertEquals("", json.getString("paradigmaIP"));
 		assertEquals(0, json.getInt("paradigmaPort"));
 		assertFalse(json.getBoolean("loggingData"));
-		assertEquals(180, json.getInt("logFileSize"));
+		assertEquals(60, json.getInt("logFileSize"));
 		assertEquals("SystaREST", json.getString("logFilePrefix"));
 		assertEquals(";", json.getString("logFileDelimiter"));
 		assertTrue(json.getString("logFileRootPath").endsWith(logDir));

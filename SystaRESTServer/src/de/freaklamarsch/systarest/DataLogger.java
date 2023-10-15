@@ -23,10 +23,11 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A {@code DataLogger} can be used for logging data entries represented as
@@ -50,9 +51,10 @@ public class DataLogger<T> {
 		public final int writerFileCount;
 		public final String logEntryDelimiter;
 		public final int bufferedEntries;
+		public final String lastTimestamp;
 
 		public DataLoggerStatus(int capacity, boolean saveLoggedData, String logFilePrefix, String logFileRootPath,
-				String logEntryDelimiter, int writerFileCount, int bufferedEntries) {
+				String logEntryDelimiter, int writerFileCount, int bufferedEntries, String lastTimestamp) {
 			this.capacity = capacity;
 			this.saveLoggedData = saveLoggedData;
 			this.logFilePrefix = logFilePrefix;
@@ -60,6 +62,7 @@ public class DataLogger<T> {
 			this.logEntryDelimiter = logEntryDelimiter;
 			this.writerFileCount = writerFileCount;
 			this.bufferedEntries = bufferedEntries;
+			this.lastTimestamp = lastTimestamp;
 		}
 	}
 
@@ -68,6 +71,8 @@ public class DataLogger<T> {
 	private static final String DEFAULT_PREFIX = "DataLogger";
 	private static final String DEFAULT_FILENAME = "";
 	private static final String DEFAULT_ROOT_PATH = System.getProperty("user.home") + File.separator + "logs";
+	private static final DateTimeFormatter DEFAULT_FORMATTER = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss.SSS")
+			.withZone(ZoneId.systemDefault());
 	private int capacity = DEFAULT_CAPACITY;
 	private CircularBuffer<T[]> dataBuffer = null;
 	private CircularBuffer<String> timestampBuffer = null;
@@ -76,7 +81,7 @@ public class DataLogger<T> {
 	private String logFilename = DEFAULT_FILENAME;
 	private String logFileRootPath = DEFAULT_ROOT_PATH;
 	private String logEntryDelimiter = DEFAULT_DELIMITER;
-	private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss");
+	private DateTimeFormatter timestampFormatter = DEFAULT_FORMATTER;
 	private int writerFileCount = 0;
 
 	/**
@@ -84,7 +89,8 @@ public class DataLogger<T> {
 	 * {@value #DEFAULT_CAPACITY} entries.
 	 */
 	public DataLogger() {
-		this(DEFAULT_PREFIX, DEFAULT_FILENAME, DEFAULT_DELIMITER, DEFAULT_CAPACITY, DEFAULT_ROOT_PATH);
+		this(DEFAULT_PREFIX, DEFAULT_FILENAME, DEFAULT_DELIMITER, DEFAULT_CAPACITY, DEFAULT_ROOT_PATH,
+				DEFAULT_FORMATTER);
 	}
 
 	/**
@@ -96,8 +102,10 @@ public class DataLogger<T> {
 	 * @param delimiter      the value to use for {@link #logEntryDelimiter}
 	 * @param entriesPerFile the value to use for {@link #capacity}
 	 * @param rootPath       the value to use for {@link #logFileRootPath}
+	 * @param rootPath       the formatter to use for {@link #timestampFormatter}
 	 */
-	public DataLogger(String prefix, String filename, String delimiter, int entriesPerFile, String rootPath) {
+	public DataLogger(String prefix, String filename, String delimiter, int entriesPerFile, String rootPath,
+			DateTimeFormatter formatter) {
 		if (entriesPerFile > 0) {
 			this.capacity = entriesPerFile;
 		} else {
@@ -108,6 +116,7 @@ public class DataLogger<T> {
 		this.dataBuffer.setOverwrite(true);
 		this.timestampBuffer = new CircularBuffer<>(capacity);
 		this.timestampBuffer.setOverwrite(true);
+		this.timestampFormatter = formatter;
 	}
 
 	/**
@@ -129,7 +138,7 @@ public class DataLogger<T> {
 	 */
 	public DataLoggerStatus getStatus() {
 		return new DataLoggerStatus(capacity, saveLoggedData, logFilePrefix, logFileRootPath, logEntryDelimiter,
-				writerFileCount, timestampBuffer.size());
+				writerFileCount, timestampBuffer.size(), Objects.requireNonNullElse(timestampBuffer.end(), "never"));
 	}
 
 	/**
@@ -317,9 +326,8 @@ public class DataLogger<T> {
 	public synchronized void addData(T[] data, long timestamp) {
 		// access to dataBuffer and timestampBuffer has to be synchronized
 		// make sure that there is new data to write
-		String newTimestamp = formatter
-				.format(LocalDateTime.ofEpochSecond(timestamp, 0, OffsetDateTime.now().getOffset()));
-		String lastTimestamp = timestampBuffer.peek();
+		String newTimestamp = timestampFormatter.format(Instant.ofEpochMilli(timestamp));
+		String lastTimestamp = timestampBuffer.end();
 		if (lastTimestamp != null && newTimestamp.equals(lastTimestamp)) {
 			// check if there is already data in the buffer (lastTimestamp!=null)
 			// and make sure the timestamp is updated
@@ -328,7 +336,8 @@ public class DataLogger<T> {
 		}
 		// save new values
 		timestampBuffer.add(newTimestamp);
-		// save a shallow copy of data, otherwise the stored array will change when the outside
+		// save a shallow copy of data, otherwise the stored array will change when the
+		// outside
 		// array changes
 		T[] d = Arrays.copyOf(data, data.length);
 		dataBuffer.add(d);
@@ -353,7 +362,7 @@ public class DataLogger<T> {
 	}
 
 	/**
-	 * @return 
+	 * @return
 	 */
 	private String[][] convertBuffersToStringArray() {
 		int cols = timestampBuffer.size();
@@ -386,7 +395,8 @@ public class DataLogger<T> {
 	}
 
 	/**
-	 * @return returns true, if buffers are ok, to work with. Returns false, if buffers are empty, or out of sync.
+	 * @return returns true, if buffers are ok, to work with. Returns false, if
+	 *         buffers are empty, or out of sync.
 	 */
 	private boolean checkAndFixBufferSync() {
 		// access to dataBuffer and timestampBuffer has to be synchronized

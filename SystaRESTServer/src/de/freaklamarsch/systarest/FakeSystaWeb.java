@@ -30,10 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
@@ -98,7 +95,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2023-10-15T07:51:47+00:00";
+			this.commitDate = "2023-10-15T20:28:06+00:00";
 		}
 	}
 
@@ -149,20 +146,17 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	private final String commitDate = "2023-10-15T07:51:47+00:00";
+	private final String commitDate = "2023-10-15T20:28:06+00:00";
 	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
 	private InetAddress remoteAddress;
 	private int remotePort;
 	private final int PORT = 22460;
 	private final int MAX_DATA_LENGTH = 1048;
 	private final int MAX_NUMBER_ENTRIES = 256;
-	private final int MAX_NUMBER_DATA_PAKETS = 4;
+	private final int MAX_NUMBER_DATA_PACKETS = 4;
 	private final int COUNTER_OFFSET_REPLY = 0x3FBF;
 	private final int COUNTER_OFFSET_REPLY_2 = 0x3FC0;
-	//private final int COUNTER_OFFSET_PWD = 0x10F9;
-	//private final int COUNTER_OFFSET_CHANGE = 0x3FBF;
 	private final int MAC_OFFSET_REPLY = 0x8E82;
-	//private final int MAC_OFFSET_CHANGE = 0x8E7E;
 
 	// the SystaComfort sends burst of 3 to 4 messages every minute
 	// at the moment packets of type 0x01, 0x02, 0x03, 0x04 are processed, so 4 buffers should be
@@ -173,7 +167,7 @@ public class FakeSystaWeb implements Runnable {
 	private int writeIndex = -1;
 	private long dataPacketsReceived = 0;
 	private byte[][] replyHeader = new byte[RING_BUFFER_SIZE][8];
-	private Integer[][] intData = new Integer[RING_BUFFER_SIZE][MAX_NUMBER_ENTRIES*MAX_NUMBER_DATA_PAKETS];
+	private Integer[][] intData = new Integer[RING_BUFFER_SIZE][MAX_NUMBER_ENTRIES*MAX_NUMBER_DATA_PACKETS];
 	private long[] timestamp = new long[RING_BUFFER_SIZE];
 
 	private String inetAddress = "not configured";
@@ -196,8 +190,11 @@ public class FakeSystaWeb implements Runnable {
 			return name.matches(logFileFilterString);
 		}
 	};
-	private DataLogger<Integer> logInt = new DataLogger<>(PREFIX, "data", DELIMITER, WRITER_MAX_DATA, LOG_PATH);
-	private DataLogger<Byte> logRaw = new DataLogger<>(PREFIX, "raw", DELIMITER, WRITER_MAX_DATA, LOG_PATH);
+	//private DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss.SSS");
+	private DateTimeFormatter timestampFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+			.withZone(ZoneId.systemDefault());
+	private DataLogger<Integer> logInt = new DataLogger<>(PREFIX, "data", DELIMITER, WRITER_MAX_DATA, LOG_PATH, timestampFormatter);
+	private DataLogger<Byte> logRaw = new DataLogger<>(PREFIX, "raw", DELIMITER, WRITER_MAX_DATA, LOG_PATH, timestampFormatter);
 
 	// constructor
 	public FakeSystaWeb() {
@@ -252,7 +249,7 @@ public class FakeSystaWeb implements Runnable {
 	 *
 	 * @return the timestamp as a LocalDateTime string, which is a date-time with a
 	 *         time-zone offset in the ISO-8601 calendar system e.g.
-	 *         2021-12-24T14:49:27+01:00 or "never"
+	 *         2021-12-24T14:49:27.123+01:00 or "never"
 	 */
 	public String getTimestampString() {
 		return (readIndex < 0) ? "never" : getFormattedTimeString(timestamp[readIndex]);
@@ -263,11 +260,10 @@ public class FakeSystaWeb implements Runnable {
 	 *
 	 * @return the timestamp as a LocalDateTime string, which is a date-time with a
 	 *         time-zone offset in the ISO-8601 calendar system e.g.
-	 *         2021-12-24T14:49:27+01:00
+	 *         2021-12-24T14:49:27.123+01:00
 	 */
 	public String getFormattedTimeString(long timestamp) {
-		return DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.of(
-				LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault()), ZoneId.systemDefault()));
+		return timestampFormatter.format(Instant.ofEpochMilli(timestamp));
 	}
 
 	/**
@@ -490,11 +486,10 @@ public class FakeSystaWeb implements Runnable {
 	 */
 	private void processDatagram(ByteBuffer data) {
 		writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
-		timestamp[writeIndex] = Instant.now().toEpochMilli();//.getEpochSecond();
+		timestamp[writeIndex] = Instant.now().toEpochMilli();
 		remoteAddress = receivePacket.getAddress();
 		remotePort = receivePacket.getPort();
 		logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);
-		//ByteBuffer data = ByteBuffer.wrap(receivePacket.getData()).order(ByteOrder.LITTLE_ENDIAN);
 		for(int i=0;i<8;i++) {
 		  // 0..5: MAC address of SystaComfort Ethernet port:
 		  // 6..7: counter, incremented by 1 for each packet
@@ -539,10 +534,9 @@ public class FakeSystaWeb implements Runnable {
 			typeOfLastReceivedMessage = MessageType.OK;
 			break;
 		  default:
+			System.out.println("[FakeSystaWeb] unknown message type received " + String.format("0x%02X", type));
 			typeOfLastReceivedMessage = MessageType.ERR;
 		}
-		/*if (typeOfLastReceivedMessage != MessageType.ERR) {
-		}*/
 	}
 
 	/**
@@ -553,6 +547,8 @@ public class FakeSystaWeb implements Runnable {
 			socket.receive(receivePacket);
 			dataPacketsReceived++;
 		} catch (IOException e) {
+            // make sure this receivePacket is not used by anyone else
+			receivePacket.setLength(0);
 			if (stopRequested) {
 				// this exception should be thrown if the socket is closed on request
 				System.out.println("[FakeSystaWeb] call to receive UDP packets got interrupted");
@@ -583,36 +579,6 @@ public class FakeSystaWeb implements Runnable {
 	 * function to reply the messages received from a Paradigma SystaComfort II, for
 	 * keeping the communication alive
 	 *
-	private void sendPassword() {
-		byte[] reply = Arrays.copyOf(replyHeader[readIndex], 28);
-		// Always constant:
-		reply[8] = 0x01;
-		reply[12] = 0x02;
-		reply[14] = 0x08;
-		reply[19] = 0x31;
-		reply[20] = 0x32;
-		reply[21] = 0x31;
-		reply[22] = 0x32;
-		// Generate reply ID from MAC address:
-		// int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF)
-		// + ((reply[20] & 0xFF) << 8) + (reply[19] & 0xFF)
-		// + MAC_OFFSET_PWD) & 0xFFFF;
-		int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) + 0xBFB5) & 0xFFFF;
-
-		reply[24] = (byte) (m & 0xFF);
-		reply[25] = (byte) (m >> 8);
-		// Generate reply counter with offset:
-		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_PWD) & 0xFFFF;
-		reply[26] = (byte) (n & 0xFF);
-		reply[27] = (byte) (n >> 8);
-		send(reply);
-	}
-	 */
-
-	/**
-	 * function to reply the messages received from a Paradigma SystaComfort II, for
-	 * keeping the communication alive
-	 *
 	 * @param index index in replyHeader where the current message is stored
 	 */
 	private void sendDataReply(int index) {
@@ -634,28 +600,6 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	/**
-	 * TODO finally remove this outdated code
-	 * 
-	 * function to reply the messages received from a Paradigma SystaComfort II, for
-	 * keeping the communication alive
-	 *
-	 * @param index index in replyHeader where the current message is stored
-	private void sendDataReplyVDR(int index) {
-		byte[] reply = Arrays.copyOf(replyHeader[index], 20);
-		// Always constant:
-		reply[12] = 0x01;
-		// Generate reply ID from MAC address:
-		int m = (((reply[5] & 0xFF) << 8) + (reply[4] & 0xFF) + MAC_OFFSET_REPLY_VDR) & 0xFFFF;
-		reply[16] = (byte) (m & 0xFF);
-		reply[17] = (byte) (m >> 8);
-		// Generate reply counter with offset:
-		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY) & 0xFFFF;
-		reply[18] = (byte) (n & 0xFF);
-		reply[19] = (byte) (n >> 8);
-		send(reply);
-	}*/
-
-	/**
 	 * send a message to the SystaComfort II unit
 	 *
 	 * @param reply byte[] holding the message to be sent
@@ -675,23 +619,12 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	/**
-	 * process UDP packets from Paradigma SystaComfort II with type field set to
-	 * 0x00
-	 *
-	 * @param data ByteBuffer that holds the received data
-	private void processDataType0(ByteBuffer data) {
-		while (data.remaining() >= 4) {
-			System.out.println("[FakeSystaWeb] Pos: " + data.position() + " Val: " + data.getInt());
-		}
-	}
-	 */
-
 	private void processDataPacket(ByteBuffer data, int offset) {
 		data.position(24);
-		//System.out.println("[FakeSystaWeb] processDataPacket(data["+data.remaining()/4+"], "+offset+")");
 		if(readIndex >= 0) {
-			intData[writeIndex] = intData[readIndex];
+			// data packets are only updates for a part of the data set.
+			// Copy the current data set and update the part that was received in the new packet
+			intData[writeIndex] = Arrays.copyOf(intData[readIndex],intData[readIndex].length);
 		}
 		data.position(24);
 		while (data.remaining() >= 4) {
@@ -699,8 +632,6 @@ public class FakeSystaWeb implements Runnable {
 		}
 		readIndex = writeIndex;
 	}
-
-	
 	
 	/**
 	 * process UPD packets from Paradigma SystaComfort II with type field set to
@@ -748,7 +679,7 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	public void logRawData(int entriesPerFile) {
-		logRaw.saveLoggedData(entriesPerFile * 3);
+		logRaw.saveLoggedData(entriesPerFile);
 		logInt.saveLoggedData(entriesPerFile);
 	}
 
@@ -758,7 +689,7 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	public void logRawData(String filePrefix, String delimiter, int entriesPerFile) {
-		logRaw.saveLoggedData(filePrefix, delimiter, entriesPerFile * 3);
+		logRaw.saveLoggedData(filePrefix, delimiter, entriesPerFile);
 		logInt.saveLoggedData(filePrefix, delimiter, entriesPerFile);
 	}
 

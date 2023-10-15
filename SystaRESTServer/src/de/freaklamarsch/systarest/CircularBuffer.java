@@ -29,9 +29,9 @@ package de.freaklamarsch.systarest;
  */
 /**
  * Implementation of a circular buffer. A circular buffer is a data structure
- * that uses a single, fixed-size buffer as if it were connected end-to-end. By
+ * that uses a single, fixed-size buffer (FiFo) as if it were connected end-to-end. By
  * default, this implementation denies adding new elements if the buffer is
- * full. This behaviour can be changed by setting {@link #overwrite}
+ * full. This behavior can be changed by setting {@link #overwrite}
  *
  * @param <E> object type to store within this buffer
  */
@@ -41,7 +41,7 @@ public class CircularBuffer<E> {
 
 	private final int capacity;
 	private final E[] data;
-	private volatile int writeSequence, readSequence;
+	private volatile int writeIndex, readIndex;
 	private boolean overwrite;
 
 	/**
@@ -55,8 +55,8 @@ public class CircularBuffer<E> {
 	public CircularBuffer(int capacity) {
 		this.capacity = (capacity < 1) ? DEFAULT_CAPACITY : capacity;
 		this.data = (E[]) new Object[this.capacity];
-		this.readSequence = 0;
-		this.writeSequence = -1;
+		this.readIndex = 0;
+		this.writeIndex = -1;
 		this.overwrite = false;
 	}
 
@@ -66,12 +66,12 @@ public class CircularBuffer<E> {
 	 */
 	public void clear() {
 		// mark the buffer as empty
-		this.readSequence = 0;
-		this.writeSequence = -1;
+		this.readIndex = 0;
+		this.writeIndex = -1;
 	}
 
 	/**
-	 * Add an element to the {@code CircularBuffer}
+	 * Add an element to the end of {@code CircularBuffer}
 	 *
 	 * @param element the element added to the {@code CircularBuffer}
 	 * @return true if the element could be added to the buffer, false otherwise
@@ -80,20 +80,19 @@ public class CircularBuffer<E> {
 
 		if (isNotFull() || overwrite) {
 
-			int nextWriteSeq = writeSequence + 1;
-			data[nextWriteSeq % capacity] = element;
+			int nextWriteIndex = writeIndex + 1;
+			data[nextWriteIndex % capacity] = element;
 
 			// if the buffer is full and overwrite is active
 			// the read index has to be moved, for removing the first element
 			// this has to be done before the write index is moved, otherwise the isFull()
 			// test will fail
 			if (isFull() && overwrite) {
-				readSequence++;
+				readIndex++;
 			}
-			writeSequence++;
+			writeIndex++;
 			return true;
 		}
-
 		return false;
 	}
 
@@ -104,8 +103,8 @@ public class CircularBuffer<E> {
 	 */
 	public E remove() {
 		if (isNotEmpty()) {
-			E nextValue = data[readSequence % capacity];
-			readSequence++;
+			E nextValue = data[readIndex % capacity];
+			readIndex++;
 			return nextValue;
 		}
 		return null;
@@ -116,7 +115,18 @@ public class CircularBuffer<E> {
 	 */
 	public E peek() {
 		if (isNotEmpty()) {
-			E nextValue = data[readSequence % capacity];
+			E nextValue = data[readIndex % capacity];
+			return nextValue;
+		}
+		return null;
+	}
+
+	/**
+	 * @return the newest element from the buffer without removing it
+	 */
+	public E end() {
+		if (isNotEmpty()) {
+			E nextValue = data[writeIndex % capacity];
 			return nextValue;
 		}
 		return null;
@@ -134,7 +144,7 @@ public class CircularBuffer<E> {
 	 *         stored.
 	 */
 	public int size() {
-		return (writeSequence - readSequence) + 1;
+		return (writeIndex - readIndex) + 1;
 	}
 
 	/**
@@ -158,7 +168,7 @@ public class CircularBuffer<E> {
 	 * @return if this {@code CircularBuffer} is empty or not.
 	 */
 	public boolean isEmpty() {
-		return writeSequence < readSequence;
+		return writeIndex < readIndex;
 	}
 
 	/**

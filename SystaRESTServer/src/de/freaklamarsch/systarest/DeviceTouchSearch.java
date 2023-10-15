@@ -115,7 +115,7 @@ public class DeviceTouchSearch {
 	private static String getDeviceTouchPassword(DeviceTouchDeviceInfo deviceInfo, InterfaceAddress ia,
 			DatagramSocket searchSocket, DatagramPacket receivePacket) throws IOException {
 		String rxMessage;
-		// broadcast to trigger info response from a SystaComfort on this network 
+		// broadcast to trigger info response from a SystaComfort on this network
 		// MAC+" 6 R UDP Pass"
 		byte[] passwordMessage = (deviceInfo.mac + " 6 R UDP Pass").getBytes();
 		DatagramPacket packet = new DatagramPacket(passwordMessage, passwordMessage.length, ia.getBroadcast(),
@@ -126,8 +126,8 @@ public class DeviceTouchSearch {
 		// 0 7 1234
 		rxMessage = new String(Arrays.copyOfRange(receivePacket.getData(), 0, receivePacket.getLength()),
 				StandardCharsets.ISO_8859_1);
-		//remove all strange characters
-		rxMessage = rxMessage.replaceAll("[^0-9 a-zA-Z]","");
+		// remove all strange characters
+		rxMessage = rxMessage.replaceAll("[^0-9 a-zA-Z]", "");
 		return rxMessage.split(" ")[2];
 	}
 
@@ -153,8 +153,8 @@ public class DeviceTouchSearch {
 		// 0 7 3477\x00
 		rxMessage = new String(Arrays.copyOfRange(receivePacket.getData(), 0, receivePacket.getLength()),
 				StandardCharsets.ISO_8859_1);
-		//remove all strange characters
-		rxMessage = rxMessage.replaceAll("[^0-9 a-zA-Z]","");
+		// remove all strange characters
+		rxMessage = rxMessage.replaceAll("[^0-9 a-zA-Z]", "");
 		if (rxMessage.toLowerCase().contains("unknown value")) {
 			return -1;
 		} else {
@@ -171,7 +171,7 @@ public class DeviceTouchSearch {
 	 */
 	private static String getDeviceTouchInfo(InterfaceAddress ia, DatagramSocket searchSocket,
 			DatagramPacket receivePacket) throws IOException {
-		// broadcast to trigger info response from a SystaComfort on this network 
+		// broadcast to trigger info response from a SystaComfort on this network
 		// "0 1 A"
 		byte[] searchMessage = "0 1 A".getBytes();
 		DatagramPacket packet = new DatagramPacket(searchMessage, searchMessage.length, ia.getBroadcast(), BCAST_PORT);

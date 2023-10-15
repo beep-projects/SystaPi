@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 import java.lang.reflect.Field;
+import java.time.Instant;
 
 import org.junit.Test;
 
@@ -56,11 +57,13 @@ public class DataLoggerTest {
 		assertEquals(";", dls.logEntryDelimiter);
 		assertEquals(0, dls.writerFileCount);
 		assertEquals(0, dls.bufferedEntries);
+		assertEquals("never", dls.lastTimestamp);
 	}
 
 	@Test
 	public void testBufferingOfData() {
 		DataLoggerStatus dls = logger.getStatus();
+		timestamp = Instant.now().toEpochMilli();
 		for (int i = 0; i < dls.capacity; i++) {
 			logger.addData(data, timestamp);
 			timestamp++;

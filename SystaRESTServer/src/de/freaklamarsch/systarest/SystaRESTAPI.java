@@ -233,8 +233,8 @@ public class SystaRESTAPI {
 		String timestampString = fsw.getTimestampString();
 		JsonArrayBuilder jab = jsonFactory.createArrayBuilder();
 		for (Integer i : rawData) {
-			//rawData is initialized to all 0, so we do not have to check for null here
-		    jab.add(i.intValue());
+			// rawData is initialized to all 0, so we do not have to check for null here
+			jab.add(i.intValue());
 		}
 		JsonObject jo = jsonFactory.createObjectBuilder().add("timestamp", timestamp)
 				.add("timestampString", timestampString).add("rawData", jab.build()).build();
@@ -402,10 +402,8 @@ public class SystaRESTAPI {
 	@Produces("application/zip")
 	public Response getAllLogs() {
 		File file = fsw.getAllLogs();
-		System.out.println("[SystaRESTServer] return zip file: "+file);
-		return Response
-				.ok(file)
-				.header("Content-Disposition", "attachment; filename=" + file.getName())
+		System.out.println("[SystaRESTServer] return zip file: " + file);
+		return Response.ok(file).header("Content-Disposition", "attachment; filename=" + file.getName())
 				.entity(new StreamingOutput() {
 					@Override
 					public void write(final OutputStream output) throws IOException, WebApplicationException {
@@ -415,8 +413,7 @@ public class SystaRESTAPI {
 							file.delete();
 						}
 					}
-				})
-				.build();
+				}).build();
 	}
 
 	@DELETE
@@ -456,7 +453,8 @@ public class SystaRESTAPI {
 	}
 
 	/**
-	 * Returns the a .html file for showing a dashboard for the values of the last 24h in the browser.
+	 * Returns the a .html file for showing a dashboard for the values of the last
+	 * 24h in the browser.
 	 * 
 	 * @return the InputStream of the file, or null, if something went wrong in the
 	 *         file handling
