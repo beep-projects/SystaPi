@@ -95,7 +95,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2023-10-16T11:54:04+00:00";
+			this.commitDate = "2023-10-16T16:25:20+00:00";
 		}
 	}
 
@@ -146,7 +146,7 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	private final String commitDate = "2023-10-16T11:54:04+00:00";
+	private final String commitDate = "2023-10-16T16:25:20+00:00";
 	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
 	private InetAddress remoteAddress;
 	private int remotePort;
@@ -606,16 +606,16 @@ public class FakeSystaWeb implements Runnable {
 	 */
 	private void send(byte[] reply) {
 		// send out the reply
-		DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, remoteAddress, remotePort);
 		try {
+			DatagramPacket replyPacket = new DatagramPacket(reply, reply.length, remoteAddress, remotePort);
 			socket.send(replyPacket);
 		} catch (IOException ioe) {
 			// do nothing
-			System.out.println("[FakeSystaWeb] could not send reply: IOException");
+			System.out.println("[FakeSystaWeb] could not send reply: IOException, " + ioe.getMessage());
 		}
 		 catch (IllegalArgumentException iae) {
 				// do nothing
-				System.out.println("[FakeSystaWeb] could not send reply: IllegalArgumentException");
+				System.out.println("[FakeSystaWeb] could not send reply: IllegalArgumentException, " + iae.getMessage());
 		}
 	}
 
