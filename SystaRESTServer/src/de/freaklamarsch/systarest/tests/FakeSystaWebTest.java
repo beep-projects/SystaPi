@@ -538,7 +538,7 @@ class FakeSystaWebTest {
 			data[i] = ByteBuffer.allocate(1048).order(ByteOrder.LITTLE_ENDIAN);
 		}
 		// load a captured packets for tests
-		String testDir = "src/de/freaklamarsch/systarest/tests/";
+		String testDir = this.getClass().getResource(".").getPath();
 		readHexTextIntoByteBuffer(data[0], testDir + "data00_09_00.txt");
 		readHexTextIntoByteBuffer(data[1], testDir + "data01_09_00.txt");
 		readHexTextIntoByteBuffer(data[2], testDir + "data02_09_01.txt");
