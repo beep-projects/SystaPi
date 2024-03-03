@@ -187,7 +187,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 
 ### Windows / manual installation
 
-1. Install Raspberry Pi OS following this [guide](https://www.raspberrypi.org/documentation/installation/installing-images/).
+1. Install Raspberry Pi OS following this [guide](https://www.raspberrypi.com/documentation/computers/getting-started.html#installing-the-operating-system).
    [Raspberry Pi OS Lite](https://www.raspberrypi.org/software/operating-systems/#raspberry-pi-os-32-bit) is sufficient.
 
 2. Download [SystaPi](https://github.com/beep-projects/SystaPi/releases/download/2.0/SystaPi-2.0.zip)
