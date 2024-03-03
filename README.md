@@ -116,11 +116,11 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 1. Run the following commands in a shell for downloading and unzipping the project files
 
    ```bash
-   wget https://github.com/beep-projects/SystaPi/releases/download/2.1/SystaPi-2.1.zip
-   unzip SystaPi-2.1.zip
+   wget https://github.com/beep-projects/SystaPi/releases/download/2.2/SystaPi-2.2.zip
+   unzip SystaPi-2.2.zip
    ```
 
-2. Open `SystaPi-2.1/SystaPi_files/firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
+2. Open `SystaPi-2.2/SystaPi_files/firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
    Most probably you want to generate your `WPA_PASSPHRASE` via `wpa_passphrase MY_WIFI passphrase` , or  use the [WPA PSK (Raw Key) Generator](https://www.wireshark.org/tools/wpa-psk.html), and add the credentials to the file.
    If you use the network `192.168.1.x` for your local network, you should change the `IP_PREFIX` to another IP range, to avoid network collisions
    
@@ -167,7 +167,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 4. Continue in the shell
 
    ```bash
-   cd SystaPi-2.1
+   cd SystaPi-2.2
    ./install_systapi.sh
    ```
 
@@ -190,7 +190,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 1. Install Raspberry Pi OS following this [guide](https://www.raspberrypi.com/documentation/computers/getting-started.html#installing-the-operating-system).
    [Raspberry Pi OS Lite](https://www.raspberrypi.org/software/operating-systems/#raspberry-pi-os-32-bit) is sufficient.
 
-2. Download [SystaPi](https://github.com/beep-projects/SystaPi/releases/download/2.1/SystaPi-2.1.zip)
+2. Download [SystaPi](https://github.com/beep-projects/SystaPi/releases/download/2.2/SystaPi-2.2.zip)
 
 3. Extract the downloaded zip file
 
