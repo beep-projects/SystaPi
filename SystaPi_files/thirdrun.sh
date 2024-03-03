@@ -19,6 +19,7 @@
 # this script is run as root, no need for sudo
 
 echo "START thirdrun.sh"
+echo "This script is running as user: $( whoami )"
 
 #disable service
 systemctl stop secondrun.service

@@ -50,9 +50,11 @@ function waitForApt() {
 #   None
 #######################################
 function waitForInternet() {
-  until nc -zw1 google.com 443 >/dev/null 2>&1;  do
-   echo waiting for internet access ...
-   sleep 1
+  #until nc -zw1 google.com 443 >/dev/null 2>&1;  do
+  #newer Raspberry Pi OS versions do not have nc preinstalled, but wget is still there
+  while ! wget -q --spider http://google.com; do
+    echo ["$(date +%T)"] waiting for internet access ...
+    sleep 1
   done
 }
 
@@ -62,6 +64,7 @@ trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>/boot/secondrun.log 2>&1
 
 echo "START secondrun.sh"
+echo "This script is running as user: $( whoami )"
 #the following variables should be set by firstrun.sh
 IP_PREFIX="192.168.1"
 #configured user name
@@ -73,28 +76,40 @@ waitForInternet
 #network should be up, update the system
 echo "updating the system"
 waitForApt
-sudo apt update
+sudo apt update --allow-releaseinfo-change # bookworn introduced an issue with the release files being not valid
+waitForApt
+sudo apt full-upgrade -y
+# do it again, because it seems to fix the bookworm release file issues
+sudo apt update --allow-releaseinfo-change # bookworn introduced an issue with the release files being not valid
+waitForApt
+sudo apt full-upgrade -y
+# do it again, because it seems to fix the bookworm release file issues
+sudo apt update --allow-releaseinfo-change # bookworn introduced an issue with the release files being not valid
 waitForApt
 sudo apt full-upgrade -y
 
+echo ""
+echo "configure eth0 to use ${IP_PREFIX}.1 as static IP address"
+#echo "configuring /etc/dhcpcd.conf"
+##sudo echo "" >> /etc/dhcpcd.conf
+##sudo echo "#configuring a static IP for connecting to the Paradigma Systa Comfort II" >> /etc/dhcpcd.conf
+##sudo echo "interface eth0" >> /etc/dhcpcd.conf
+##sudo echo "static ip_address=${IP_PREFIX}.1/24" >> /etc/dhcpcd.conf
+#echo "" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+#echo "#configuring a static IP for connecting to the Paradigma Systa Comfort II" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+#echo "interface eth0" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+#echo "static ip_address=${IP_PREFIX}.1/24" | sudo tee -a /etc/dhcpcd.conf > /dev/null
+# bookworm uses network manager
+#nmcli connection add type ethernet id "SystaConnect" interface-name eth0 autoconnect yes autoconnect-priority 1337 ipv4.method manual ipv4.addresses ${IP_PREFIX}.1/24 ipv6.method disabled
+sudo nmcli connection add type ethernet con-name "SystaConnect" ifname eth0 autoconnect yes ipv4.method manual ipv4.addresses 192.168.11.1/24 ipv6.method disabled
+sudo nmcli connection up "SystaConnect"
+
+
+#sudo systemctl daemon-reload
 #install dnsmasq for DNS spoofing
 echo "installing dnsmasq"
 waitForApt
 sudo apt install -y dnsmasq
-
-echo ""
-echo "configure eth0 to use ${IP_PREFIX}.1 as static IP address"
-echo "configuring /etc/dhcpcd.conf"
-#sudo echo "" >> /etc/dhcpcd.conf
-#sudo echo "#configuring a static IP for connecting to the Paradigma Systa Comfort II" >> /etc/dhcpcd.conf
-#sudo echo "interface eth0" >> /etc/dhcpcd.conf
-#sudo echo "static ip_address=${IP_PREFIX}.1/24" >> /etc/dhcpcd.conf
-echo "" | sudo tee -a /etc/dhcpcd.conf > /dev/null
-echo "#configuring a static IP for connecting to the Paradigma Systa Comfort II" | sudo tee -a /etc/dhcpcd.conf > /dev/null
-echo "interface eth0" | sudo tee -a /etc/dhcpcd.conf > /dev/null
-echo "static ip_address=${IP_PREFIX}.1/24" | sudo tee -a /etc/dhcpcd.conf > /dev/null
-
-sudo systemctl daemon-reload
 
 echo "configuring /etc/dnsmasq.conf"
 #sudo echo "" >> /etc/dnsmasq.conf
@@ -111,6 +126,7 @@ echo "interface=eth0" | sudo tee -a /etc/dnsmasq.conf > /dev/null
 echo "listen-address=${IP_PREFIX}.1" | sudo tee -a /etc/dnsmasq.conf > /dev/null
 echo "no-dhcp-interface=wlan0" | sudo tee -a /etc/dnsmasq.conf > /dev/null
 echo "address=/paradigma.remoteportal.de/${IP_PREFIX}.1" | sudo tee -a /etc/dnsmasq.conf > /dev/null
+echo "local-ttl=3600" | sudo tee -a /etc/dnsmasq.conf > /dev/null
 
 echo "configuring /etc/dnsmasq.hosts"
 #sudo echo "" >> /etc/dnsmasq.hosts
@@ -121,7 +137,7 @@ echo "#configure DNS spoofing for paradigma.remoteportal.de" | sudo tee -a /etc/
 echo "${IP_PREFIX}.1 paradigma.remoteportal.de" | sudo tee -a /etc/dnsmasq.hosts > /dev/null
 
 echo "restart dnsmasq"
-sudo /etc/init.d/dnsmasq restart 
+sudo sudo systemctl restart dnsmasq.service
 
 #see https://www.azul.com/downloads/?architecture=arm-32-bit-hf&package=jdk for available versions
 echo "install OpenJDK build from Azul for Pi Zero (ARM 32-bit HF v6)"
@@ -129,18 +145,17 @@ if [ ! -d /usr/lib/jvm ]; then
   sudo mkdir /usr/lib/jvm
 fi
 cd /usr/lib/jvm || exit 1
-
-#sudo wget https://cdn.azul.com/zulu-embedded/bin/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz
-#sudo tar -xzvf zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz 
-#sudo rm zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz
-#sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf/bin/java 1
-#sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf/bin/javac 1
-#sudo wget https://cdn.azul.com/zulu-embedded/bin/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz
-sudo wget https://cdn.azul.com/zulu-embedded/bin/zulu11.58.25-ca-jdk11.0.16.1-linux_aarch32hf.tar.gz
-sudo tar -xzvf zulu11.58.25-ca-jdk11.0.16.1-linux_aarch32hf.tar.gz
-sudo rm zulu11.58.25-ca-jdk11.0.16.1-linux_aarch32hf.tar.gz
-sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu11.58.25-ca-jdk11.0.16.1-linux_aarch32hf/bin/java 1
-sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu11.58.25-ca-jdk11.0.16.1-linux_aarch32hf/bin/javac 1
+#AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz"
+#AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz"
+#AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.66.19-ca-jdk11.0.20.1-linux_aarch32hf.tar.gz"
+AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.70.15-ca-hl-jdk11.0.22-linux_aarch32hf.tar.gz"
+AZUL_FILE_NAME=${AZUL_URL##*/}
+AZUL_BUILD_NAME=${AZUL_FILE_NAME%.tar.gz}
+sudo wget "${AZUL_URL}"
+sudo tar -xzvf "${AZUL_FILE_NAME}"
+sudo rm "${AZUL_FILE_NAME}"
+sudo update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/${AZUL_BUILD_NAME}/bin/java" 1
+sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/${AZUL_BUILD_NAME}/bin/javac" 1
 
 #copy SystaRESTServer to the ${USERNAME} home folder for easy access
 echo "copy SystaRESTServer from /boot to /home/${USERNAME}"

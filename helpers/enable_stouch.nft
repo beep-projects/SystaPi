@@ -1,0 +1,72 @@
+#!/sbin/nft -f
+# Copyright (c) 2023, The beep-projects contributors
+# this file originated from https://github.com/beep-projects
+# Do not remove the lines above.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see https://www.gnu.org/licenses/
+#
+# nftables rules to enable communication between the S-Touch app and a Paradigma SystaComfort on SystaPi
+# if this does not work, you might have to enable ip forwarding
+#   sudo sysctl -w net.ipv4.ip_forward=1
+# enable rules with:
+#   sudo nft -f enable_stouch.nft
+# make rules permanent:
+# 
+# for debugging, add "meta nftrace set 1" to the start of the chain which you want to inspect
+# and run "sudo nft monitor trace" on the console
+
+flush ruleset
+
+define STOUCH_DEVICE_IP = [IP ADDRESS OF THE DEVICE RUNNING THE S-TOUCH APP]
+define SYSTA_COMFORT_IP = [IP ADDRESS OF YOUR SYSTA COMFORT]
+define ETH_IP = [IP ADDRESS OF THE ETHERNET INTERFACE CONNECTING TO YOUR SYSTA COMFORT]
+define BC_PORT = 8001
+define DISP_PORT = 3477
+define IF_TO_LOCAL_NETWORK = wlan0
+define IF_TO_SYSTA_COMFORT = eth0
+
+table netdev broadcastnat {
+    chain fromLocalNework {
+      #meta nftrace set 1
+      type filter hook ingress device $IF_TO_LOCAL_NETWORK priority 0;
+      pkttype broadcast ether type ip ip daddr 255.255.255.255 udp dport $BC_PORT jump ethOut;
+    }
+
+    chain toSystaComfort {
+        #meta nftrace set 1
+        ip saddr set $ETH_IP ip daddr set 255.255.255.255
+        fwd to $IF_TO_SYSTA_COMFORT;
+    }
+
+    chain toLocalNetwork {
+        #meta nftrace set 1
+        fwd to $IF_TO_LOCAL_NETWORK;
+    }
+}
+
+table ip nat {
+  chain prerouting {
+    #meta nftrace set 1
+    type nat hook prerouting priority 0; policy accept;
+    meta iifname $IF_TO_LOCAL_NETWORK udp dport {$DISP_PORT, $BC_PORT, 30000-65535} dnat ip to $SYSTA_COMFORT_IP;
+    meta iifname $IF_TO_SYSTA_COMFORT udp dport {$DISP_PORT, $BC_PORT, 30000-65535} dnat ip to $STOUCH_DEVICE_IP;
+  }
+
+  chain postrouting {
+    #meta nftrace set 1
+    type nat hook postrouting priority 100; policy accept;
+    oifname $IF_TO_LOCAL_NETWORK masquerade
+  }
+}
+
+

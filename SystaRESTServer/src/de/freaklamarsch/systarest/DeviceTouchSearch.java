@@ -128,6 +128,7 @@ public class DeviceTouchSearch {
 				StandardCharsets.ISO_8859_1);
 		// remove all strange characters
 		rxMessage = rxMessage.replaceAll("[^0-9 a-zA-Z]", "");
+		rxMessage = rxMessage.trim();
 		return rxMessage.split(" ")[2];
 	}
 
@@ -155,6 +156,7 @@ public class DeviceTouchSearch {
 				StandardCharsets.ISO_8859_1);
 		// remove all strange characters
 		rxMessage = rxMessage.replaceAll("[^0-9 a-zA-Z]", "");
+		rxMessage = rxMessage.trim();
 		if (rxMessage.toLowerCase().contains("unknown value")) {
 			return -1;
 		} else {

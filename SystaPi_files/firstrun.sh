@@ -32,6 +32,7 @@ trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>/boot/firstrun.log 2>&1
 
 echo "START firstrun.sh"
+echo "This script is running as user: $( whoami )"
 
 #-------------------------------------------------------------------------------
 #----------------------- START OF CONFIGURATION --------------------------------
@@ -69,6 +70,26 @@ ENABLE_ENC28J60=true
 #------------------------ END OF CONFIGURATION ---------------------------------
 #-------------------------------------------------------------------------------
 
+# Prior to Bookworm, Raspberry Pi OS stored the boot partition at /boot/.
+# Since Bookworm, the boot partition is located at /boot/firmware/. 
+echo "checking if files were moved to /boot/firmware"
+if [ -f /boot/firmware/secondrun.sh ]; then
+   echo "ln -s /boot/firmware/secondrun.sh /boot/secondrun.sh"
+   ln -s /boot/firmware/secondrun.sh /boot/secondrun.sh
+fi
+if [ -f /boot/firmware/thirdrun.sh ]; then
+   echo "ln -s /boot/firmware/thirdrun.sh /boot/thirdrun.sh"
+   ln -s /boot/firmware/thirdrun.sh /boot/thirdrun.sh
+fi
+if [ -d /boot/firmware/helpers ]; then
+   echo "ln -s /boot/firmware/helpers /boot/helpers"
+   ln -s /boot/firmware/helpers /boot/helpers
+fi
+if [ -d /boot/firmware/SystaRESTServer ]; then
+   echo "ln -s /boot/firmware/SystaRESTServer /boot/SystaRESTServer"
+   ln -s /boot/firmware/SystaRESTServer /boot/SystaRESTServer
+fi
+
 #copy the IP_PREFIX into secondrun.sh and remove a trailing . if present
 sed -i "s/^IP_PREFIX=.*/IP_PREFIX=${IP_PREFIX%.}/" /boot/secondrun.sh
 #copy the USERNAME into secondrun.sh 
@@ -76,14 +97,18 @@ sed -i "s/^USERNAME=.*/USERNAME=${USERNAME}/" /boot/secondrun.sh
 
 CURRENT_HOSTNAME=$( </etc/hostname tr -d " \t\n\r" )
 echo "set hostname to ${HOSTNAME} (was ${CURRENT_HOSTNAME})"
-echo $HOSTNAME >/etc/hostname
-sed -i "s/127.0.1.1.*$CURRENT_HOSTNAME/127.0.1.1\t$HOSTNAME/g" /etc/hosts
+if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then
+   /usr/lib/raspberrypi-sys-mods/imager_custom set_hostname systapi
+else
+   echo systapi >/etc/hostname
+   sed -i "s/127.0.1.1.*${CURRENT_HOSTNAME}/127.0.1.1\t${HOSTNAME}/g" /etc/hosts
+fi
 
 FIRSTUSER=$( getent passwd 1000 | cut -d: -f1 )
 echo "set default user to ${USERNAME} (was ${FIRSTUSER})"
 #FIRSTUSERHOME=$( getent passwd 1000 | cut -d: -f6 )
 if [ -f /usr/lib/userconf-pi/userconf ]; then
-   echo "/usr/lib/userconf-pi/userconf ${USERNAME} ${PASSWD}"
+   echo "/usr/lib/userconf-pi/userconf \"${USERNAME}\" \"${PASSWD}\""
    /usr/lib/userconf-pi/userconf "${USERNAME}" "${PASSWD}"
 else
    echo "echo ${FIRSTUSER}:${PASSWD} | chpasswd -e"
@@ -106,13 +131,22 @@ else
 fi
 
 echo "setting network options"
-sed -i "s/^REGDOMAIN=.*/REGDOMAIN=${COUNTRY}/" /etc/default/crda
+#sed -i "s/^REGDOMAIN=.*/REGDOMAIN=${COUNTRY}/" /etc/default/crda
 
-systemctl enable ssh
+if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then
+   /usr/lib/raspberrypi-sys-mods/imager_custom enable_ssh
+else
+   systemctl enable ssh
+fi
+
+if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then
+   /usr/lib/raspberrypi-sys-mods/imager_custom set_wlan "${SSID}" "${WPA_PASSPHRASE}" "${COUNTRY}"
+else
 cat >/etc/wpa_supplicant/wpa_supplicant.conf <<WPAEOF
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
 country=$COUNTRY
-#ap_scan=1
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+ap_scan=1
+
 update_config=1
 network={
 	ssid="$SSID"
@@ -120,24 +154,29 @@ network={
 }
 
 WPAEOF
-chmod 600 /etc/wpa_supplicant/wpa_supplicant.conf
-rfkill unblock wifi
-for filename in /var/lib/systemd/rfkill/*:wlan ; do
-  echo 0 > "${filename}"
-done
-rm -f /etc/xdg/autostart/piwiz.desktop
-rm -f /etc/localtime
+   chmod 600 /etc/wpa_supplicant/wpa_supplicant.conf
+   rfkill unblock wifi
+   for filename in /var/lib/systemd/rfkill/*:wlan ; do
+       echo 0 > "${filename}"
+   done
+fi
 
-echo "setting timezone and keyboard layout"
-echo $TIMEZONE >/etc/timezone
-dpkg-reconfigure -f noninteractive tzdata
+if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then
+   /usr/lib/raspberrypi-sys-mods/imager_custom set_keymap "${COUNTRY}"
+   /usr/lib/raspberrypi-sys-mods/imager_custom set_timezone "${TIMEZONE}"
+else
+   rm -f /etc/localtime
+   echo "${TIMEZONE}" >/etc/timezone
+   dpkg-reconfigure -f noninteractive tzdata
 cat >/etc/default/keyboard <<KBEOF
 XKBMODEL=$XKBMODEL
 XKBLAYOUT=$XKBLAYOUT
 XKBVARIANT=$XKBVARIANT
 XKBOPTIONS=$XKBOPTIONS
+
 KBEOF
-dpkg-reconfigure -f noninteractive keyboard-configuration
+   dpkg-reconfigure -f noninteractive keyboard-configuration
+fi
 
 if $ENABLE_ENC28J60; then
   echo "enable enc28j60 overlay"
@@ -146,15 +185,11 @@ if $ENABLE_ENC28J60; then
   grep -qxF -- "${LINE}" "${FILE}" || echo "${LINE}" >> "${FILE}"
 fi
 
-#clean up
-#echo "removing firstrun.sh from the system"
-#rm -f /boot/firstrun.sh
-sed -i "s| systemd.run.*||g" /boot/cmdline.txt
-
 echo "installing secondrun.service"
 # make sure secondrun.sh is executed at next boot. 
 # we will need network up and running, so we install the script as a service that depends on network
-cat <<EOF >/etc/systemd/system/secondrun.service
+echo "create /etc/systemd/system/secondrun.service"
+cat <<EOF | sudo tee /etc/systemd/system/secondrun.service
 [Unit]
 Description=SecondRun
 After=network.target
@@ -171,10 +206,17 @@ RemainAfterExit=no
 WantedBy=multi-user.target
 
 EOF
+echo "enable secondrun.service"
 #reload systemd to make the daemon aware of the new configuration
 systemctl --system daemon-reload
 #enable service
 systemctl enable secondrun.service
+
+#clean up
+echo "removing firstrun.sh from /boot/cmdline.txt"
+#rm -f /boot/firstrun.sh
+sed -i "s| systemd.run.*||g" /boot/cmdline.txt
+
 echo "DONE firstrun.sh"
 
 exit 0
