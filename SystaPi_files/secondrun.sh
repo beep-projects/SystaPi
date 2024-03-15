@@ -70,6 +70,9 @@ IP_PREFIX="192.168.1"
 #configured user name
 USERNAME=beep
 
+#enable ipv4 forwarding, which is required by ~/helpers/enable_stouch.nft
+sudo sed -i "s/^#net\.ipv4\.ip_forward=1/net\.ipv4\.ip_forward=1/" /etc/sysctl.conf
+
 #internet connectivity is required for installing required packages and updating the system
 waitForInternet
 
