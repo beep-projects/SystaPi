@@ -589,7 +589,7 @@ public class FakeSystaWeb implements Runnable {
 		reply[13] = (byte) (m >> 8);
 		// Generate reply counter with offset:
 		int n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY) & 0xFFFF;
-		if ((reply[5] + reply[4]) == 57 || (reply[5] + reply[4]) == 313 || (reply[5] + reply[4]) == 473) {
+		if ((reply[5] + reply[4]) == 57 || (reply[5] + reply[4]) == 313 || (reply[5] + reply[4]) == -39) {
 			// TODO this is just a hack to support a specific unit.
 			// Find out why this is needed and make it generic
 			n = (((reply[7] & 0xFF) << 8) + (reply[6] & 0xFF) + COUNTER_OFFSET_REPLY_2) & 0xFFFF;
