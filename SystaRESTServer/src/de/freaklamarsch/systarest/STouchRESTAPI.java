@@ -296,14 +296,14 @@ public class STouchRESTAPI {
 	 *                    a touch event on the given text, if it is in the object
 	 *                    tree of the screen touchButton=id emulate a touch event on
 	 *                    the button with the given id, if it is in the object tree
-	 *                    of the screen whileText=text&doAction while the given text
+	 *                    of the screen whileText=text&amp;doAction while the given text
 	 *                    is in the object tree of the screen, do the given action
-	 *                    whileButton=id&doAction while the button with the given id
+	 *                    whileButton=id&amp;doAction while the button with the given id
 	 *                    is in the object tree of the screen, do the given action
-	 *                    checkText=text&theDoThisAction&elseDoThisAction if the
+	 *                    checkText=text&amp;theDoThisAction&amp;elseDoThisAction if the
 	 *                    given text is in the object tree of the screen, then do
 	 *                    the first action, else do the second
-	 *                    checkButton=id&theDoThisAction&elseDoThisAction if the
+	 *                    checkButton=id&amp;theDoThisAction&amp;elseDoThisAction if the
 	 *                    button with the given id is in the object tree of the
 	 *                    screen, then do the first action, else do the second
 	 *                    disconnect disconnect from the SystaComfort unit

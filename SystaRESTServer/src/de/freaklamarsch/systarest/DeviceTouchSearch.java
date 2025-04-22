@@ -34,6 +34,9 @@ import java.util.List;
  * This class provides methods to create search messages, parse responses, and extract device information.
  */
 public class DeviceTouchSearch {
+	/**
+	 * Information returned from a device supporting the DeviceTouch protocol
+	 */
 	public static class DeviceTouchDeviceInfo {
 		public String string = null;
 		public String localIp = null;
@@ -57,6 +60,12 @@ public class DeviceTouchSearch {
 	private static final int MAX_DATA_LENGTH = 1024;
 	private static final int BCAST_PORT = 8001;
 
+	/**
+	 * Search for devices supporting the DeviceTouch protocol. The search sends UDP broadcasts
+	 * and returns the {@link DeviceTouchDeviceInfo} object parsed from received reply messages
+	 * 
+	 * @return received {@link DeviceTouchDeviceInfo}
+	 */
 	public static DeviceTouchDeviceInfo search() {
 		DeviceTouchDeviceInfo deviceInfo = null;
 		// loop over all available interfaces
@@ -132,7 +141,7 @@ public class DeviceTouchSearch {
     /**
      * Extracts the password reply string from a DatagramPacket received from a DeviceTouch device.
      *
-     * @param packet the DatagramPacket containing the password reply
+     * @param receivePacket the DatagramPacket containing the password reply
      * @return the extracted password reply string
      */
 	public static String getPasswordReplyString(DatagramPacket receivePacket) throws NumberFormatException {
@@ -166,7 +175,7 @@ public class DeviceTouchSearch {
      *
      * @param reply the reply string containing the port
      * @return the extracted port
-	 * @throws NumberFormatException
+	 * @throws NumberFormatException if the reply dows not contain a valid {@code Integer}
      */
 	public static int parsePortReplyString(String reply) throws NumberFormatException {
 		if (reply.toLowerCase().contains("unknown value")) {
@@ -229,7 +238,6 @@ public class DeviceTouchSearch {
      *
      * @param bcastAddress the broadcast address to send the search message
      * @return a DatagramPacket containing the search message
-     * @throws IOException if an I/O error occurs while creating the packet
      */
 	public static DatagramPacket createSearchMessage(InetAddress bcastAddress) {
 		// broadcast to trigger info response from a SystaComfort on this network
@@ -238,83 +246,6 @@ public class DeviceTouchSearch {
 		DatagramPacket packet = new DatagramPacket(searchMessage, searchMessage.length, bcastAddress, BCAST_PORT);
 		return packet;
 	}
-
-	/**
-	 * @param deviceInfo
-	 * @param ia
-	 * @param searchSocket
-	 * @param receivePacket
-	 * @return
-	 * @throws IOException
-	 
-	public static String getDeviceTouchPassword(DeviceTouchDeviceInfo deviceInfo, InterfaceAddress ia,
-			DatagramSocket searchSocket, DatagramPacket receivePacket) throws IOException {
-		String rxMessage;
-		// broadcast to trigger info response from a SystaComfort on this network
-		// MAC+" 6 R UDP Pass"
-		byte[] passwordMessage = (deviceInfo.mac + " 6 R UDP Pass").getBytes();
-		DatagramPacket packet = new DatagramPacket(passwordMessage, passwordMessage.length, ia.getBroadcast(),
-				BCAST_PORT);
-		searchSocket.send(packet);
-		searchSocket.receive(receivePacket);
-		rxMessage = getPortReplyString(receivePacket);
-		return parsePasswordReplyString(rxMessage);
-	}*/
-
-	/**
-	 * @param deviceInfo
-	 * @param ia
-	 * @param searchSocket
-	 * @param receivePacket
-	 * @return
-	 * @throws IOException
-	 
-	public static int getDeviceTouchPort(DeviceTouchDeviceInfo deviceInfo, InterfaceAddress ia,
-			DatagramSocket searchSocket, DatagramPacket receivePacket) throws IOException {
-		String rxMessage;
-		// broadcast to trigger port info response from a SystaComfort on this network
-		// MAC+" 6 A R DISP Port"
-		byte[] portMessage = (deviceInfo.mac + " 6 A R DISP Port").getBytes();
-		DatagramPacket packet = new DatagramPacket(portMessage, portMessage.length, ia.getBroadcast(), BCAST_PORT);
-		searchSocket.send(packet);
-		searchSocket.receive(receivePacket);
-		// replies seen so far:
-		// 0 7 unknown value:Uremoteportalde
-		// 0 7 3477\x00
-		rxMessage = new String(Arrays.copyOfRange(receivePacket.getData(), 0, receivePacket.getLength()),
-				StandardCharsets.ISO_8859_1);
-		// remove all strange characters
-		rxMessage = rxMessage.replaceAll("[^0-9 a-zA-Z]", "");
-		rxMessage = rxMessage.trim();
-		if (rxMessage.toLowerCase().contains("unknown value")) {
-			return -1;
-		} else {
-			return Integer.parseInt(rxMessage.split(" ")[2]);
-		}
-	}*/
-
-	/**
-	 * @param ia
-	 * @param searchSocket
-	 * @param receivePacket
-	 * @return
-	 * @throws IOException
-	public static String getDeviceTouchInfo(InterfaceAddress ia, DatagramSocket searchSocket,
-			DatagramPacket receivePacket) throws IOException {
-		// broadcast to trigger info response from a SystaComfort on this network
-		// "0 1 A"
-		byte[] searchMessage = "0 1 A".getBytes();
-		DatagramPacket packet = new DatagramPacket(searchMessage, searchMessage.length, ia.getBroadcast(), BCAST_PORT);
-		searchSocket.send(packet);
-		searchSocket.receive(receivePacket);
-		// the reply should be something like
-		// SC2 1 192.168.11.23 255.255.255.0 192.168.11.1 SystaComfort-II0 0809720001 0
-		// V0.34 V1.00 2CBE9700BEE9
-		String rxMessage = new String(Arrays.copyOfRange(receivePacket.getData(), 0, receivePacket.getLength()),
-				StandardCharsets.ISO_8859_1).strip();
-		return rxMessage;
-	}
-	 */
 
 	/**
 	 * Function to parse the info string returned from a Paradigma SystaComfort The

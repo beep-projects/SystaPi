@@ -4,7 +4,7 @@ package de.freaklamarsch.systarest;
  *
  * MIT License
  *
- * Copyright (c) 2017 Eugen Paraschiv
+ * Copyright (c) 2017 Eugen Paraschiv & 2021 The beep-projects contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

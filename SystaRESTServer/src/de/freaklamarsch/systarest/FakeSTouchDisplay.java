@@ -32,15 +32,20 @@ import de.freaklamarsch.systarest.STouchProtocol.Circle;
 import de.freaklamarsch.systarest.STouchProtocol.Rectangle;
 import de.freaklamarsch.systarest.STouchProtocol.TextXY;
 
+/**
+ * A mock implementation of a S-Touch display used, for interaction with a S-Touch capable device.
+ */
 public class FakeSTouchDisplay {
+	// most of these values are derived from reverse engineering the protocol communication
+	// they might only be correct for the software and hardware versions used for this.
 	byte[] checksumByte = { 0x56, 0x72, 0x41, (byte) (0xB5 & 0xFF) };
 	int checksum = 0;
 	int config = 0;
-	int FONTS_AVAILABLE = 7; // reverse calculated from protocol
+	int FONTS_AVAILABLE = 7;
 	public int FONTS_USED = 3;
-	public int RESSOURCE_ID = 0;// reverse calculated from protocol
-	int SYMBOLS_AVAILABLE = 17; // reverse calculated from protocol
-	public int SYMBOLS_USED = 3; // reverse calculated from protocol
+	public int RESSOURCE_ID = 0;
+	int SYMBOLS_AVAILABLE = 17;
+	public int SYMBOLS_USED = 3;
 
 	// state variables
 	private int x = -1;

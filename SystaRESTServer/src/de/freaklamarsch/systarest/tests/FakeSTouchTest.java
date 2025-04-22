@@ -91,9 +91,7 @@ class FakeSTouchTest {
 	 * the Hex Stream of a captured packet as a single line. The size of the
 	 * ByteBuffer has to match the Hex Stream in the file. No checks are done.
 	 * 
-	 * @param byteBuffer  the buffer in which the bytes from the hexText file should
-	 *                    be stored
-	 * @param hexTextFile path to the hexText file
+	 * @param pcapDumpHeaderFile  path to the file that should be loaded
 	 */
 	private void readPCAPDumpHeaderFileIntoByteBufferArray(String pcapDumpHeaderFile) {
 		packetData = new ArrayList<PcapPacket>();
@@ -345,8 +343,9 @@ class FakeSTouchTest {
 	}
 
 	/**
+	 * Save the {@code objectTree} from the display of the passed {@link FakeSTouch} as excalidraw.png-file
 	 * @param stouch
-	 * @param i
+	 * @param filename
 	 */
 	@SuppressWarnings("unused")
 	private void saveDisplayAsExcalidraw(FakeSTouch stouch, String filename) {
@@ -360,8 +359,9 @@ class FakeSTouchTest {
 	}
 	
 	/**
+	 * Save the {@code objectTree} from the display of the passed {@link FakeSTouch} as png-file
 	 * @param stouch
-	 * @param i
+	 * @param filename
 	 */
 	@SuppressWarnings("unused")
 	private void saveDisplayAsPNG(FakeSTouch stouch, String filename) {

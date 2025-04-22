@@ -26,14 +26,6 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.ext.Provider;
 
 /**
- * ContainerResponseFilter to allow fetch calls from client side JavaScript.
- * Without this, e.g. Chrome would block each fetch attempt with messages like:
- * Access to fetch at 'http://systapi:1337/SystaREST/rawdata' from origin 'null'
- * has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is
- * present on the requested resource. If an opaque response serves your needs,
- * set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
- */
-/**
  * A filter that adds Cross-Origin Resource Sharing (CORS) headers to HTTP responses.
  * This allows client-side JavaScript to make fetch calls to the server without being blocked by the browser's
  * same-origin policy.
