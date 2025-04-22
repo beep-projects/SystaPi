@@ -1,0 +1,39 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://github.com/beep-projects/SystaPi",
+  "elements": [
+    {
+      "type": "rectangle",
+      "x": 0,
+      "y": 0,
+      "width": 319,
+      "height": 239,
+      "strokeColor": "#e03131"
+    },
+    {
+      "type": "text",
+      "x": 2,
+      "y": 0,
+      "width": 40,
+      "height": 20,
+      "text": "30",
+      "fontSize": 20,
+      "strokeColor": "#e03131"
+    },
+    {
+      "type": "text",
+      "x": 10,
+      "y": 86,
+      "width": 320,
+      "height": 25,
+      "text": "Mi  1. Jan. 2025",
+      "fontSize": 20
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}

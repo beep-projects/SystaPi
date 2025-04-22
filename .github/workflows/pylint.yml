@@ -1,6 +1,13 @@
+# this action will run pylint on all python files in this project
 name: Pylint
 
-on: [push]
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -25,3 +32,4 @@ jobs:
       with:
         name: pylint report
         path: pylint.txt
+        

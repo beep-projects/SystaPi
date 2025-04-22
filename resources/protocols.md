@@ -47,4 +47,33 @@ If you want to give it a try, you have to place the [stouch.lua](../helpers/stou
 
 ![s-touch_dissector](s-touch_dissector.jpg)
 
- 
+### reS-Touch flow chart
+
+```mermaid
+stateDiagram-v2
+    %%definition of states
+    start : Start Screen
+    select : Selection Screen
+    heating : Heating Circuit
+    hotwater : Hot Water
+    system : System
+    
+    %%diagram
+    [*] --> start : findSTouch
+    start --> [*]
+    start --> select
+
+    select --> heating
+    select --> hotwater
+    select --> system
+
+    state heating {
+      heatingstart : Room Temperature
+      [*] --> heatingstart
+      heatingstart --> heatingstart : room_temp_target(0.5), room_temp_target(-0.5)
+      heatingstart --> [*] : return
+    }
+    heating --> select
+    
+    Crash --> [*]
+```

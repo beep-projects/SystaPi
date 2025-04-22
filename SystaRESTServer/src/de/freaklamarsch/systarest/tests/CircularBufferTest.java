@@ -18,6 +18,7 @@
 */
 package de.freaklamarsch.systarest.tests;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,6 +36,61 @@ public class CircularBufferTest {
 		cb = new CircularBuffer<>(testCapacity);
 	}
 
+    @Test
+    public void testAddAndRemove() {
+        CircularBuffer<Integer> buffer = new CircularBuffer<>(3);
+        assertTrue(buffer.add(1));
+        assertTrue(buffer.add(2));
+        assertTrue(buffer.add(3));
+        assertFalse(buffer.add(4)); // Buffer is full
+        assertEquals(1, buffer.remove());
+        assertEquals(2, buffer.remove());
+        assertEquals(3, buffer.remove());
+        assertNull(buffer.remove()); // Buffer is empty
+    }
+
+    @Test
+    public void testOverwrite() {
+        CircularBuffer<Integer> buffer = new CircularBuffer<>(3);
+        buffer.setOverwrite(true);
+        assertTrue(buffer.add(1));
+        assertTrue(buffer.add(2));
+        assertTrue(buffer.add(3));
+        assertTrue(buffer.add(4)); // Overwrites the oldest element
+        assertEquals(2, buffer.remove());
+        assertEquals(3, buffer.remove());
+        assertEquals(4, buffer.remove());
+    }
+
+    @Test
+    public void testInvalidCapacity() {
+        CircularBuffer<Integer> buffer = new CircularBuffer<>(-1);
+        assertEquals(8, buffer.capacity()); // Default capacity
+    }
+
+		@Test
+		public void testAddToFullBufferWithoutOverwrite() {
+				CircularBuffer<Integer> buffer = new CircularBuffer<>(3);
+				buffer.setOverwrite(false);
+		
+				assertTrue(buffer.add(1));
+				assertTrue(buffer.add(2));
+				assertTrue(buffer.add(3));
+				assertFalse(buffer.add(4)); // Buffer is full
+		}
+		
+		@Test
+		public void testAddToFullBufferWithOverwrite() {
+				CircularBuffer<Integer> buffer = new CircularBuffer<>(3);
+				buffer.setOverwrite(true);
+		
+				assertTrue(buffer.add(1));
+				assertTrue(buffer.add(2));
+				assertTrue(buffer.add(3));
+				assertTrue(buffer.add(4)); // Overwrites the oldest element
+				assertEquals(2, buffer.remove()); // Oldest element is overwritten
+		}
+				
 	@Test
 	public void testConstructor() {
 		int defaultCapacity = -1;

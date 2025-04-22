@@ -27,21 +27,29 @@ package de.freaklamarsch.systarest;
  * originally obtained from:
  * https://github.com/eugenp/tutorials/blob/master/data-structures/src/main/java/com/baeldung/circularbuffer/CircularBuffer.java
  */
+
 /**
- * Implementation of a circular buffer. A circular buffer is a data structure
- * that uses a single, fixed-size buffer (FiFo) as if it were connected end-to-end. By
- * default, this implementation denies adding new elements if the buffer is
- * full. This behavior can be changed by setting {@link #overwrite}
+ * A circular buffer implementation that uses a fixed-size buffer to store elements in a FIFO (First In, First Out) manner.
+ * By default, this implementation denies adding new elements if the buffer is full. This behavior can be changed by
+ * enabling the {@link #overwrite} setting.
  *
- * @param <E> object type to store within this buffer
+ * <p>This class is not thread-safe. External synchronization is required for concurrent access. Synchronization can be avoided, if you
+ * have only one reader and one writer accessing the {@code CircularBuffer}</p>
+ *
+ * @param <E> the type of elements stored in the buffer
  */
 public class CircularBuffer<E> {
-
+	/** The default capacity of the buffer if no capacity is specified. */
 	private static final int DEFAULT_CAPACITY = 8;
-
+	/** The maximum number of elements the buffer can hold. */
 	private final int capacity;
+	/** The underlying array used to store elements in the buffer. */
 	private final E[] data;
-	private volatile int writeIndex, readIndex;
+	/** The index where the next element will be written. */
+	private volatile int writeIndex;
+	/** The index of the oldest element in the buffer. */
+	private volatile int readIndex;
+	/** Determines whether the buffer overwrites the oldest element when full. */
 	private boolean overwrite;
 
 	/**
@@ -60,9 +68,9 @@ public class CircularBuffer<E> {
 		this.overwrite = false;
 	}
 
-	/**
-	 * moves the markers to represent an empty buffer. Note, this does not
-	 * immediately destroy the stored elements in the buffer.
+    /**
+     * Clears the buffer by resetting the read and write indices.
+     * Note, this does not destroy the stored elements in the buffer.
 	 */
 	public void clear() {
 		// mark the buffer as empty
@@ -70,12 +78,14 @@ public class CircularBuffer<E> {
 		this.writeIndex = -1;
 	}
 
-	/**
-	 * Add an element to the end of {@code CircularBuffer}
-	 *
-	 * @param element the element added to the {@code CircularBuffer}
-	 * @return true if the element could be added to the buffer, false otherwise
-	 */
+    /**
+     * Adds an element to the buffer. If the buffer is full and {@link #overwrite} is {@code true}, the oldest element
+     * is overwritten. If {@link #overwrite} is {@code false}, the element is not added.
+     *
+     * @param element the element to add to the buffer
+     * @return {@code true} if the element was added successfully; {@code false} if the buffer is full and overwriting
+     *         is disabled
+     */
 	public boolean add(E element) {
 
 		if (isNotFull() || overwrite) {
@@ -96,11 +106,11 @@ public class CircularBuffer<E> {
 		return false;
 	}
 
-	/**
-	 * Removes the oldest element from the {@code CircularBuffer} and returns it
-	 *
-	 * @return the oldest element
-	 */
+    /**
+     * Removes and returns the oldest element from the {@code CircularBuffer}.
+     *
+     * @return the oldest element, or {@code null} if the buffer is empty
+     */
 	public E remove() {
 		if (isNotEmpty()) {
 			E nextValue = data[readIndex % capacity];
@@ -110,9 +120,11 @@ public class CircularBuffer<E> {
 		return null;
 	}
 
-	/**
-	 * @return the oldest element from the buffer without removing it
-	 */
+    /**
+     * Returns the oldest element in the buffer without removing it.
+     *
+     * @return the oldest element, or {@code null} if the buffer is empty
+     */
 	public E peek() {
 		if (isNotEmpty()) {
 			E nextValue = data[readIndex % capacity];
@@ -121,9 +133,11 @@ public class CircularBuffer<E> {
 		return null;
 	}
 
-	/**
-	 * @return the newest element from the buffer without removing it
-	 */
+    /**
+     * Returns the newest element in the buffer without removing it.
+     *
+     * @return the newest element, or {@code null} if the buffer is empty
+     */
 	public E end() {
 		if (isNotEmpty()) {
 			E nextValue = data[writeIndex % capacity];
@@ -132,23 +146,26 @@ public class CircularBuffer<E> {
 		return null;
 	}
 
-	/**
-	 * @return the capacity of the {@code CircularBuffer}
-	 */
+    /**
+     * Returns the maximum number of elements the buffer can hold.
+     *
+     * @return the capacity of the buffer
+     */
 	public int capacity() {
 		return capacity;
 	}
 
-	/**
-	 * @return the size of the {@code CircularBuffer}, i.e. elements currently
-	 *         stored.
-	 */
+    /**
+     * Returns the number of elements currently stored in the buffer.
+     *
+     * @return the number of elements in the buffer
+     */
 	public int size() {
 		return (writeIndex - readIndex) + 1;
 	}
 
 	/**
-	 * @param overwrite Set the behavior if an element is added to a full
+	 * @param overwrite Set the overwrite behavior if an element is added to a full
 	 *                  {@code CircularBuffer}. If set to {@code true}, the oldest
 	 *                  element is overwritten. If set to {@code false}, add will
 	 *                  ignore the add request and return {@code false}.
@@ -157,31 +174,47 @@ public class CircularBuffer<E> {
 		this.overwrite = overwrite;
 	}
 
-	/**
-	 * @return the current value of {@link #overwrite}
-	 */
+    /**
+     * Returns whether the buffer is configured to overwrite the oldest element when full.
+     *
+     * @return {@code true} if overwriting is enabled; {@code false} otherwise
+     */
 	public boolean getOverwrite() {
 		return overwrite;
 	}
 
-	/**
-	 * @return if this {@code CircularBuffer} is empty or not.
-	 */
+    /**
+     * Returns whether the buffer is empty.
+     *
+     * @return {@code true} if the buffer is empty; {@code false} otherwise
+     */
 	public boolean isEmpty() {
 		return writeIndex < readIndex;
 	}
 
-	/**
-	 * @return if this {@code CircularBuffer} is full or not.
-	 */
+    /**
+     * Returns whether the buffer is full.
+     *
+     * @return {@code true} if the buffer is full; {@code false} otherwise
+     */
 	public boolean isFull() {
 		return size() >= capacity;
 	}
 
+    /**
+     * Returns whether the buffer is not empty.
+     *
+     * @return {@code true} if the buffer is not empty; {@code false} otherwise
+     */
 	private boolean isNotEmpty() {
 		return !isEmpty();
 	}
 
+    /**
+     * Returns whether the buffer is not full.
+     *
+     * @return {@code true} if the buffer is not full; {@code false} otherwise
+     */
 	private boolean isNotFull() {
 		return !isFull();
 	}

@@ -83,6 +83,28 @@ class SystaRESTAPITest extends JerseyTest {
 		return config;
 	}
 
+	@Test
+	void testStartAndStop() {
+			Response response = target("/systarest/start").request().post(null);
+			assertEquals(204, response.getStatus());
+
+			response = target("/systarest/stop").request().post(null);
+			assertEquals(204, response.getStatus());
+	}
+
+	@Test
+	void testServiceStatus() {
+			Response response = target("/systarest/servicestatus").request().get();
+			assertEquals(200, response.getStatus());
+			assertNotNull(response.readEntity(String.class));
+	}
+
+	@Test
+	void testInvalidEndpoint() {
+			Response response = target("/systarest/invalid").request().get();
+			assertEquals(404, response.getStatus());
+	}
+
 	/**
 	 * Use reflection to change the hardcoded directory used for the location of log
 	 * files. As DEFAULT_ROOT_PATH is static final in DataLogger, it is officially a

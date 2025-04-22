@@ -30,11 +30,11 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * A {@code DataLogger} can be used for logging data entries represented as
+ * A utility class for logging data entries represented as
  * {@code T[]} to delimited text files. The default delimiter used for this is
  * {@code ;}, making it a logger for CSV files. The {@code DataLogger} has a
  * defined capacity, which is the number of elements that can be stored.
- * Depending on the {@link #saveLoggedData} setting adding new elements will
+ * Depending on the {@link #saveLoggedData} setting, adding new elements will
  * trigger {@link #writeLoggedDataToFile} and empty the {@link #dataBuffer} or
  * just overwrite the oldest element stored.
  */

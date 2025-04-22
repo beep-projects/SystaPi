@@ -1,1 +1,1 @@
-console=serial0,115200 console=tty1 root=PARTUUID=7d5a2870-02 rootfstype=ext4 net.ifnames=0 elevator=deadline fsck.repair=yes rootwait quiet init=/usr/lib/raspberrypi-sys-mods/firstboot systemd.run=/boot/firstrun.sh systemd.run_success_action=reboot systemd.unit=kernel-command-line.target
+console=serial0,115200 console=tty1 root=PARTUUID=fb33757d-02 rootfstype=ext4 net.ifnames=0 elevator=deadline fsck.repair=yes rootwait quiet init=/usr/lib/raspberrypi-sys-mods/firstboot systemd.run=/boot/firstrun.sh systemd.run_success_action=reboot systemd.unit=kernel-command-line.target

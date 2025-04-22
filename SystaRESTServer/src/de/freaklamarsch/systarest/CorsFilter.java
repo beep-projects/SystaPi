@@ -33,12 +33,28 @@ import jakarta.ws.rs.ext.Provider;
  * present on the requested resource. If an opaque response serves your needs,
  * set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
  */
+/**
+ * A filter that adds Cross-Origin Resource Sharing (CORS) headers to HTTP responses.
+ * This allows client-side JavaScript to make fetch calls to the server without being blocked by the browser's
+ * same-origin policy.
+ *
+ * <p>Without this filter, browsers like Chrome will block fetch attempts with messages like:
+ * "Access to fetch at 'http://systapi:1337/SystaREST/rawdata' from origin 'null'
+ * has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is
+ * present on the requested resource. If an opaque response serves your needs,
+ * set the request's mode to 'no-cors' to fetch the resource with CORS disabled."</p>
+ */
+
 @Provider
 public class CorsFilter implements ContainerResponseFilter {
 
-	/**
-	 * filter function with granting a lot of rights
-	 */
+    /**
+     * Adds CORS headers to the HTTP response to allow cross-origin requests.
+     *
+     * @param requestContext the context of the incoming HTTP request
+     * @param responseContext the context of the outgoing HTTP response
+     * @throws IOException if an I/O error occurs
+     */
 	@Override
 	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
 			throws IOException {

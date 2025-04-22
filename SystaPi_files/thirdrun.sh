@@ -30,6 +30,9 @@ rm /etc/systemd/system/secondrun.service
 systemctl --system daemon-reload
 systemctl reset-failed
 #clean up
+#rm -rf /boot/install
+#rm -f /boot/firstrun.log
+#rm -f /boot/secondrun.log
 #rm -f /boot/secondrun.sh
 #rm -f /boot/thirdrun.sh
 sed -i 's| systemd.run.*||g' /boot/cmdline.txt
