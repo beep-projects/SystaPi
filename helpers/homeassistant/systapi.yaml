@@ -1,6 +1,6 @@
   method: GET
   scan_interval: 10
-  resource: "http://10.0.0.70:1337/SystaREST/status"
+  resource: "http://systapi:1337/SystaREST/status"
   sensor:
     - name: "systapi_outsideTemp"
       value_template: "{{ value_json.outsideTemp }}"
