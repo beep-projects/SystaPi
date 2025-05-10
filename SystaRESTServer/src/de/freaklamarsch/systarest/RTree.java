@@ -40,7 +40,8 @@ public class RTree {
      */
 	public synchronized boolean add(RTreeNode newNode) {
 		if(elements.contains(newNode)) {
-			return false;
+			//return false;
+			return true; // TODO check how this case should be handled, should the tree have been cleared before?
 		} else {
 			elements.add(newNode);
 			return add(root, newNode);
@@ -336,13 +337,34 @@ public class RTree {
 			DisplayText txt = (DisplayText)o;
 			FontMetrics fm = g.getFontMetrics();
 			Rectangle2D rect = fm.getStringBounds(txt.textXY.text, g);
+	        int textWidth = fm.stringWidth(txt.textXY.text);
+	        int offsetX = 0;
+	        int offsetBoundsX = 0;
+	        switch (txt.alignment) {
+            	case DisplayText.ALIGN_NONE:
+                	offsetX = 0;
+                	offsetBoundsX = 0;
+                	break;
+            	case DisplayText.ALIGN_RIGHT:
+            		offsetX = 0;
+            		offsetBoundsX = 0;
+            		break;
+	            case DisplayText.ALIGN_CENTER:
+	                offsetX = -textWidth / 2;
+	                offsetBoundsX = (int) (-rect.getWidth() / 2);
+	                break;
+	            case DisplayText.ALIGN_LEFT:
+	                offsetX = -textWidth;
+	                offsetBoundsX = (int) -rect.getWidth();
+	                break;
+	        }
             g.setColor(bgColor);
-            g.fillRect(txt.textXY.x,
+            g.fillRect(txt.textXY.x + offsetBoundsX,
             		   txt.textXY.y - fm.getAscent(),
                        (int) rect.getWidth(),
                        (int) rect.getHeight());
 	        g.setColor(fgColor);
-	        g.drawString(txt.textXY.text, txt.textXY.x, txt.textXY.y);
+	        g.drawString(txt.textXY.text, txt.textXY.x + offsetX, txt.textXY.y);
 		}
 		if(o instanceof DisplayCircle) {
 			DisplayCircle c = (DisplayCircle)o;

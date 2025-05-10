@@ -58,6 +58,7 @@ public class FakeSTouchDisplay {
 	private Color foregroundColor = Color.BLACK;
 	private Color backgroundColor = Color.WHITE;
 	private int style = -1;
+	
 
 	public class DisplayButton {
 		Button button;
@@ -151,20 +152,66 @@ public class FakeSTouchDisplay {
 	}
 
 	public class DisplayText {
-		TextXY textXY;
+
+	    public static final int ALIGN_NONE = 0;
+	    public static final int ALIGN_LEFT = 1;
+	    public static final int ALIGN_CENTER = 2;
+	    public static final int ALIGN_RIGHT = 3;
+	    
+	    TextXY textXY;
+		int style;
+		int alignment = 0;
 
 		public DisplayText(TextXY text) {
 			this.textXY = text;
 		}
 
+	    public DisplayText(TextXY text, int style) {
+	        this.textXY = text;
+	        this.setStyle(style);
+	    }
+
+		public void setStyle(int style) {
+			this.style = style;
+			switch(style) {
+			case 131:
+				alignment = ALIGN_RIGHT;
+				break;
+			case 147:
+				alignment = ALIGN_LEFT;
+				break;
+			case 97:
+				alignment = ALIGN_CENTER;
+				break;
+			default:
+				alignment = ALIGN_NONE;
+				break;
+			}
+		}
+
+		public String getALignmentString() {
+			switch(this.alignment) {
+			case ALIGN_RIGHT:
+				return "ALIGN_RIGHT";
+			case ALIGN_LEFT:
+				return "ALIGN_LEFT";
+			case ALIGN_CENTER:
+				return "ALIGN_CENTER";
+			case ALIGN_NONE:
+				return "ALIGN_NONE";
+			default:
+				return "unknown";
+			}
+		}
+
 		@Override
 		public String toString() {
-			return "Text: " + textXY.text + " (" + textXY.x + ", " + textXY.y + ")";
+			return "Text: " + textXY.text + " (" + textXY.x + ", " + textXY.y + ")" + "[" + getALignmentString() + "]";
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(textXY.text, textXY.x, textXY.y);
+			return Objects.hash(textXY.text, textXY.x, textXY.y, style, alignment);
 		}
 
 		@Override
@@ -177,7 +224,7 @@ public class FakeSTouchDisplay {
 			}
 			DisplayText other = (DisplayText) obj;
 			return this.textXY.text.equals(other.textXY.text) && this.textXY.x == other.textXY.x
-					&& this.textXY.y == other.textXY.y;
+					&& this.textXY.y == other.textXY.y && this.style == other.style && this.alignment == other.alignment;
 		}
 	}
 
@@ -396,7 +443,7 @@ public class FakeSTouchDisplay {
 	}
 
 	// TODO remove this old method
-	public synchronized boolean addText(byte[] bytes, int cmdStartIdx, int cmdEndIdx) {
+	/*public synchronized boolean addText(byte[] bytes, int cmdStartIdx, int cmdEndIdx) {
 		ByteBuffer rcvBuf = ByteBuffer.wrap(bytes);
 		rcvBuf.order(ByteOrder.LITTLE_ENDIAN);
 		rcvBuf.position(cmdStartIdx);
@@ -412,7 +459,7 @@ public class FakeSTouchDisplay {
 		}
 		String text = new String(builder.toString().getBytes(), Charset.forName("windows-1252")).trim();
 		return addText(new TextXY(x, y, text));
-	}
+	}*/
 
 	public synchronized boolean addText(TextXY textXY) {
 		int x = textXY.x;
@@ -423,6 +470,7 @@ public class FakeSTouchDisplay {
 			this.objectTree.remove(nodeAtPos);
 		}
 		DisplayText text = new DisplayText(textXY);
+		text.setStyle(style);
 		getObjectTree().add(new RTreeNode(text, x, y, x, y, foregroundColor, backgroundColor, null));
 		return texts.add(text);
 	}
@@ -490,6 +538,20 @@ public class FakeSTouchDisplay {
 
 	public synchronized boolean drawRect(Rectangle rectangle) {
 		DisplayRectangle rect = new DisplayRectangle(rectangle);
+	    // Rectangles are drawn on top of the current screen
+		// This is like removing them from the display
+	    var iterator = texts.iterator();
+	    while (iterator.hasNext()) {
+	        DisplayText text = iterator.next();
+	        if (text.textXY.x >= rectangle.xMin && text.textXY.x <= rectangle.xMax &&
+	            text.textXY.y >= rectangle.yMin && text.textXY.y <= rectangle.yMax) {
+	            // Remove from objectTree
+	            objectTree.remove(new RTreeNode(text, text.textXY.x, text.textXY.y, text.textXY.x, text.textXY.y, null, null, null));
+	            // Remove from texts
+	            iterator.remove();
+	        }
+	    }
+
 		getObjectTree().add(new RTreeNode(rect, rectangle.xMin, rectangle.yMin, rectangle.xMax, rectangle.yMax,
 				foregroundColor, backgroundColor, null));
 		return rectangles.add(rect);

@@ -62,7 +62,7 @@ public class RTreeNode {
 	}
 	
 	public String toString() {
-		String string = (object == null) ? "none" : object.toString();
+		String string = (object == null) ? "none" : object.toString()+" [" + backgroundColor + "/" + foregroundColor + "]";
 		int i = 1;
 		RTreeNode aParent = parent;
 		while(aParent != null) {

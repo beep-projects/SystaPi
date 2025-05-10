@@ -513,15 +513,20 @@ public class STouchProtocol {
 
 		@Override
 		public String readFromBuffer(ByteBuffer buffer) {
-	        StringBuilder builder = new StringBuilder();
+	        buffer.mark();
+	        int length = 0;
 	        while (buffer.hasRemaining()) {
 	            byte b = buffer.get();
 	            if (b == 0) {
 	                break;
 	            }
-	            builder.append((char) b);
+	            length++;
 	        }
-	        return new String(builder.toString().getBytes(), Charset.forName("windows-1252")).trim();
+	        buffer.reset();
+	        byte[] bytes = new byte[length];
+	        buffer.get(bytes, 0, length);
+	        buffer.get();
+	        return new String(bytes, Charset.forName("windows-1252")).trim();
 		}
 
 		@Override
@@ -672,6 +677,11 @@ public class STouchProtocol {
 			this.x = x;
 			this.y = y;
 		}
+		
+		@Override
+		public String toString() {
+		    return "Coordinates { \"x\": " + x + ", \"y\": " + y + " }";
+		}
 	}
 
 	public static class Rectangle {
@@ -685,6 +695,12 @@ public class STouchProtocol {
 			this.yMin = yMin;
 			this.xMax = xMax;
 			this.yMax = yMax;
+		}
+		
+		@Override
+		public String toString() {
+		    return "Rectangle { \"xMin\": " + xMin + ", \"yMin\": " + yMin + 
+		           ", \"xMax\": " + xMax + ", \"yMax\": " + yMax + " }";
 		}
 	}
 
@@ -702,6 +718,13 @@ public class STouchProtocol {
 			this.yMax = yMax;
 			this.curvature = curvature;
 		}
+		
+		@Override
+		public String toString() {
+		    return "RoundRectangle { \"xMin\": " + xMin + ", \"yMin\": " + yMin + 
+		           ", \"xMax\": " + xMax + ", \"yMax\": " + yMax + 
+		           ", \"curvature\": " + curvature + " }";
+		}
 	}
 
 	public static class Circle {
@@ -713,6 +736,11 @@ public class STouchProtocol {
 			this.x = x;
 			this.y = y;
 			this.radius = radius;
+		}
+		
+		@Override
+		public String toString() {
+		    return "Circle { \"x\": " + x + ", \"y\": " + y + ", \"radius\": " + radius + " }";
 		}
 	}
 
@@ -726,6 +754,11 @@ public class STouchProtocol {
 			this.y = y;
 			this.id = id;
 		}
+		
+		@Override
+		public String toString() {
+		    return "Symbol { \"x\": " + x + ", \"y\": " + y + ", \"id\": " + id + " }";
+		}
 	}
 
 	public static class TextXY {
@@ -738,6 +771,11 @@ public class STouchProtocol {
 			this.y = y;
 			this.text = text;
 		}
+		
+		@Override
+		public String toString() {
+		    return "TextXY { \"x\": " + x + ", \"y\": " + y + ", \"text\": \"" + text + "\" }";
+		}
 	}
 
 	public static class TextRotate {
@@ -747,6 +785,11 @@ public class STouchProtocol {
 		public TextRotate(int rotationAngle, String text) {
 			this.rotationAngle = rotationAngle;
 			this.text = text;
+		}
+		
+		@Override
+		public String toString() {
+		    return "TextRotate { \"rotationAngle\": " + rotationAngle + ", \"text\": \"" + text + "\" }";
 		}
 	}
 
@@ -764,7 +807,12 @@ public class STouchProtocol {
 			this.xMax = xMax;
 			this.yMax = yMax;
 		}
+		
+		@Override
+		public String toString() {
+		    return "Button { \"id\": " + id + 
+		           ", \"xMin\": " + xMin + ", \"yMin\": " + yMin + 
+		           ", \"xMax\": " + xMax + ", \"yMax\": " + yMax + " }";
+		}
 	}
-
-
 }

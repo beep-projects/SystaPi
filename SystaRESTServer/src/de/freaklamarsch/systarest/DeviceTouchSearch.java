@@ -55,6 +55,30 @@ public class DeviceTouchSearch {
 		public String baseVersion = null;
 		public String password = null;
 		public boolean stouchSupported = false;
+		
+		@Override
+		public String toString() {
+		    return "{\n" +
+		           //"    \"SystaWebIP\":\"" + localIp + "\",\n" +
+		           //"    \"SystaWebPort\":" + port + ",\n" +
+		           "    \"DeviceTouchBcastIP\":\"" + bcastIp + "\",\n" +
+		           "    \"DeviceTouchBcastPort\":" + bcastPort + ",\n" +
+		           "    \"deviceTouchInfoString\":\"" + string + "\",\n" +
+		           "    \"unitIP\":\"" + ip + "\",\n" +
+		           "    \"unitName\":\"" + name + "\",\n" +
+		           "    \"unitId\":\"" + id + "\",\n" +
+		           "    \"unitApp\":" + app + ",\n" +
+		           "    \"unitPlatform\":" + platform + ",\n" +
+		           "    \"unitVersion\":\"" + version + "\",\n" +
+		           "    \"unitMajor\":" + major + ",\n" +
+		           "    \"unitMinor\":" + minor + ",\n" +
+		           "    \"unitBaseVersion\":\"" + baseVersion + "\",\n" +
+		           "    \"unitMac\":\"" + mac + "\",\n" +
+		           "    \"STouchAppSupported\":" + stouchSupported + ",\n" +
+		           "    \"DeviceTouchPort\":" + port + ",\n" +
+		           "    \"DeviceTouchPassword\":\"" + password + "\"\n" +
+		           "}";
+		}
 	}
 
 	private static final int MAX_DATA_LENGTH = 1024;

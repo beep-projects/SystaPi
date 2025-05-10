@@ -50,33 +50,33 @@ import de.freaklamarsch.systarest.STouchProtocol.TextXY;
  */
 public class FakeSTouch {
 
-	private static final int TIMEOUT = 1000; // 1 second
-	private static final int MAX_RETRIES = 10;
 	private DatagramSocket socket;
 	private boolean connected = false;
 	private ExecutorService listenerService = null;
 	private Future<?> listenerFuture = null;
 
 	// constants
+	private static final int TIMEOUT = 1000; // 1 second
+	private static final int MAX_RETRIES = 10;
 	private static final int APP_MINOR = 2;
 	private static final int APP_VERSION = 20;
 	private static final int BASIS_VERSION = 2201;
 	private static final int MAX_DATA_LENGTH = 4096;
 
-	private boolean debug = true; // TODO change back to false
+	private boolean debug = false; // TODO change back to false
 	int lastId = -1;
 	int lastX = -1;
 	int lastY = -1;
 	/** The display associated with this S-Touch device. */
 	private FakeSTouchDisplay display = new FakeSTouchDisplay();
 
-	int rxRetryCount = 0;
+	//int rxRetryCount = 0;
 	long PktCmd;
 	int port = 0;
 	InetAddress inetAddress;
 	int cnCmd;
 	String mac;
-	byte[] password = new byte[4];
+	byte[] password = null;
 	DeviceTouchDeviceInfo info = null;
 
 	public enum ConnectionStatus {
@@ -191,11 +191,7 @@ public class FakeSTouch {
 			return false;
 		}
 		this.port = info.port;
-		byte[] bytes = info.password.getBytes();
-		this.password[0] = bytes[0];
-		this.password[1] = bytes[1];
-		this.password[2] = bytes[2];
-		this.password[3] = bytes[3];
+		this.password = info.password.getBytes();
 		return true;
 	}
 
@@ -212,23 +208,23 @@ public class FakeSTouch {
 	 *                              for a reply for connection messages
 	 */
 	public synchronized ConnectionStatus connect() throws IOException, InterruptedException {
-		if (connected) {
+		if (this.connected) {
 			return ConnectionStatus.ALREADY_CONNECTED;
 		}
-		if (info == null) {
-			this.setInfo(searchSTouchDevice());
+		if (this.info == null) {
+			setInfo(searchSTouchDevice());
 		}
-		if (info == null) {
+		if (this.info == null) {
 			return ConnectionStatus.NO_COMPATIBLE_DEVICE_FOUND;
 		}
 
 		DatagramPacket connectionRequest = createConnectionRequestMessage();
 
-		socket = new DatagramSocket();
-		socket.setSoTimeout(TIMEOUT);
+		this.socket = new DatagramSocket();
+		this.socket.setSoTimeout(TIMEOUT);
 
 		for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
-			socket.send(connectionRequest);
+			this.socket.send(connectionRequest);
 			DatagramPacket responsePacket = receive();
 			if (responsePacket == null) {
 				continue; // retry
@@ -238,11 +234,11 @@ public class FakeSTouch {
 			if (responseLength == 7 && responseBytes[5] == 1) {
 				if (responseBytes[6] == 1) {
 					printDebugInfo("Connect() succeeded, starting communication");
-					connected = true;
+					this.connected = true;
 					startListening();
 					return ConnectionStatus.SUCCESS;
 				} else if (responseBytes[6] == 0) {
-					printDebugInfo("Connect() failed, wrong UDP password sent");
+					printDebugInfo("Connect() failed, wrong UDP password sent. Password: " + new String(this.password));
 					return ConnectionStatus.WRONG_UDP_PASSWORD;
 				} else if (responseBytes[6] == -2) {
 					printDebugInfo("Connect() failed, device is already in use");
@@ -250,7 +246,7 @@ public class FakeSTouch {
 				}
 			}
 		}
-		socket.close();
+		this.socket.close();
 		return ConnectionStatus.TIMEOUT;
 	}
 
@@ -262,7 +258,10 @@ public class FakeSTouch {
 	 */
 	public DatagramPacket createConnectionRequestMessage() {
 		int txLen = 10;
-		byte[] txBytes = { 8, 0, 0, 0, 0, 1, this.password[0], this.password[1], this.password[2], this.password[3] };
+		byte[] headerBytes = {8, 0, 0, 0, 0, 1};
+		byte[] txBytes = new byte[headerBytes.length + this.password.length];
+		System.arraycopy(headerBytes, 0, txBytes, 0, headerBytes.length);
+		System.arraycopy(this.password, 0, txBytes, headerBytes.length, this.password.length);
 		DatagramPacket datagramPacket = new DatagramPacket(txBytes, txLen, this.inetAddress, this.port);
 		return datagramPacket;
 	}
@@ -281,18 +280,22 @@ public class FakeSTouch {
 	}
 
 	private void startListening() {
-		listenerService = Executors.newSingleThreadExecutor();
-		listenerFuture = listenerService.submit(() -> {
-			while (connected) {
+		this.listenerService = Executors.newSingleThreadExecutor();
+		this.listenerFuture = this.listenerService.submit(() -> {
+			while (this.connected) {
 				DatagramPacket packet = receive();
 				if (packet != null) {
 					DatagramPacket reply = processCommands(packet);
 					if (reply != null) {
 						try {
-							socket.send(reply);
+							if(this.connected) {
+								this.socket.send(reply);
+							} else {
+								printDebugInfo("FakeSTouch got disconnected while processing commands, not sending reply message.");
+							}
 							getDisplay().setTouch(-1, -1);
 						} catch (IOException ioe) {
-							if (debug) {
+							if (this.debug) {
 								ioe.printStackTrace();
 							}
 						}
@@ -321,7 +324,7 @@ public class FakeSTouch {
 				return null;
 			}
 		} catch (IOException ioe) {
-			if (debug) {
+			if (this.debug) {
 				ioe.printStackTrace();
 			}
 			return null;
@@ -334,40 +337,36 @@ public class FakeSTouch {
 	 * @throws IOException if an error occurs during disconnection
 	 */
 	public synchronized void disconnect() throws IOException {
-		if (!connected) {
+		if (!this.connected) {
 			return;
 		}
 		// set connected to false, so the listenerService can gracefully exit
-		connected = false;
+		this.connected = false;
 		// the thread might be stuck in the receive() function, so we force it out of
 		// that
-		if (listenerFuture != null) {
-			listenerFuture.cancel(true);
-			listenerFuture = null;
+		if (this.listenerFuture != null) {
+			this.listenerFuture.cancel(true);
+			this.listenerFuture = null;
 		}
 		DatagramPacket disconnectMessage = createDisconnectRequestMessage();
 
 		for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
-			socket.send(disconnectMessage);
-			DatagramPacket diconnectConfirmation = receive();
-			if (diconnectConfirmation == null) {
+			this.socket.send(disconnectMessage);
+			DatagramPacket disconnectConfirmation = receive();
+			if (disconnectConfirmation == null) {
 				continue; // retry
 			}
-			int responseLength = diconnectConfirmation.getLength();
-			byte[] responseBytes = diconnectConfirmation.getData();
-			// TODO fix the disconnect
-			// 01 F7 00 F7 00 F7 03 00 00 00
-			// 01 247 00 247 00 247 03 00 00 00
-			// 01 247 247 1015 00 00 00
-			if (((responseLength == 2) || (responseLength == 2)) && (responseBytes[responseLength - 2] == 1)
-					&& (responseBytes[responseLength - 1] == -1)) {
-				// TODO, we need to figure out if there can be other replies than this
+			int responseLength = disconnectConfirmation.getLength();
+			byte[] responseBytes = disconnectConfirmation.getData();
+			byte[] disconnectConfirmationBytes = { 8, 0, 0, 0, 0, 1, 0, 0, 1, -1 };
+			if (responseLength == 7 && Arrays.equals(responseBytes, 0, 6, disconnectConfirmationBytes, 0, 6)) {
 				printDebugInfo("Disconnect confirmed by " + this.inetAddress.getHostAddress());
 				break;
 			} else {
 				printDebugInfo(
 						"Unknown disconnectConfirmation message received from " + this.inetAddress.getHostAddress());
-				if (debug) {
+				if (this.debug) {
+					System.out.println("responseLength == "+responseLength);
 					printByteArrayAsHex(responseBytes, responseLength);
 				}
 			}
@@ -375,11 +374,11 @@ public class FakeSTouch {
 
 		printDebugInfo("Closing connection to " + this.inetAddress.getHostAddress());
 
-		socket.close();
+		this.socket.close();
 
-		if (listenerService != null) {
-			listenerService.shutdownNow();
-			listenerService = null;
+		if (this.listenerService != null) {
+			this.listenerService.shutdownNow();
+			this.listenerService = null;
 		}
 	}
 
@@ -388,7 +387,7 @@ public class FakeSTouch {
 	}
 
 	private void printDebugInfo(String string) {
-		if (debug) {
+		if (this.debug) {
 			System.out.println(string);
 		}
 	}
@@ -407,7 +406,7 @@ public class FakeSTouch {
 	 * @param y the y-coordinate of the touch
 	 */
 	public void touch(int x, int y) {
-		this.getDisplay().setTouch(x, y);
+		getDisplay().setTouch(x, y);
 	}
 
 	public void printScreen() {
@@ -461,11 +460,6 @@ public class FakeSTouch {
 			} else {
 				enabled = true;
 			}
-
-			// TODO remove this part
-			/*
-			 * this.cnCmd = (int) ((long) this.cnCmd & 65535L); this.PktCmd &= 65535L;
-			 */
 		}
 		return enabled;
 	}
@@ -481,7 +475,7 @@ public class FakeSTouch {
 		ByteBuffer replyBuffer = ByteBuffer.wrap(replyBuf);
 		replyBuffer.order(ByteOrder.LITTLE_ENDIAN);
 		printDebugInfo("THE RECEIVED PACKET, len = " + rcvLen);
-		if (debug) {
+		if (this.debug) {
 			printByteArrayAsHex(rcvBuf, rcvLen);
 		}
 		int packetType = rcvBuffer.get();
@@ -553,6 +547,7 @@ public class FakeSTouch {
 									case SYSTEM_ACTIVATEAPP:
 										if (cmdLen > 0) {
 											parameters = STouchProtocol.read(cmd, rcvBuffer);
+											printDebugInfo("Parameters: " + parameters);
 										}
 										printDebugInfo(cmd.name());
 										Function<Object, Boolean> processor = displayMethods.get(cmd);
@@ -663,6 +658,12 @@ public class FakeSTouch {
 										replyPacket.setLength(0);
 										break;
 									}
+									if(debug) { 
+										System.out.println("reply packet after processing of: " + cmd.name());
+										System.out.println("buffer position is: " + replyBuffer.position());
+										System.out.print("The current replyBuffer: ");
+										printByteArrayAsHex(replyBuf, replyBuffer.position());
+									}
 								} else {
 									// if not emeaCmd(cmd)
 									printDebugInfo("Command is not enable, continue with next");
@@ -718,7 +719,7 @@ public class FakeSTouch {
 			replyPacket = null;
 		}
 		printDebugInfo("THE REPLY PACKET");
-		if (debug) {
+		if (this.debug) {
 			if (replyPacket == null) {
 				System.out.println("null");
 			} else {
