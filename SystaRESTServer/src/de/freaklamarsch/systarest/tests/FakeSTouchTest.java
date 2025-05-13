@@ -113,7 +113,7 @@ class FakeSTouchTest {
 				}
 				// check if a tx packet was found and sort it to the front
 				if (offset < packetData.size()) {
-					//System.out.println("resort #" + offset + " to #" + (i + 1));
+					// System.out.println("resort #" + offset + " to #" + (i + 1));
 					PcapPacket txPacket = packetData.remove(offset);
 					packetData.add(i + 1, txPacket);
 				}
@@ -365,7 +365,8 @@ class FakeSTouchTest {
 
 				}
 				DatagramPacket reply = stouch.processCommands(packetData.get(i).packet);
-				//saveDisplayAsPNG(stouch, String.format("testCommunication_%05d", (i+1))); //+1 to match the pcap frame numbering	
+				// saveDisplayAsPNG(stouch, String.format("testCommunication_%05d", (i+1)));
+				// //+1 to match the pcap frame numbering
 				if (reply == null) {
 					// if no reply is generated, there should also not be a reply (tx message) in
 					// the dump

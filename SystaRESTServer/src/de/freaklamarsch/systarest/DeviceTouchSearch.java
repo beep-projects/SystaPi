@@ -29,9 +29,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
+
 /**
- * A utility class for searching and interacting with DeviceTouch devices.
- * This class provides methods to create search messages, parse responses, and extract device information.
+ * A utility class for searching and interacting with DeviceTouch devices. This
+ * class provides methods to create search messages, parse responses, and
+ * extract device information.
  */
 public class DeviceTouchSearch {
 	/**
@@ -55,29 +57,20 @@ public class DeviceTouchSearch {
 		public String baseVersion = null;
 		public String password = null;
 		public boolean stouchSupported = false;
-		
+
 		@Override
 		public String toString() {
-		    return "{\n" +
-		           //"    \"SystaWebIP\":\"" + localIp + "\",\n" +
-		           //"    \"SystaWebPort\":" + port + ",\n" +
-		           "    \"DeviceTouchBcastIP\":\"" + bcastIp + "\",\n" +
-		           "    \"DeviceTouchBcastPort\":" + bcastPort + ",\n" +
-		           "    \"deviceTouchInfoString\":\"" + string + "\",\n" +
-		           "    \"unitIP\":\"" + ip + "\",\n" +
-		           "    \"unitName\":\"" + name + "\",\n" +
-		           "    \"unitId\":\"" + id + "\",\n" +
-		           "    \"unitApp\":" + app + ",\n" +
-		           "    \"unitPlatform\":" + platform + ",\n" +
-		           "    \"unitVersion\":\"" + version + "\",\n" +
-		           "    \"unitMajor\":" + major + ",\n" +
-		           "    \"unitMinor\":" + minor + ",\n" +
-		           "    \"unitBaseVersion\":\"" + baseVersion + "\",\n" +
-		           "    \"unitMac\":\"" + mac + "\",\n" +
-		           "    \"STouchAppSupported\":" + stouchSupported + ",\n" +
-		           "    \"DeviceTouchPort\":" + port + ",\n" +
-		           "    \"DeviceTouchPassword\":\"" + password + "\"\n" +
-		           "}";
+			return "{\n" +
+			// " \"SystaWebIP\":\"" + localIp + "\",\n" +
+			// " \"SystaWebPort\":" + port + ",\n" +
+					"    \"DeviceTouchBcastIP\":\"" + bcastIp + "\",\n" + "    \"DeviceTouchBcastPort\":" + bcastPort
+					+ ",\n" + "    \"deviceTouchInfoString\":\"" + string + "\",\n" + "    \"unitIP\":\"" + ip + "\",\n"
+					+ "    \"unitName\":\"" + name + "\",\n" + "    \"unitId\":\"" + id + "\",\n" + "    \"unitApp\":"
+					+ app + ",\n" + "    \"unitPlatform\":" + platform + ",\n" + "    \"unitVersion\":\"" + version
+					+ "\",\n" + "    \"unitMajor\":" + major + ",\n" + "    \"unitMinor\":" + minor + ",\n"
+					+ "    \"unitBaseVersion\":\"" + baseVersion + "\",\n" + "    \"unitMac\":\"" + mac + "\",\n"
+					+ "    \"STouchAppSupported\":" + stouchSupported + ",\n" + "    \"DeviceTouchPort\":" + port
+					+ ",\n" + "    \"DeviceTouchPassword\":\"" + password + "\"\n" + "}";
 		}
 	}
 
@@ -85,8 +78,9 @@ public class DeviceTouchSearch {
 	private static final int BCAST_PORT = 8001;
 
 	/**
-	 * Search for devices supporting the DeviceTouch protocol. The search sends UDP broadcasts
-	 * and returns the {@link DeviceTouchDeviceInfo} object parsed from received reply messages
+	 * Search for devices supporting the DeviceTouch protocol. The search sends UDP
+	 * broadcasts and returns the {@link DeviceTouchDeviceInfo} object parsed from
+	 * received reply messages
 	 * 
 	 * @return received {@link DeviceTouchDeviceInfo}
 	 */
@@ -111,7 +105,7 @@ public class DeviceTouchSearch {
 							DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 							DatagramPacket packet = createSearchMessage(ia.getBroadcast());
 							String rxMessage = "";
-							//search for Systa Comfort unit attached to this interface
+							// search for Systa Comfort unit attached to this interface
 							searchSocket.send(packet);
 							searchSocket.receive(receivePacket);
 							rxMessage = getSearchReplyString(receivePacket);
@@ -119,7 +113,7 @@ public class DeviceTouchSearch {
 							deviceInfo.localIp = ip.getHostAddress();
 							deviceInfo.bcastIp = ia.getBroadcast().getHostAddress();
 							deviceInfo.bcastPort = BCAST_PORT;
-							//request port from Systa Comfort
+							// request port from Systa Comfort
 							packet = createPortRequestMessage(deviceInfo.mac, ia.getBroadcast());
 							searchSocket.send(packet);
 							searchSocket.receive(receivePacket);
@@ -152,22 +146,23 @@ public class DeviceTouchSearch {
 		return null;
 	}
 
-    /**
-     * Parses a password reply message received from a DeviceTouch device.
-     *
-     * @param reply the reply string containing the password
-     * @return the extracted password
-     */
+	/**
+	 * Parses a password reply message received from a DeviceTouch device.
+	 *
+	 * @param reply the reply string containing the password
+	 * @return the extracted password
+	 */
 	public static String parsePasswordReplyString(String reply) {
 		return reply.split(" ")[2];
 	}
 
-    /**
-     * Extracts the password reply string from a DatagramPacket received from a DeviceTouch device.
-     *
-     * @param receivePacket the DatagramPacket containing the password reply
-     * @return the extracted password reply string
-     */
+	/**
+	 * Extracts the password reply string from a DatagramPacket received from a
+	 * DeviceTouch device.
+	 *
+	 * @param receivePacket the DatagramPacket containing the password reply
+	 * @return the extracted password reply string
+	 */
 	public static String getPasswordReplyString(DatagramPacket receivePacket) throws NumberFormatException {
 		// replies seen so far:
 		// 1234
@@ -177,30 +172,30 @@ public class DeviceTouchSearch {
 		return reply;
 	}
 
-
-    /**
-     * Creates the DatagramPacket to request the password from a DeviceTouch device.
-     *
-	 * @param mac the MAC address of the target DeviceTouch device
-	 * @param bcastAddress the broadcast address used for communication with the DeviceTouch device
+	/**
+	 * Creates the DatagramPacket to request the password from a DeviceTouch device.
+	 *
+	 * @param mac          the MAC address of the target DeviceTouch device
+	 * @param bcastAddress the broadcast address used for communication with the
+	 *                     DeviceTouch device
 	 * @return a DatagramPacket containing the password request message
 	 */
 	public static DatagramPacket createPasswordRequestMessage(String mac, InetAddress bcastAddress) {
 		// broadcast to trigger info response from a SystaComfort on this network
 		// MAC+" 6 R UDP Pass"
 		byte[] passwordMessage = (mac + " 6 R UDP Pass").getBytes();
-		DatagramPacket packet = new DatagramPacket(passwordMessage, passwordMessage.length, bcastAddress,
-				BCAST_PORT);
+		DatagramPacket packet = new DatagramPacket(passwordMessage, passwordMessage.length, bcastAddress, BCAST_PORT);
 		return packet;
 	}
 
-    /**
-     * Parses a port reply message received from a DeviceTouch device.
-     *
-     * @param reply the reply string containing the port
-     * @return the extracted port
-	 * @throws NumberFormatException if the reply dows not contain a valid {@code Integer}
-     */
+	/**
+	 * Parses a port reply message received from a DeviceTouch device.
+	 *
+	 * @param reply the reply string containing the port
+	 * @return the extracted port
+	 * @throws NumberFormatException if the reply dows not contain a valid
+	 *                               {@code Integer}
+	 */
 	public static int parsePortReplyString(String reply) throws NumberFormatException {
 		if (reply.toLowerCase().contains("unknown value")) {
 			return -1;
@@ -227,11 +222,13 @@ public class DeviceTouchSearch {
 		return rxMessage;
 	}
 
-    /**
-     * Creates the DatagramPacket to request the port number used from communication from a DeviceTouch device.
-     *
-	 * @param mac the MAC address of the target DeviceTouch device
-	 * @param bcastAddress the broadcast address used for communication with the DeviceTouch device
+	/**
+	 * Creates the DatagramPacket to request the port number used from communication
+	 * from a DeviceTouch device.
+	 *
+	 * @param mac          the MAC address of the target DeviceTouch device
+	 * @param bcastAddress the broadcast address used for communication with the
+	 *                     DeviceTouch device
 	 * @return a DatagramPacket containing the port request message
 	 */
 	public static DatagramPacket createPortRequestMessage(String mac, InetAddress bcastAddress) {
@@ -242,12 +239,12 @@ public class DeviceTouchSearch {
 		return packet;
 	}
 
-    /**
-     * Extracts the search reply string from a DatagramPacket.
-     *
-     * @param receivePacket the DatagramPacket containing the search reply
-     * @return the extracted search reply string
-     */
+	/**
+	 * Extracts the search reply string from a DatagramPacket.
+	 *
+	 * @param receivePacket the DatagramPacket containing the search reply
+	 * @return the extracted search reply string
+	 */
 	public static String getSearchReplyString(DatagramPacket receivePacket) {
 		// the reply should be something like
 		// SC2 1 192.168.11.23 255.255.255.0 192.168.11.1 SystaComfort-II0 0809720001 0
@@ -257,12 +254,13 @@ public class DeviceTouchSearch {
 		return reply;
 	}
 
-    /**
-     * Creates a search message to broadcast on the network for discovering DeviceTouch devices.
-     *
-     * @param bcastAddress the broadcast address to send the search message
-     * @return a DatagramPacket containing the search message
-     */
+	/**
+	 * Creates a search message to broadcast on the network for discovering
+	 * DeviceTouch devices.
+	 *
+	 * @param bcastAddress the broadcast address to send the search message
+	 * @return a DatagramPacket containing the search message
+	 */
 	public static DatagramPacket createSearchMessage(InetAddress bcastAddress) {
 		// broadcast to trigger info response from a SystaComfort on this network
 		// "0 1 A"

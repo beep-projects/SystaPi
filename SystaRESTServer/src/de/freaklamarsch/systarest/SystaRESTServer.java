@@ -83,7 +83,8 @@ public class SystaRESTServer {
 		URI baseUri = UriBuilder.fromUri("http://" + restAPIIPv4 + "/")
 				.port(Integer.parseInt(props.getProperty("RESTAPI_PORT"))).build();
 		ResourceConfig config = new ResourceConfig(SystaRESTAPI.class);
-        config.register(new STouchRESTAPI());
+		//config.register(new STouchRESTAPI());
+		config.register(STouchRESTAPI.class);
 		config.register(new CorsFilter());
 		config.property(SystaRESTAPI.PROP_PARADIGMA_IP, paradigmIPv4);
 		// config.property("jersey.config.server.wadl.disableWadl", true);

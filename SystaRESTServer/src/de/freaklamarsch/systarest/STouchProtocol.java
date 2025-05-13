@@ -63,8 +63,8 @@ public class STouchProtocol {
 		SYSTEM_SETCONFIG(247, 0), SYSTEM_CLEARAPP(250, 0), SYSTEM_FLASHAPP(251, 0), SYSTEM_ACTIVATEAPP(252, 0),
 		// internal commands added for parsing the received messages. The ids are
 		// selected randomly
-		TYPE_BYTE(1337, 1), TYPE_SHORT_INTEGER(1338, 2), TYPE_INTEGER(1339, 4),
-		TYPE_MAC_ADDRESS(1340, 6), TYPE_COMMAND(1341, 1);
+		TYPE_BYTE(1337, 1), TYPE_SHORT_INTEGER(1338, 2), TYPE_INTEGER(1339, 4), TYPE_MAC_ADDRESS(1340, 6),
+		TYPE_COMMAND(1341, 1);
 
 		private final int id;
 		private final int length; // -1 indicates variable length
@@ -92,7 +92,7 @@ public class STouchProtocol {
 		 * @return the length of the command
 		 */
 		public int length(ByteBuffer buffer) {
-			if(length == 0) {
+			if (length == 0) {
 				return 0;
 			} else if (length > 0) {
 				if (buffer != null && buffer.remaining() >= length) {
@@ -144,52 +144,52 @@ public class STouchProtocol {
 	private static final Map<STouchProtocol.STouchCommand, ObjectReaderWriter<?>> readerWriters = new HashMap<>();
 
 	static {
-        //DISPLAY_SWITCHON(0, 0)
-        //DISPLAY_SWITCHOFF(1, 0)
-        readerWriters.put(STouchCommand.DISPLAY_SETSTYLE, new ByteReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_SETINVERS, new ByteReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_SETFORECOLOR, new ColorReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_SETBACKCOLOR, new ColorReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_SETFONTTYPE, new ByteReaderWriter());
-        //DISPLAY_SETPIXEL(7, 0)
-        readerWriters.put(STouchCommand.DISPLAY_MOVETO, new CoordinatesReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_LINETO, new CoordinatesReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_DRAWRECT, new RectangleReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_DRAWARC, new CircleReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_DRAWROUNDRECT, new RoundRectangleReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_DRAWSYMBOL, new SymbolReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_DELETESYMBOL, new SymbolReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_SETXY, new CoordinatesReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_PUTC, new ByteReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_PRINT, new TextReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_PRINTXY, new TextXYReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_PUTCROT, new CharacterRotateReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_PRINTROT, new TextRotateReaderWriter());
-        //DISPLAY_CALIBRATETOUCH(21, 0)
-        readerWriters.put(STouchCommand.DISPLAY_SYNCNOW, new ShortIntegerReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_SETBACKLIGHT, new ByteReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_SETBUZZER, new ShortIntegerReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_SETCLICK, new ByteReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_SETBUTTON, new ButtonReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_DELBUTTON, new ByteReaderWriter());
-        readerWriters.put(STouchCommand.DISPLAY_SETTEMPOFFSETS, new CoordinatesReaderWriter());
-        //SYSTEM_GETSYSTEM(240, 0),
-        //SYSTEM_GOSYSTEM(241, 0)
-        //SYSTEM_CLEARID(242, 0)
-        //SYSTEM_GETRESOURCEINFO(243, 0),
-        //SYSTEM_ERASERESOURCE(244, 0)
-        //SYSTEM_FLASHRESOURCE(245, 0)
-        //SYSTEM_ACTIVATERESOURCE(246, 0),
-        //SYSTEM_SETCONFIG(247, 0)
-        //SYSTEM_CLEARAPP(250, 0)
-        //SYSTEM_FLASHAPP(251, 0),
-        //SYSTEM_ACTIVATEAPP(252, 0), 
-        readerWriters.put(STouchCommand.TYPE_BYTE, new ByteReaderWriter());
-        readerWriters.put(STouchCommand.TYPE_SHORT_INTEGER, new ShortIntegerReaderWriter());
-        readerWriters.put(STouchCommand.TYPE_INTEGER, new IntegerReaderWriter());
-        readerWriters.put(STouchCommand.TYPE_MAC_ADDRESS, new MacAddressReaderWriter());
-        readerWriters.put(STouchCommand.TYPE_COMMAND, new CommandReaderWriter());
-    }
+		// DISPLAY_SWITCHON(0, 0)
+		// DISPLAY_SWITCHOFF(1, 0)
+		readerWriters.put(STouchCommand.DISPLAY_SETSTYLE, new ByteReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_SETINVERS, new ByteReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_SETFORECOLOR, new ColorReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_SETBACKCOLOR, new ColorReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_SETFONTTYPE, new ByteReaderWriter());
+		// DISPLAY_SETPIXEL(7, 0)
+		readerWriters.put(STouchCommand.DISPLAY_MOVETO, new CoordinatesReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_LINETO, new CoordinatesReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_DRAWRECT, new RectangleReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_DRAWARC, new CircleReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_DRAWROUNDRECT, new RoundRectangleReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_DRAWSYMBOL, new SymbolReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_DELETESYMBOL, new SymbolReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_SETXY, new CoordinatesReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_PUTC, new ByteReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_PRINT, new TextReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_PRINTXY, new TextXYReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_PUTCROT, new CharacterRotateReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_PRINTROT, new TextRotateReaderWriter());
+		// DISPLAY_CALIBRATETOUCH(21, 0)
+		readerWriters.put(STouchCommand.DISPLAY_SYNCNOW, new ShortIntegerReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_SETBACKLIGHT, new ByteReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_SETBUZZER, new ShortIntegerReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_SETCLICK, new ByteReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_SETBUTTON, new ButtonReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_DELBUTTON, new ByteReaderWriter());
+		readerWriters.put(STouchCommand.DISPLAY_SETTEMPOFFSETS, new CoordinatesReaderWriter());
+		// SYSTEM_GETSYSTEM(240, 0),
+		// SYSTEM_GOSYSTEM(241, 0)
+		// SYSTEM_CLEARID(242, 0)
+		// SYSTEM_GETRESOURCEINFO(243, 0),
+		// SYSTEM_ERASERESOURCE(244, 0)
+		// SYSTEM_FLASHRESOURCE(245, 0)
+		// SYSTEM_ACTIVATERESOURCE(246, 0),
+		// SYSTEM_SETCONFIG(247, 0)
+		// SYSTEM_CLEARAPP(250, 0)
+		// SYSTEM_FLASHAPP(251, 0),
+		// SYSTEM_ACTIVATEAPP(252, 0),
+		readerWriters.put(STouchCommand.TYPE_BYTE, new ByteReaderWriter());
+		readerWriters.put(STouchCommand.TYPE_SHORT_INTEGER, new ShortIntegerReaderWriter());
+		readerWriters.put(STouchCommand.TYPE_INTEGER, new IntegerReaderWriter());
+		readerWriters.put(STouchCommand.TYPE_MAC_ADDRESS, new MacAddressReaderWriter());
+		readerWriters.put(STouchCommand.TYPE_COMMAND, new CommandReaderWriter());
+	}
 
 	/**
 	 * Retrieves the parser for the given command code.
@@ -210,7 +210,7 @@ public class STouchProtocol {
 			throw new IllegalArgumentException("ByteBuffer buffer must not be null");
 		}
 		ObjectReaderWriter<?> parser = readerWriters.get(cmd);
-		if(parser == null) {
+		if (parser == null) {
 			return null;
 		}
 		if (!buffer.hasRemaining()) {
@@ -513,20 +513,20 @@ public class STouchProtocol {
 
 		@Override
 		public String readFromBuffer(ByteBuffer buffer) {
-	        buffer.mark();
-	        int length = 0;
-	        while (buffer.hasRemaining()) {
-	            byte b = buffer.get();
-	            if (b == 0) {
-	                break;
-	            }
-	            length++;
-	        }
-	        buffer.reset();
-	        byte[] bytes = new byte[length];
-	        buffer.get(bytes, 0, length);
-	        buffer.get();
-	        return new String(bytes, Charset.forName("windows-1252")).trim();
+			buffer.mark();
+			int length = 0;
+			while (buffer.hasRemaining()) {
+				byte b = buffer.get();
+				if (b == 0) {
+					break;
+				}
+				length++;
+			}
+			buffer.reset();
+			byte[] bytes = new byte[length];
+			buffer.get(bytes, 0, length);
+			buffer.get();
+			return new String(bytes, Charset.forName("windows-1252")).trim();
 		}
 
 		@Override
@@ -541,12 +541,12 @@ public class STouchProtocol {
 	private static class TextXYReaderWriter implements ObjectReaderWriter<TextXY> {
 		CoordinatesReaderWriter coordinatesReaderWriter = new CoordinatesReaderWriter();
 		TextReaderWriter textReaderWriter = new TextReaderWriter();
-		
+
 		@Override
 		public TextXY readFromBuffer(ByteBuffer buffer) {
-	        Coordinates coordinates = coordinatesReaderWriter.readFromBuffer(buffer);
-	        String text = textReaderWriter.readFromBuffer(buffer);
-	        return new TextXY(coordinates.x, coordinates.y, text);
+			Coordinates coordinates = coordinatesReaderWriter.readFromBuffer(buffer);
+			String text = textReaderWriter.readFromBuffer(buffer);
+			return new TextXY(coordinates.x, coordinates.y, text);
 		}
 
 		@Override
@@ -560,12 +560,12 @@ public class STouchProtocol {
 	private static class TextRotateReaderWriter implements ObjectReaderWriter<TextRotate> {
 		private final ShortIntegerReaderWriter shortIntegerReaderWriter = new ShortIntegerReaderWriter();
 		TextReaderWriter textReaderWriter = new TextReaderWriter();
-		
+
 		@Override
 		public TextRotate readFromBuffer(ByteBuffer buffer) {
-	        int rotationAngle = shortIntegerReaderWriter.readFromBuffer(buffer);
-	        String text = textReaderWriter.readFromBuffer(buffer);
-	        return new TextRotate(rotationAngle, text);
+			int rotationAngle = shortIntegerReaderWriter.readFromBuffer(buffer);
+			String text = textReaderWriter.readFromBuffer(buffer);
+			return new TextRotate(rotationAngle, text);
 		}
 
 		@Override
@@ -578,15 +578,15 @@ public class STouchProtocol {
 
 	private static class CharacterRotateReaderWriter implements ObjectReaderWriter<TextRotate> {
 		private final ShortIntegerReaderWriter shortIntegerReaderWriter = new ShortIntegerReaderWriter();
-		
+
 		@Override
 		public TextRotate readFromBuffer(ByteBuffer buffer) {
-	        int rotationAngle = shortIntegerReaderWriter.readFromBuffer(buffer);
-	        StringBuilder builder = new StringBuilder();
-	        byte b = buffer.get();
-	        builder.append((char) b);
-	        String text = new String(builder.toString().getBytes(), Charset.forName("windows-1252")).trim();
-	        return new TextRotate(rotationAngle, text);
+			int rotationAngle = shortIntegerReaderWriter.readFromBuffer(buffer);
+			StringBuilder builder = new StringBuilder();
+			byte b = buffer.get();
+			builder.append((char) b);
+			String text = new String(builder.toString().getBytes(), Charset.forName("windows-1252")).trim();
+			return new TextRotate(rotationAngle, text);
 		}
 
 		@Override
@@ -618,7 +618,6 @@ public class STouchProtocol {
 			return 9;
 		}
 	}
-
 
 	/***********************************************
 	 ***********************************************
@@ -677,10 +676,10 @@ public class STouchProtocol {
 			this.x = x;
 			this.y = y;
 		}
-		
+
 		@Override
 		public String toString() {
-		    return "Coordinates { \"x\": " + x + ", \"y\": " + y + " }";
+			return "Coordinates { \"x\": " + x + ", \"y\": " + y + " }";
 		}
 	}
 
@@ -696,11 +695,11 @@ public class STouchProtocol {
 			this.xMax = xMax;
 			this.yMax = yMax;
 		}
-		
+
 		@Override
 		public String toString() {
-		    return "Rectangle { \"xMin\": " + xMin + ", \"yMin\": " + yMin + 
-		           ", \"xMax\": " + xMax + ", \"yMax\": " + yMax + " }";
+			return "Rectangle { \"xMin\": " + xMin + ", \"yMin\": " + yMin + ", \"xMax\": " + xMax + ", \"yMax\": "
+					+ yMax + " }";
 		}
 	}
 
@@ -718,12 +717,11 @@ public class STouchProtocol {
 			this.yMax = yMax;
 			this.curvature = curvature;
 		}
-		
+
 		@Override
 		public String toString() {
-		    return "RoundRectangle { \"xMin\": " + xMin + ", \"yMin\": " + yMin + 
-		           ", \"xMax\": " + xMax + ", \"yMax\": " + yMax + 
-		           ", \"curvature\": " + curvature + " }";
+			return "RoundRectangle { \"xMin\": " + xMin + ", \"yMin\": " + yMin + ", \"xMax\": " + xMax + ", \"yMax\": "
+					+ yMax + ", \"curvature\": " + curvature + " }";
 		}
 	}
 
@@ -737,10 +735,10 @@ public class STouchProtocol {
 			this.y = y;
 			this.radius = radius;
 		}
-		
+
 		@Override
 		public String toString() {
-		    return "Circle { \"x\": " + x + ", \"y\": " + y + ", \"radius\": " + radius + " }";
+			return "Circle { \"x\": " + x + ", \"y\": " + y + ", \"radius\": " + radius + " }";
 		}
 	}
 
@@ -754,10 +752,10 @@ public class STouchProtocol {
 			this.y = y;
 			this.id = id;
 		}
-		
+
 		@Override
 		public String toString() {
-		    return "Symbol { \"x\": " + x + ", \"y\": " + y + ", \"id\": " + id + " }";
+			return "Symbol { \"x\": " + x + ", \"y\": " + y + ", \"id\": " + id + " }";
 		}
 	}
 
@@ -771,10 +769,10 @@ public class STouchProtocol {
 			this.y = y;
 			this.text = text;
 		}
-		
+
 		@Override
 		public String toString() {
-		    return "TextXY { \"x\": " + x + ", \"y\": " + y + ", \"text\": \"" + text + "\" }";
+			return "TextXY { \"x\": " + x + ", \"y\": " + y + ", \"text\": \"" + text + "\" }";
 		}
 	}
 
@@ -786,10 +784,10 @@ public class STouchProtocol {
 			this.rotationAngle = rotationAngle;
 			this.text = text;
 		}
-		
+
 		@Override
 		public String toString() {
-		    return "TextRotate { \"rotationAngle\": " + rotationAngle + ", \"text\": \"" + text + "\" }";
+			return "TextRotate { \"rotationAngle\": " + rotationAngle + ", \"text\": \"" + text + "\" }";
 		}
 	}
 
@@ -807,12 +805,11 @@ public class STouchProtocol {
 			this.xMax = xMax;
 			this.yMax = yMax;
 		}
-		
+
 		@Override
 		public String toString() {
-		    return "Button { \"id\": " + id + 
-		           ", \"xMin\": " + xMin + ", \"yMin\": " + yMin + 
-		           ", \"xMax\": " + xMax + ", \"yMax\": " + yMax + " }";
+			return "Button { \"id\": " + id + ", \"xMin\": " + xMin + ", \"yMin\": " + yMin + ", \"xMax\": " + xMax
+					+ ", \"yMax\": " + yMax + " }";
 		}
 	}
 }

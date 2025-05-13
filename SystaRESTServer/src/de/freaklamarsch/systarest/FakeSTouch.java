@@ -70,7 +70,7 @@ public class FakeSTouch {
 	/** The display associated with this S-Touch device. */
 	private FakeSTouchDisplay display = new FakeSTouchDisplay();
 
-	//int rxRetryCount = 0;
+	// int rxRetryCount = 0;
 	long PktCmd;
 	int port = 0;
 	InetAddress inetAddress;
@@ -137,7 +137,6 @@ public class FakeSTouch {
 		displayMethods.put(STouchCommand.SYSTEM_CLEARAPP, parameters -> true);
 		displayMethods.put(STouchCommand.SYSTEM_FLASHAPP, parameters -> true);
 		displayMethods.put(STouchCommand.SYSTEM_ACTIVATEAPP, parameters -> true);
-
 	}
 
 	public FakeSTouch() {
@@ -147,8 +146,8 @@ public class FakeSTouch {
 	/**
 	 * Enable/disable the writing of debug messages
 	 *
-	 * @param debug {@code true} enables writing of debugging info, {@code false} disables
-	 * it.
+	 * @param debug {@code true} enables writing of debugging info, {@code false}
+	 *              disables it.
 	 */
 	public void setDebug(boolean debug) {
 		this.debug = debug;
@@ -258,7 +257,7 @@ public class FakeSTouch {
 	 */
 	public DatagramPacket createConnectionRequestMessage() {
 		int txLen = 10;
-		byte[] headerBytes = {8, 0, 0, 0, 0, 1};
+		byte[] headerBytes = { 8, 0, 0, 0, 0, 1 };
 		byte[] txBytes = new byte[headerBytes.length + this.password.length];
 		System.arraycopy(headerBytes, 0, txBytes, 0, headerBytes.length);
 		System.arraycopy(this.password, 0, txBytes, headerBytes.length, this.password.length);
@@ -288,10 +287,11 @@ public class FakeSTouch {
 					DatagramPacket reply = processCommands(packet);
 					if (reply != null) {
 						try {
-							if(this.connected) {
+							if (this.connected) {
 								this.socket.send(reply);
 							} else {
-								printDebugInfo("FakeSTouch got disconnected while processing commands, not sending reply message.");
+								printDebugInfo(
+										"FakeSTouch got disconnected while processing commands, not sending reply message.");
 							}
 							getDisplay().setTouch(-1, -1);
 						} catch (IOException ioe) {
@@ -366,7 +366,7 @@ public class FakeSTouch {
 				printDebugInfo(
 						"Unknown disconnectConfirmation message received from " + this.inetAddress.getHostAddress());
 				if (this.debug) {
-					System.out.println("responseLength == "+responseLength);
+					System.out.println("responseLength == " + responseLength);
 					printByteArrayAsHex(responseBytes, responseLength);
 				}
 			}
@@ -658,7 +658,7 @@ public class FakeSTouch {
 										replyPacket.setLength(0);
 										break;
 									}
-									if(debug) { 
+									if (debug) {
 										System.out.println("reply packet after processing of: " + cmd.name());
 										System.out.println("buffer position is: " + replyBuffer.position());
 										System.out.print("The current replyBuffer: ");

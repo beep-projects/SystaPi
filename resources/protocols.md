@@ -6,7 +6,7 @@ The communication between **SystaPi**  and the SystaComfort is based on the reve
 
 ## S-Touch Protocol
 
-The S-Touch app is providing a canvas on which the SystaComfort is drawing the user interface. This means that there are no easy to use commands for e.g. setting and reading values. If you want to use this protocol for operating the SystaComfort, you have to automate the navigation through the user interface for accessing the information you want. This is why I did not want to continue the analysis of this protocol, but I would like to share my findings.
+The S-Touch app is providing a canvas on which the SystaComfort is drawing the user interface. This means that there are no easy to use commands for e.g. setting and reading values. If you want to use this protocol for operating the SystaComfort, you have to automate the navigation through the user interface for accessing the information you want. 
 
 ### Search for SystaComfort units
 

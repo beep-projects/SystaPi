@@ -57,7 +57,9 @@ public class STouchRESTAPI {
 	private static FakeSTouch fst = null;
 
 	public STouchRESTAPI() {
-		fst = new FakeSTouch();
+		if(fst == null) {
+			fst = new FakeSTouch();
+		}
 	}
 
 	/**
@@ -296,15 +298,16 @@ public class STouchRESTAPI {
 	 *                    a touch event on the given text, if it is in the object
 	 *                    tree of the screen touchButton=id emulate a touch event on
 	 *                    the button with the given id, if it is in the object tree
-	 *                    of the screen whileText=text&amp;doAction while the given text
-	 *                    is in the object tree of the screen, do the given action
-	 *                    whileButton=id&amp;doAction while the button with the given id
-	 *                    is in the object tree of the screen, do the given action
-	 *                    checkText=text&amp;theDoThisAction&amp;elseDoThisAction if the
-	 *                    given text is in the object tree of the screen, then do
-	 *                    the first action, else do the second
-	 *                    checkButton=id&amp;theDoThisAction&amp;elseDoThisAction if the
-	 *                    button with the given id is in the object tree of the
+	 *                    of the screen whileText=text&amp;doAction while the given
+	 *                    text is in the object tree of the screen, do the given
+	 *                    action whileButton=id&amp;doAction while the button with
+	 *                    the given id is in the object tree of the screen, do the
+	 *                    given action
+	 *                    checkText=text&amp;theDoThisAction&amp;elseDoThisAction if
+	 *                    the given text is in the object tree of the screen, then
+	 *                    do the first action, else do the second
+	 *                    checkButton=id&amp;theDoThisAction&amp;elseDoThisAction if
+	 *                    the button with the given id is in the object tree of the
 	 *                    screen, then do the first action, else do the second
 	 *                    disconnect disconnect from the SystaComfort unit
 	 * @return a {@link Response} indicating the result of the automation
@@ -323,79 +326,79 @@ public class STouchRESTAPI {
 				continue;
 			}
 			if (command.toLowerCase().startsWith("whiletext")) {
-				Response response = handleWhileTextCommand(commandArray, i);
+				Response response = automationWhileTextCommand(commandArray, i);
 				if (response != null)
 					return response;
 				skipNext = true;
 				continue;
 			}
 			if (command.toLowerCase().startsWith("checktext")) {
-				skipNext = handleCheckTextCommand(command);
+				skipNext = automationCheckTextCommand(command);
 				continue;
 			}
 			if (command.toLowerCase().startsWith("whilebutton")) {
-				Response response = handleWhileButtonCommand(commandArray, i);
+				Response response = automationWhileButtonCommand(commandArray, i);
 				if (response != null)
 					return response;
 				skipNext = true;
 				continue;
 			}
 			if (command.toLowerCase().startsWith("checkbutton")) {
-				skipNext = handleCheckButtonCommand(command);
+				skipNext = automationCheckButtonCommand(command);
 				continue;
 			}
-			Response response = executeCommand(command);
+			Response response = automationExecuteCommand(command);
 			if (response.getStatus() != Response.Status.OK.getStatusCode()) {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 						.entity("Command failed: " + command + ", Error: " + response.getEntity()).build();
 			}
-			sleepForOneSecond();
+			sleepForTwoSeconds();
 		}
 		return Response.ok("Automation executed successfully").build();
 	}
 
-	private Response handleWhileTextCommand(String[] commandArray, int i) {
+	private Response automationWhileTextCommand(String[] commandArray, int i) {
 		String command = commandArray[i];
 		String searchText = extractComparisonValue(command, "whiletext");
 		boolean isEqualComparison = command.toLowerCase().startsWith("whiletext==");
 		DisplayText foundText = STouchRESTAPI.fst.getDisplay().findTextInObjectTree(searchText);
 		while ((isEqualComparison && foundText != null) || (!isEqualComparison && foundText == null)) {
-			Response response = executeCommand(commandArray[i + 1]);
+			Response response = automationExecuteCommand(commandArray[i + 1]);
 			if (response.getStatus() != Response.Status.OK.getStatusCode()) {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 						.entity("Command failed: " + command + ", Error: " + response.getEntity()).build();
 			}
-			sleepForOneSecond();
+			sleepForTwoSeconds();
 			foundText = STouchRESTAPI.fst.getDisplay().findTextInObjectTree(searchText);
 		}
 		return null;
 	}
 
-	private boolean handleCheckTextCommand(String command) {
+	private boolean automationCheckTextCommand(String command) {
 		String searchText = extractComparisonValue(command, "checktext");
 		DisplayText foundText = STouchRESTAPI.fst.getDisplay().findTextInObjectTree(searchText);
 		boolean isEqualComparison = command.toLowerCase().startsWith("checktext==");
 		return isEqualComparison ? foundText == null : foundText != null;
 	}
 
-	private Response handleWhileButtonCommand(String[] commandArray, int i) {
+	private Response automationWhileButtonCommand(String[] commandArray, int i) {
 		String command = commandArray[i];
 		Byte searchId = extractByteValue(command, "whilebutton");
 		boolean isEqualComparison = command.toLowerCase().startsWith("whilebutton==");
 		DisplayButton foundButton = STouchRESTAPI.fst.getDisplay().findButtonInObjectTree(searchId);
 		while ((isEqualComparison && foundButton != null) || (!isEqualComparison && foundButton == null)) {
-			Response response = executeCommand(commandArray[i + 1]);
+			Response response = automationExecuteCommand(commandArray[i + 1]);
 			if (response.getStatus() != Response.Status.OK.getStatusCode()) {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 						.entity("Command failed: " + command + ", Error: " + response.getEntity()).build();
 			}
-			sleepForOneSecond();
+			sleepForTwoSeconds();
 			foundButton = STouchRESTAPI.fst.getDisplay().findButtonInObjectTree(searchId);
 		}
 		return null;
 	}
 
-	private boolean handleCheckButtonCommand(String command) {
+	private boolean automationCheckButtonCommand(String command) {
 		Byte searchId = extractByteValue(command, "checkbutton");
 		DisplayButton foundButton = STouchRESTAPI.fst.getDisplay().findButtonInObjectTree(searchId);
 		boolean isEqualComparison = command.toLowerCase().startsWith("checkbutton==");
@@ -410,16 +413,16 @@ public class STouchRESTAPI {
 		return Byte.parseByte(command.substring((prefix + "??").length()));
 	}
 
-	private void sleepForOneSecond() {
+	private void sleepForTwoSeconds() {
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(2000);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException("Execution interrupted.");
 		}
 	}
 
-	private Response executeCommand(String command) {
+	private Response automationExecuteCommand(String command) {
 		if (command.equalsIgnoreCase("none")) {
 			return Response.ok().build();
 		} else if (command.equalsIgnoreCase("connect")) {
