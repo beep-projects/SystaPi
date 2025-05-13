@@ -1,4 +1,6 @@
-<img src="resources/systapi/banner.png" alt="SystaPi" />
+<div align="center">
+<img src="resources/systapi/banner.png" alt="SystaPi" style="width:100%;"/>
+</div>
 
 <sup>Code:</sup> [![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/blob/main/LICENSE) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=code)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=blanks)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=lines)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=comments)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=cocomo)](https://github.com/beep-projects/SystaPi/)  
 <sup>Checks:</sup> [![JUnit](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml) [![shellcheck](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml) [![Pylint](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml)  
@@ -7,8 +9,8 @@
 # SystaPi, SystaREST and STouchREST
 
 **SystaPi** provides a REST API for communication with [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs.
-The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. The server is running two services, SystaRESTAPI for reading values from the Sytsa Comfort unit and STouchRESTAPI for writing to the Systa Comfort, e.g. selecting the operation mode.
-**Note:** The communication protocols use by the Systa Comfort unit are not publicly available! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. **Please contribute information from your system!**  
+The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. The server is running two services, SystaRESTAPI for reading values from the Sytsa Comfort unit and STouchRESTAPI for writing to the Systa Comfort, e.g. selecting the operation mode.  
+**Important Note:** The communication protocols use by the Systa Comfort unit are not publicly available! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. **Please [contribute](#contribute) information from your system!**  
 
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).  
 
@@ -727,14 +729,17 @@ Responses:
 `500 Internal Server Error`: Command failed.
 
 ## Contribute
-<img src="resources/systapidashboard.jpg" alt="SystaPi Dashboard" style="width:45%;"/> <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;"/>  
+Steps to send your contribution are described in [CONTRIBUTING.md](CONTRIBUTING.md), but whatever you want to contribute to the project, the fastes way is to [open a new discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) and describe your contribution.
+
 
 To support you in reverse engineering the protocol for SystaRESTAPI, the server has a rudimentary [logging](#enablelogging) functionality integrated. The [dashboard](#dashboard) gives you an overview of the known values received in the last 24h and has buttons to start/stop the logging and to download all log files as zip, for easy logfile handling.  
 You can also use [monitorrawdata](#monitorrawdata) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system (see also [monitorrawdata](#monitorrawdata)). These pages are created using [React](https://reactjs.org/), so you also can use them as starting point for creating your own dashboard.  
 
-If you want to report new fields, simply open a new issue or discussion.  
+If you want to report new fields, simply open a new [Issue](https://github.com/beep-projects/SystaPi/issues) or [Discussion](https://github.com/beep-projects/SystaPi/discussions).  
 
-To support you in reverse engineering the protocol for STouchRESTAPI, the server has an endpoint, that provides a clickable image of the S-touch scree, which also logs the x,y coordinates of clicks on the screen.
+<img src="resources/systapidashboard.jpg" alt="SystaPi Dashboard" style="width:45%;"/> <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;"/>  
+
+To support you in reverse engineering the protocol for STouchRESTAPI, the server has an endpoint, that provides a clickable image of the S-touch scree, which also logs the x,y coordinates of clicks on the screen, see [debugscreen](#debugscreen).
 <img src="resources/debug_screen.jpg" alt="SDebug Screen" style="width:45%;"/>  
 
 ## Known Issues
