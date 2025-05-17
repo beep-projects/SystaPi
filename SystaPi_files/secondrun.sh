@@ -148,11 +148,18 @@ if [ ! -d /usr/lib/jvm ]; then
   sudo mkdir /usr/lib/jvm
 fi
 cd /usr/lib/jvm || exit 1
+
+
 #AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz"
 #AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz"
 #AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.66.19-ca-jdk11.0.20.1-linux_aarch32hf.tar.gz"
 #AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.70.15-ca-hl-jdk11.0.22-linux_aarch32hf.tar.gz"
-AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.78.15-ca-jdk11.0.26-linux_aarch32hf.tar.gz"
+#AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.78.15-ca-jdk11.0.26-linux_aarch32hf.tar.gz"
+AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.80.21-ca-jdk11.0.27-linux_aarch32hf.tar.gz"
+ARCH=$(arch)
+if [[ "$ARCH" == "armv8l" ]]; then
+    AZUL_URL="https://cdn.azul.com/zulu/bin/zulu11.80.21-ca-jdk11.0.27-linux_aarch64.tar.gz"
+fi
 AZUL_FILE_NAME=${AZUL_URL##*/}
 AZUL_BUILD_NAME=${AZUL_FILE_NAME%.tar.gz}
 sudo wget "${AZUL_URL}"

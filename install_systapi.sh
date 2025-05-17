@@ -35,6 +35,63 @@ function error() {
     exit "${2-1}" ## Return a code specified by $2, or 1 by default.
 }
 
+#######################################
+# Print usage info.
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   Prints the usage information to stdout
+#   and exits with a non-zero status.
+#   This function is called when the script is run with invalid arguments.
+#######################################
+function usage() {
+    echo "Usage: $0 [--sdcard PATH] [--arch armhf|arm64] [--os-type lite|desktop] [--latest]"
+    exit 1
+}
+
+# Default values
+SD_CARD_PATH="/dev/mmcblk0"
+ARCH="armhf"
+RASPI_OS_TYPE="lite" # or "desktop"
+USE_LATEST_RASPI_OS=false
+
+# Parse command-line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --sdcard)
+            SD_CARD_PATH="$2"
+            shift 2
+            ;;
+        --arch)
+            if [[ "$2" == "armhf" || "$2" == "arm64" ]]; then
+                ARCH="$2"
+            else
+                echo "Invalid architecture: $2"
+                usage
+            fi
+            shift 2
+            ;;
+        --os-type)
+            if [[ "$2" == "lite" || "$2" == "desktop" ]]; then
+                RASPI_OS_TYPE="$2"
+            else
+                echo "Invalid OS type: $2"
+                usage
+            fi
+            shift 2
+            ;;
+        --latest)
+            USE_LATEST_RASPI_OS=true
+            shift 1
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
 echo 
 echo "=============================================================="
 echo " WARNING  WARNING  WARNING  WARNING  WARNING  WARNING  WARNING"
@@ -54,21 +111,14 @@ echo " initializing script"
 echo "=============================================================="
 echo 
 
-# SD card path
-if [ "${1}" ]; then
-  SD_CARD_PATH="${1}"
-else
-  SD_CARD_PATH="/dev/mmcblk0"
-fi
-
 #RPI_IMAGE_URL="https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2022-09-07/2022-09-06-raspios-bullseye-armhf-lite.img.xz"
 #RPI_IMAGE_URL="https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2023-10-10/2023-10-10-raspios-bookworm-armhf-lite.img.xz"
-RPI_IMAGE_URL="https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2023-12-11/2023-12-11-raspios-bookworm-armhf-lite.img.xz"
-USE_LATEST_RASPI_OS=false
-RASPI_OS_TYPE="lite" # or "desktop"
-RASPI_OS_ID="raspios_armhf"
+#RPI_IMAGE_URL="https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2023-12-11/2023-12-11-raspios-bookworm-armhf-lite.img.xz"
+RPI_IMAGE_URL="https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2025-05-13/2025-05-13-raspios-bookworm-armhf-lite.img.xz"
+
+RASPI_OS_ID="raspios_full_${ARCH}"
 if [[ "${RASPI_OS_TYPE}" == "lite" ]]; then
-	RASPI_OS_ID="raspios_lite_armhf"
+	RASPI_OS_ID="raspios_lite_${ARCH}"
 fi
 
 #get HOSTNAME for raspberry pi from firstrun.sh
