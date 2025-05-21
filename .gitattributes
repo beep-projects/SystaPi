@@ -1,1 +1,2 @@
-docs/** linguist-vendored
+docs/* linguist-generated
+docs/** linguist-generated
