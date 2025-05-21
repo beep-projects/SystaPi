@@ -143,12 +143,10 @@ echo "restart dnsmasq"
 sudo sudo systemctl restart dnsmasq.service
 
 #see https://www.azul.com/downloads/?architecture=arm-32-bit-hf&package=jdk for available versions
-echo "install OpenJDK build from Azul for Pi Zero (ARM 32-bit HF v6)"
 if [ ! -d /usr/lib/jvm ]; then
   sudo mkdir /usr/lib/jvm
 fi
 cd /usr/lib/jvm || exit 1
-
 
 #AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz"
 #AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz"
@@ -157,7 +155,8 @@ cd /usr/lib/jvm || exit 1
 #AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.78.15-ca-jdk11.0.26-linux_aarch32hf.tar.gz"
 AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.80.21-ca-jdk11.0.27-linux_aarch32hf.tar.gz"
 ARCH=$(arch)
-if [[ "$ARCH" == "armv8l" ]]; then
+echo "install OpenJDK build from Azul for detected architecture: ${ARCH}"
+if [[ "$ARCH" == "armv8l" || "$ARCH" == "aarch64" ]]; then
     AZUL_URL="https://cdn.azul.com/zulu/bin/zulu11.80.21-ca-jdk11.0.27-linux_aarch64.tar.gz"
 fi
 AZUL_FILE_NAME=${AZUL_URL##*/}
