@@ -98,9 +98,9 @@ sed -i "s/^USERNAME=.*/USERNAME=${USERNAME}/" /boot/secondrun.sh
 CURRENT_HOSTNAME=$( </etc/hostname tr -d " \t\n\r" )
 echo "set hostname to ${HOSTNAME} (was ${CURRENT_HOSTNAME})"
 if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then
-   /usr/lib/raspberrypi-sys-mods/imager_custom set_hostname systapi
+   /usr/lib/raspberrypi-sys-mods/imager_custom set_hostname ${HOSTNAME}
 else
-   echo systapi >/etc/hostname
+   echo ${HOSTNAME} >/etc/hostname
    sed -i "s/127.0.1.1.*${CURRENT_HOSTNAME}/127.0.1.1\t${HOSTNAME}/g" /etc/hosts
 fi
 
@@ -157,8 +157,13 @@ WPAEOF
    chmod 600 /etc/wpa_supplicant/wpa_supplicant.conf
    rfkill unblock wifi
    for filename in /var/lib/systemd/rfkill/*:wlan ; do
-       echo 0 > "${filename}"
+      echo 0 > "${filename}"
    done
+fi
+
+#Disable "Welcome to Raspberry Pi" setup wizard at system start
+if [ -f /etc/xdg/autostart/piwiz.desktop ]; then
+   rm -f /etc/xdg/autostart/piwiz.desktop
 fi
 
 if [ -f /usr/lib/raspberrypi-sys-mods/imager_custom ]; then

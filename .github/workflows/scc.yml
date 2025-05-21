@@ -26,7 +26,7 @@ jobs:
       - name: Run scc
         id: scc
         #get the action from iryanbell's repo
-        uses: iryanbell/scc-docker-action@v1.0.2
+        uses: hdmsantander/scc-docker-action@3.0
         with:
           # run the command for the whole workspace
           args: ${{ env.workspace }}

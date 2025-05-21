@@ -33,7 +33,7 @@
 #######################################
 function waitForApt() {
   while sudo fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1; do
-   echo waiting for access to apt lock files ...
+   echo ["$(date +%T)"] waiting for access to apt lock files ...
    sleep 1
   done
 }
@@ -69,6 +69,9 @@ echo "This script is running as user: $( whoami )"
 IP_PREFIX="192.168.1"
 #configured user name
 USERNAME=beep
+
+#enable ipv4 forwarding, which is required by ~/helpers/enable_stouch.nft
+sudo sed -i "s/^#net\.ipv4\.ip_forward=1/net\.ipv4\.ip_forward=1/" /etc/sysctl.conf
 
 #internet connectivity is required for installing required packages and updating the system
 waitForInternet
@@ -140,15 +143,22 @@ echo "restart dnsmasq"
 sudo sudo systemctl restart dnsmasq.service
 
 #see https://www.azul.com/downloads/?architecture=arm-32-bit-hf&package=jdk for available versions
-echo "install OpenJDK build from Azul for Pi Zero (ARM 32-bit HF v6)"
 if [ ! -d /usr/lib/jvm ]; then
   sudo mkdir /usr/lib/jvm
 fi
 cd /usr/lib/jvm || exit 1
+
 #AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.48.21-ca-jdk11.0.11-linux_aarch32hf.tar.gz"
 #AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.50.19-ca-jdk11.0.12-linux_aarch32hf.tar.gz"
 #AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.66.19-ca-jdk11.0.20.1-linux_aarch32hf.tar.gz"
-AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.70.15-ca-hl-jdk11.0.22-linux_aarch32hf.tar.gz"
+#AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.70.15-ca-hl-jdk11.0.22-linux_aarch32hf.tar.gz"
+#AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.78.15-ca-jdk11.0.26-linux_aarch32hf.tar.gz"
+AZUL_URL="https://cdn.azul.com/zulu-embedded/bin/zulu11.80.21-ca-jdk11.0.27-linux_aarch32hf.tar.gz"
+ARCH=$(arch)
+echo "install OpenJDK build from Azul for detected architecture: ${ARCH}"
+if [[ "$ARCH" == "armv8l" || "$ARCH" == "aarch64" ]]; then
+    AZUL_URL="https://cdn.azul.com/zulu/bin/zulu11.80.21-ca-jdk11.0.27-linux_aarch64.tar.gz"
+fi
 AZUL_FILE_NAME=${AZUL_URL##*/}
 AZUL_BUILD_NAME=${AZUL_FILE_NAME%.tar.gz}
 sudo wget "${AZUL_URL}"
@@ -204,6 +214,7 @@ sudo systemctl enable SystaRESTServer
 #clean up
 echo "remove autoinstalled packages" 
 waitForApt
+echo "sudo apt -y autoremove"
 sudo apt -y autoremove
 
 echo "add run /boot/thirdrun.sh command to cmdline.txt file for next reboot"

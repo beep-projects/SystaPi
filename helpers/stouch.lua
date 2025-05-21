@@ -25,7 +25,7 @@ stouch_protocol = Proto("S-Touch",  "S-Touch Protocol")
 -- Header fields
 packet_type     = ProtoField.uint8 ("S-Touch.packet_type"      , "packetType"        , base.DEC)
 packet_command  = ProtoField.uint16 ("S-Touch.packet_command"  , "packetCommand"     , base.HEX)
-pktID              = ProtoField.uint16 ("S-Touch.pktID"              , "pktID"                , base.DEC)
+pktID           = ProtoField.uint16 ("S-Touch.pktID"           , "pktID"             , base.DEC)
 packet_subtype  = ProtoField.int8   ("S-Touch.packet_subtype"  , "packetSubtype"     , base.DEC)
 
 -- Payload fields
@@ -79,16 +79,17 @@ function stouch_protocol.dissector(buffer, pinfo, tree)
 
     -- Header
     subtree:add(packet_type,    buffer(0,1))
-	local packet_type = buffer(0,1):uint()
-	local packet_subtype_name = "Unknown"
-	local i = 0
+    local packet_type = buffer(0,1):uint()
+    local packet_subtype_name = "Unknown"
     subtree:add_le(packet_command, buffer(1,2))
-    if packet_type == 1 then
-      subtree:add_le(pktID, buffer(3,1))
-      i = 4;
-    elseif packet_type == 9 then
+    local i = 3
+    if packet_type == 1 || packet_type == 9 then
       subtree:add_le(pktID, buffer(3,2))
       i = 5
+    --  i = 4
+    --elseif packet_type == 9 then
+    --  subtree:add_le(pktID, buffer(3,2))
+    --  i = 5
     end	
 
 	local packet_subtype = buffer(i,1):uint()

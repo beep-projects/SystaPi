@@ -1,6 +1,13 @@
+# this action will run pylint on all python files in this project
 name: Pylint
 
-on: [push]
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -21,7 +28,8 @@ jobs:
       run: |
         pylint --rcfile .github/workflows/pylintrc --fail-under=10 `find -regextype egrep -regex '(.*.py)$'` | tee pylint.txt
     - name: Upload pylint.txt as artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: pylint report
         path: pylint.txt
+        

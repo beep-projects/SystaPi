@@ -28,7 +28,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -41,10 +40,10 @@ import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * The main function of this class starts an
- * {@link com.sun.net.httpserver.HttpServer} for providing {@link SystaRESTAPI}.
+ * {@link com.sun.net.httpserver.HttpServer} for providing {@link SystaRESTAPI} and {@link STouchRESTAPI}.
  * The main method requires a configured SystaREST.properties for setting the
- * interfaces to use. On interface is used for the connection to the Paradigma
- * SystaComfort II and one for acessing the REST API.
+ * interfaces that should be used. One interface is used for the connection to the Paradigma
+ * SystaComfort II and one for accessing the REST APIs.
  */
 public class SystaRESTServer {
 
@@ -52,13 +51,13 @@ public class SystaRESTServer {
 		// load configuration from SystaREST.properties
 		String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
 		String defaultConfigPath = rootPath + "SystaREST.properties";
-		System.out.println("[RESTServer] Reading properties from file: " + defaultConfigPath);
+		System.out.println("[SystaRESTServer] Reading properties from file: " + defaultConfigPath);
 		Properties props = new Properties();
 		try {
 			props.load(new FileInputStream(defaultConfigPath));
 		} catch (IOException e1) {
 			e1.printStackTrace();
-			System.out.println("[RESTServer] Could not load properties file: " + defaultConfigPath + ". Exiting.");
+			System.out.println("[SystaRESTServer] Could not load properties file: " + defaultConfigPath + ". Exiting.");
 			System.exit(1);
 		}
 		// load interfaces
@@ -71,44 +70,48 @@ public class SystaRESTServer {
 		if (restAPIIPv4 == null || paradigmIPv4 == null) {
 			System.out.println(restAPIIfaceName + " and/or " + paradigmaIfaceName
 					+ " are not configured properly. Please check your configuration. I am exiting now!");
-			System.out.println("[RESTServer] Interface for Paradigma RESTAPI: " + restAPIIPv4);
-			System.out.println("[RESTServer] Interface for connecting to Paradigma SystaComfort II: " + paradigmIPv4);
+			System.out.println("[SystaRESTServer] Interface for Paradigma RESTAPI: " + restAPIIPv4);
+			System.out.println("[SystaRESTServer] Interface for connecting to Paradigma SystaComfort II: " + paradigmIPv4);
 			System.exit(1);
 		}
 
-		System.out.println("[RESTServer] Interface for Paradigma RESTAPI: " + restAPIIPv4);
-		System.out.println("[RESTServer] Interface for connecting to Paradigma SystaComfort II: " + paradigmIPv4);
+		System.out.println("[SystaRESTServer] Interface for Paradigma RESTAPI: " + restAPIIPv4);
+		System.out.println("[SystaRESTServer] Interface for connecting to Paradigma SystaComfort II: " + paradigmIPv4);
 
 		// create REST API server
-		System.out.println("[RESTServer] Starting RESTServer");
+		System.out.println("[SystaRESTServer] Starting SystaRESTServer");
 		URI baseUri = UriBuilder.fromUri("http://" + restAPIIPv4 + "/")
 				.port(Integer.parseInt(props.getProperty("RESTAPI_PORT"))).build();
 		ResourceConfig config = new ResourceConfig(SystaRESTAPI.class);
+		//config.register(new STouchRESTAPI());
+		config.register(STouchRESTAPI.class);
 		config.register(new CorsFilter());
 		config.property(SystaRESTAPI.PROP_PARADIGMA_IP, paradigmIPv4);
 		// config.property("jersey.config.server.wadl.disableWadl", true);
 		HttpServer server = JdkHttpServerFactory.createHttpServer(baseUri, config, false);
 		server.start();
-		System.out.println("[RESTServer] RESTServer started at " + baseUri);
+		System.out.println("[SystaRESTServer] SystaRESTServer started at " + baseUri);
 		try {
 			// start the SystaRESTAPI
-			System.out.println("Calling: " + baseUri + "SystaREST/start");
+			System.out.println("[SystaRESTServer] Calling: " + baseUri + "SystaREST/start");
 			HttpClient client = HttpClient.newHttpClient();
 			HttpRequest request = HttpRequest.newBuilder().uri(URI.create(baseUri + "SystaREST/start"))
 					.POST(HttpRequest.BodyPublishers.ofString("")).build();
 			// send the POST SystaREST/start request
 			client.send(request, HttpResponse.BodyHandlers.ofString());
-
+			System.out.println("[SystaRESTServer] Returning from: " + baseUri + "SystaREST/start");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		try {
+			System.out.println("[SystaRESTServer] Joining currenThread");
 			Thread.currentThread().join();
-			System.out.println("[RESTServer] Server exited");
+			System.out.println("[SystaRESTServer] Server exited");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		server.stop(0);
+        System.out.println("[SystaRESTServer] Server stopped");
 	}
 
 	/**
@@ -122,7 +125,7 @@ public class SystaRESTServer {
 		try {
 			NetworkInterface restAPIIface = NetworkInterface.getByName(interfaceName);
 			if (restAPIIface == null || !restAPIIface.isUp()) {
-				System.out.println("[RESTServer] Interface " + interfaceName + " is not configured");
+				System.out.println("[SystaRESTServer] Interface " + interfaceName + " is not configured");
 				return null;
 			}
 			Enumeration<InetAddress> addresses = restAPIIface.getInetAddresses();

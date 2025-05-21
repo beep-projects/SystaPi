@@ -46,7 +46,7 @@ import de.freaklamarsch.systarest.SystaWaterHeaterStatus.tempUnit;
 /**
  * @see Runnable implementation to mock the Paradigma SystaWeb service. This
  *      class opens a @see DatagramSocket for the communication with a Paradigma
- *      SystaComfort II. This class provides access to the received data.
+ *      SystaComfort I or II. This class provides access to the received data.
  */
 public class FakeSystaWeb implements Runnable {
 
@@ -95,7 +95,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2024-03-03T20:18:58+00:00";
+			this.commitDate = "2025-05-21T20:46:45+00:00";
 		}
 	}
 
@@ -146,23 +146,38 @@ public class FakeSystaWeb implements Runnable {
 		}
 	}
 
-	private final String commitDate = "2024-03-03T20:18:58+00:00";
-	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
-	private InetAddress remoteAddress;
-	private int remotePort;
-	private final int PORT = 22460;
-	private final int MAX_DATA_LENGTH = 1048;
-	private final int MAX_NUMBER_ENTRIES = 256;
-	private final int MAX_NUMBER_DATA_PACKETS = 4;
-	private final int COUNTER_OFFSET_REPLY = 0x3FBF;
-	private final int COUNTER_OFFSET_REPLY_2 = 0x3FC0;
-	private final int MAC_OFFSET_REPLY = 0x8E82;
-
+    // Constants 
+	private static final String commitDate = "2025-05-21T20:46:45+00:00";
+    private static final int PORT = 22460;
+    private static final int MAX_DATA_LENGTH = 1048;
+    private static final int MAX_NUMBER_ENTRIES = 256;
+    private static final int MAX_NUMBER_DATA_PACKETS = 4;
+    private static final int COUNTER_OFFSET_REPLY = 0x3FBF;
+    private static final int COUNTER_OFFSET_REPLY_2 = 0x3FC0;
+    private static final int MAC_OFFSET_REPLY = 0x8E82;
 	// the SystaComfort sends burst of 3 to 4 messages every minute
 	// at the moment packets of type 0x01, 0x02, 0x03, 0x04 are processed, so 4 buffers should be
 	// enough
 	// TODO adjust this value if more packet types are processed
 	private final int RING_BUFFER_SIZE = 6; //make it 6, just to have some additional space
+	private static final String[] WATER_HEATER_OPERATION_MODES = { "off", "normal", "comfort", "locked" };
+	private static final int WRITER_MAX_DATA = 60;
+	private static final String DELIMITER = ";";
+	private static final String PREFIX = "SystaREST";
+	private static final String LOG_PATH = System.getProperty("user.home") + File.separator + "logs";
+	private static final String logFileFilterString = ".*-(raw|data)-[0-9]+\\.txt";
+	private static final FilenameFilter logFileFilter = (dir, name) -> name.matches(logFileFilterString);
+	/*private static final FilenameFilter logFileFilter = new FilenameFilter() {
+		@Override
+		public boolean accept(File dir, String name) {
+			return name.matches(logFileFilterString);
+		}
+	};*/
+	
+	private MessageType typeOfLastReceivedMessage = MessageType.NONE;
+	private InetAddress remoteAddress;
+	private int remotePort;
+
 	private int readIndex = -1;
 	private int writeIndex = -1;
 	private long dataPacketsReceived = 0;
@@ -177,20 +192,6 @@ public class FakeSystaWeb implements Runnable {
 	private byte[] receiveData = new byte[MAX_DATA_LENGTH];
 	private DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
-	private final String[] WATER_HEATER_OPERATION_MODES = { "off", "normal", "comfort", "locked" };
-
-	private static final int WRITER_MAX_DATA = 60;
-	private static final String DELIMITER = ";";
-	private static final String PREFIX = "SystaREST";
-	private static final String LOG_PATH = System.getProperty("user.home") + File.separator + "logs";
-	private static final String logFileFilterString = ".*-(raw|data)-[0-9]+\\.txt";
-	private static final FilenameFilter logFileFilter = new FilenameFilter() {
-		@Override
-		public boolean accept(File dir, String name) {
-			return name.matches(logFileFilterString);
-		}
-	};
-	//private DateTimeFormatter timestampFormatter = DateTimeFormatter.ofPattern("E-dd.MM.yy-HH:mm:ss.SSS");
 	private DateTimeFormatter timestampFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 			.withZone(ZoneId.systemDefault());
 	private DataLogger<Integer> logInt = new DataLogger<>(PREFIX, "data", DELIMITER, WRITER_MAX_DATA, LOG_PATH, timestampFormatter);
@@ -198,12 +199,18 @@ public class FakeSystaWeb implements Runnable {
 
 	// constructor
 	public FakeSystaWeb() {
-		for (Integer[] data : intData) {
+		/*for (Integer[] data : intData) {
             Arrays.fill(data, 0);
-		}
+		}*/
+        Arrays.stream(intData).forEach(data -> Arrays.fill(data, 0));
 		Arrays.fill(timestamp, -1);
 	}
 
+    /**
+     * Simulates retrieving the status of the SystaComfort unit.
+     *
+     * @return a {@link SystaStatus} object containing the current status
+     */
 	public FakeSystaWebStatus getStatus() {
 		DataLoggerStatus dls = logRaw.getStatus();
 		// if we have received data within the last 120 seconds, we are considered being
@@ -211,9 +218,9 @@ public class FakeSystaWeb implements Runnable {
 		boolean connected = (readIndex < 0) ? false
 				: (timestamp[readIndex] > 0 && (Instant.now().toEpochMilli() - timestamp[readIndex] < 120));
 		return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.getTimestampString(),
-				this.inetAddress, this.PORT, this.remoteAddress, this.remotePort, dls.saveLoggedData, dls.capacity,
+				this.inetAddress, FakeSystaWeb.PORT, this.remoteAddress, this.remotePort, dls.saveLoggedData, dls.capacity,
 				dls.logFilePrefix, dls.logEntryDelimiter, dls.logFileRootPath, dls.writerFileCount, dls.bufferedEntries,
-				this.commitDate);
+				FakeSystaWeb.commitDate);
 	}
 
 	public DeviceTouchDeviceInfo findSystaComfort() {

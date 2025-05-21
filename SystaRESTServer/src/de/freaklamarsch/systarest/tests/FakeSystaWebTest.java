@@ -34,8 +34,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.time.LocalDateTime;
@@ -68,13 +66,7 @@ class FakeSystaWebTest {
 	private Field timestamp;
 	private Field socketField;
 	private DatagramSocket socket;
-	private Field remoteAddressField;
-	private InetAddress remoteAddress;
-	private Field remotePortField;
-	private int remotePort;
 	private Field intData;
-	private Method logRawAddData;
-	private Method logIntAddData;
 	private DataLogger<Integer> logInt;
 	private Field logIntDataBufferField;
 	private CircularBuffer<Integer> logIntDataBuffer;
@@ -113,14 +105,14 @@ class FakeSystaWebTest {
 			Field logRawField = FakeSystaWeb.class.getDeclaredField("logRaw");
 			logRawField.setAccessible(true);
 			logRaw = (DataLogger<Byte>) logRawField.get(fsw);
-			logRawAddData = logRaw.getClass().getMethod("addData", Object[].class, long.class);
+			logRaw.getClass().getMethod("addData", Object[].class, long.class);
 			Field logIntField = fsw.getClass().getDeclaredField("logInt");
 			logIntField.setAccessible(true);
 			logInt = (DataLogger<Integer>) logIntField.get(fsw);
 			logIntDataBufferField = logInt.getClass().getDeclaredField("dataBuffer");
 			logIntDataBufferField.setAccessible(true);
 			logIntDataBuffer = (CircularBuffer<Integer>) logIntDataBufferField.get(logInt);
-			logIntAddData = logInt.getClass().getDeclaredMethod("addData", Object[].class, long.class);
+			logInt.getClass().getDeclaredMethod("addData", Object[].class, long.class);
 			logFileFilterStringField = FakeSystaWeb.class.getDeclaredField("logFileFilterString");
 			logFileFilterStringField.setAccessible(true);
 			logFileFilterString = (String) logFileFilterStringField.get(fsw);
@@ -435,7 +427,7 @@ class FakeSystaWebTest {
 	 * @throws IllegalAccessException
 	 * @throws NoSuchMethodException
 	 */
-	private Method prepareInvokeMethod(String methodName, Class... parameters) throws NoSuchFieldException,
+	private Method prepareInvokeMethod(String methodName, Class<?>... parameters) throws NoSuchFieldException,
 			SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException {
 		// Method processDataType1 =
 		// FakeSystaWeb.class.getDeclaredMethod("processDataType1", ByteBuffer.class);

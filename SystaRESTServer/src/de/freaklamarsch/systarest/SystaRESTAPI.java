@@ -57,9 +57,10 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 
 /**
- * class for creating a Jersey resource that offers a REST API for a Paradigma
- * SystaComfort II For running this class a {@link SystaRESTServer} is required
- *
+ /**
+ * A REST API for interacting with the Paradigma SystaComfort system.
+ * This API provides endpoints for retrieving system status, monitoring raw data, and managing logging.
+ * This class is intended to be run by a {@link SystaRESTServer}
  */
 @Path("{systarest : (?i)systarest}")
 public class SystaRESTAPI {
@@ -92,6 +93,7 @@ public class SystaRESTAPI {
 	 * also be accesses by calling
 	 * {@code http://<ip>:<port>/application.wadl?detail=true}
 	 */
+	@SuppressWarnings("unused")
 	private void printAPI() {
 		Resource resource = Resource.from(this.getClass());
 		System.out.println("Path is " + resource.getPath());
@@ -113,13 +115,13 @@ public class SystaRESTAPI {
 	@POST
 	@Path("{start : (?i)start}")
 	public void start(@Context ResourceConfig config) {
-		System.out.println("[ParadigmaRESTAPI] start: called");
+		System.out.println("SystaRESTAPI] start: called");
 		if (t == null || !t.isAlive()) {
 			// in Java you can start a thread only once, so we need a new one
 			t = new Thread(fsw);
-			System.out.println("[ParadigmaRESTAPI] start: starting FakeSystaWeb");
+			System.out.println("[SystaRESTAPI] start: starting FakeSystaWeb");
 			String confInetAddress = (String) config.getProperty(PROP_PARADIGMA_IP);
-			System.out.println("[ParadigmaRESTAPI] start: Configuring FakeSystaWeb to listen on IP " + confInetAddress);
+			System.out.println("[SystaRESTAPI] start: Configuring FakeSystaWeb to listen on IP " + confInetAddress);
 			if (confInetAddress != null) {
 				fsw.setInetAddress(confInetAddress);
 			}
@@ -128,9 +130,9 @@ public class SystaRESTAPI {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			System.out.println("[ParadigmaRESTAPI] start: running");
+			System.out.println("[SystaRESTAPI] start: running");
 		} else {
-			System.out.println("[ParadigmaRESTAPI] start: FakeSystaWeb is already running, ignoring request");
+			System.out.println("[SystaRESTAPI] start: FakeSystaWeb is already running, ignoring request");
 		}
 	}
 
@@ -140,9 +142,9 @@ public class SystaRESTAPI {
 	@POST
 	@Path("{stop : (?i)stop}")
 	public void stop() {
-		System.out.println("[ParadigmaRESTAPI] stop: called");
+		System.out.println("[SystaRESTAPI] stop: called");
 		fsw.stop();
-		System.out.println("[ParadigmaRESTAPI] stop: stopped");
+		System.out.println("[SystaRESTAPI] stop: stopped");
 	}
 
 	/**

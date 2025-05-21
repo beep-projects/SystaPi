@@ -1,20 +1,16 @@
-<img src="resources/banner.png" alt="SystaPi" />
+<div align="center">
+<img src="resources/systapi/banner.png" alt="SystaPi" style="width:100%;"/>
+</div>
 
-[![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/blob/main/LICENSE) [![JUnit](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml) [![shellcheck](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml) [![Pylint](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml) [![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub forks](https://img.shields.io/github/forks/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/network) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) ![GitHub repo size](https://img.shields.io/github/repo-size/beep-projects/SystaPi)  
-[![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=code)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=blanks)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=lines)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=comments)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=cocomo)](https://github.com/beep-projects/SystaPi/) [![Visitors](https://api.visitorbadge.io/api/visitors?path=beep-projects%2FSystaPi&label=Visitors&labelColor=%235a5a5a&countColor=%234cc71e&style=flat&labelStyle=none)](https://visitorbadge.io/status?path=beep-projects%2FSystaPi)
+<sup>Code:</sup> [![GitHub license](https://img.shields.io/github/license/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/blob/main/LICENSE) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=code)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=blanks)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=lines)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=comments)](https://github.com/beep-projects/SystaPi/) [![Scc Count Badge](https://sloc.xyz/github/beep-projects/SystaPi/?category=cocomo)](https://github.com/beep-projects/SystaPi/)  
+<sup>Checks:</sup> [![JUnit](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/junit.yml) [![shellcheck](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/shellcheck.yml) [![Pylint](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml/badge.svg)](https://github.com/beep-projects/SystaPi/actions/workflows/pylint.yml)  
+<sup>Repo:</sup> [![GitHub issues](https://img.shields.io/github/issues/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/issues) [![GitHub forks](https://img.shields.io/github/forks/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/network) [![GitHub stars](https://img.shields.io/github/stars/beep-projects/SystaPi)](https://github.com/beep-projects/SystaPi/stargazers) ![GitHub repo size](https://img.shields.io/github/repo-size/beep-projects/SystaPi) [![Visitors](https://api.visitorbadge.io/api/visitors?path=beep-projects%2FSystaPi&label=Visitors&labelColor=%235a5a5a&countColor=%234cc71e&style=flat&labelStyle=none)](https://visitorbadge.io/status?path=beep-projects%2FSystaPi)
 
-# SystaPi and SystaREST
+# SystaPi, SystaREST and STouchREST
 
-**SystaPi** adds a REST API to [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs.
-The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. Up to now only reading of values is supported by SystaREST, see the documentation for details of the supported fields [Javadoc: SystaStatus](https://beep-projects.github.io/SystaPi/de/freaklamarsch/systarest/SystaStatus.html).  
-
-<img src="resources/systapidashboard.jpg" alt="SystaPi Dashboard" style="width:45%;"/> <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;"/>  
-**Note:** The communication protocol is not publicly available! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. **Please contribute information from your system!**  
-
-To support you in reverse engineering, the server has a rudimentary [logging](#enablelogging) functionality integrated. [dashboard](#dashboard) gives you an overview of the known values received in the last 24h and has buttons to start/stop the logging and to download all log files as zip, for easy logfile handling.  
-You can also use [monitorrawdata](#monitorrawdata) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system (see also [monitorrawdata](#monitorrawdata)). These pages are created using [React](https://reactjs.org/), so you also can use them as starting point for creating your own dashboard.  
-
-If you want to report new fields, simply open a new issue or discussion.  
+**SystaPi** provides a REST API for communication with [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs.
+The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. The server is running two services, SystaRESTAPI for reading values from the Sytsa Comfort unit and STouchRESTAPI for writing to the Systa Comfort, e.g. selecting the operation mode.  
+**Important Note:** The communication protocols use by the Systa Comfort unit are not publicly available! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. **Please [contribute](#contribute) information from your system!**  
 
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).  
 
@@ -42,9 +38,19 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
   - [status](#status)
   - [enablelogging](#enablelogging)
   - [disablelogging](#disablelogging)
+- [The STouchREST API](#the-stouchrest-api)
+  - [connect](#connect)
+  - [disconnect](#disconnect)
+  - [touch](#touch)
+  - [screen](#screen)
+  - [debugscreen](#debugscreen)
+  - [objecttree](#objecttree)
+  - [touchbutton](#touchbutton)
+  - [touchtext](#touchtext)
+  - [automation](#automation)
+- [Contribute](#contribute)
 - [Known Issues](#known-issues)
 - [Links](#links)
-
 
 ## Directory Structure of this Project
 
@@ -269,13 +275,16 @@ Each script creates a log file, so check `firstrun.log`, `secondrun.log` and `th
 4. SystaRESTServer is installed as a service on the raspberry pi. 
 `systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
 
-## The SystaREST API
-
+## The SystaRESTServer
 Per default, the SystaREST server is listening on port `1337`, you can change this by editing `/home/pi/SystaRESTServer/bin/SystaREST.properties`.
 The hostname of the Raspberry Pi is set to `systapi`.
-The path and method names on the REST server are implemented case insensitive.
-The root path is: `systarest`, or `SystaREST`, or any variation you like.
-So you should be able to access the server via `http://systapi:1337/SystaREST/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the URL assigned by your router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+There are two services running by default. The first one is SystaREST for reading values from a Systa Comfort unit and the second one is STouchREST which emulates the S-Touch app for providing write access to the Systa Comfort unit.
+The paths and method names on the REST server are implemented case insensitive.
+The root path for the both services are: `systarest`, or `SystaREST` and  `stouchrest`, or `STouchREST`, or any variation of that.
+By default you should be able to access the server via `http://systapi:1337/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the IP assigned to your server by the router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+
+### The SystaREST API
+
 If a command is called which should retrieve data from the SystaREST, but the communication is not running, `start` is automatically called, but the reply will be empty until the first data packet is received from the Paradigma SystaComfort. Data packets are sent every minute.
 
 #### findsystacomfort
@@ -359,7 +368,7 @@ curl "http://systapi:1337/SystaREST/servicestatus"
 
 #### rawdata
 
-`GET` `/SystaREST/rawdata` 
+`GET` `/SystaREST/rawdata`  
 [http://systapi:1337/SystaREST/rawdata](http://systapi:1337/SystaREST/rawdata)  
 Returns the raw data received from the Paradigma Systa Comfort with added timestamp information.
 
@@ -392,7 +401,7 @@ curl "http://systapi:1337/SystaREST/rawdata"
 
 #### dashboard
 
-`GET` `/SystaREST/dashboard` 
+`GET` `/SystaREST/dashboard`  
 [http://systapi:1337/SystaREST/dashboard](http://systapi:1337/SystaREST/dashboard)  
 
 Returns a React-based HTML dashboard that displays the received data for the last 24h. On the bottom right of the dashboard, you can start the logging of data (log/stop), delete the log files on the SystaPi (del) and download all saved logs as zip file (zip). Call this function from your browser, to see something like:
@@ -401,7 +410,7 @@ Returns a React-based HTML dashboard that displays the received data for the las
 
 #### monitorrawdata
 
-`GET` `/SystaREST/monitorrawdata` 
+`GET` `/SystaREST/monitorrawdata`  
 [http://systapi:1337/SystaREST/monitorrawdata](http://systapi:1337/SystaREST/monitorrawdata)  
 
 Optional parameters:  
@@ -588,6 +597,150 @@ stop the logging of received data packets. This writes all currently stored data
 ```bash
 curl -X PUT http://systapi:1337/SystaREST/disblelogging
 ```
+### The STouchREST API
+
+The `STouchREST` API emulates the S-Touch app to interact with the Paradigma SystaComfort system. It provides endpoints for connecting to the device, simulating touch events, retrieving the screen state, and automating sequences of actions.
+
+#### connect
+`POST` `/stouchrest/connect`  
+Establishes a connection to the SystaComfort unit.
+```bash
+curl -X POST http://systapi:1337/stouchrest/connect
+```
+Responses:  
+`200 OK`: Connection successful.  
+`409 Conflict`: Device is already in use or already connected.  
+`401 Unauthorized`: Wrong UDP password.  
+`408 Request Timeout`: Connection request timed out.  
+`500 Internal Server Error`: Unknown error.
+
+#### disconnect
+`POST` `/stouchrest/disconnect`  
+Disconnects from the SystaComfort unit.
+```bash
+curl -X POST http://systapi:1337/stouchrest/disconnect
+```
+Responses:  
+`200 OK`: Disconnection successful.  
+`500 Internal Server Error`: Error occurred during disconnection.
+
+#### touch
+`POST` `/stouchrest/touch`  
+Simulates a touch event at the specified coordinates on the screen.
+
+Query Parameters:  
+`x` (int): The x-coordinate of the touch.  
+`y` (int): The y-coordinate of the touch.
+```bash
+curl -X POST "http://systapi:1337/stouchrest/touch?x=100&y=200"
+```
+Responses:  
+`200 OK`: Touch event simulated successfully.
+
+#### screen
+`GET` `/stouchrest/screen`  
+[http://systapi:1337/STouchREST/screen](http://systapi:1337/STouchREST/screen)  
+Retrieves the current screen as a PNG image.
+```bash
+curl -X GET http://systapi:1337/stouchrest/screen --output screen.png
+```
+Responses:  
+`200 OK`: Returns the screen image as a PNG.  
+`500 Internal Server Error`: Error processing the image.
+
+#### debugscreen
+`GET` `/stouchrest/debugscreen`  
+[http://systapi:1337/STouchREST/debugscreen](http://systapi:1337/STouchREST/debugscreen)  
+Returns an interactive HTML page for debugging touch events on the screen. The HTML shows the current screen and a history of the touch events.
+```bash
+curl -X GET http://systapi:1337/stouchrest/debugscreen
+```
+Responses:  
+`200 OK`: Returns the HTML page for debugging.  
+`500 Internal Server Error`: Error processing the image.
+
+#### objecttree
+`GET` `/stouchrest/objecttree`  
+[http://systapi:1337/STouchREST/objecttree](http://systapi:1337/STouchREST/objecttree)  
+Returns the object tree of the current screen as a JSON object.
+```bash
+curl -X GET http://systapi:1337/stouchrest/objecttree
+```
+Responses:  
+`200 OK`: Returns the object tree as JSON.
+
+#### touchbutton
+`POST` `/stouchrest/touchbutton`  
+Simulates a touch event on a button with the specified ID.
+```bash
+curl -X POST "http://systapi:1337/stouchrest/touchbutton?id=1"
+```
+Query Parameters:  
+`id` (byte): The ID of the button to touch.
+Responses:
+
+`200 OK`: Button pressed successfully.  
+`404 Not Found`: Button with the specified ID not found.  
+`500 Internal Server Error`: Error while pressing the button.
+
+#### touchtext
+`POST` `/stouchrest/touchtext`  
+Simulates a touch event on the specified text.
+```bash
+curl -X POST "http://systapi:1337/stouchrest/touchtext?text=Hello"
+```
+Query Parameters:  
+`text` (String): The text to touch.
+Responses:
+
+`200 OK`: Text touched successfully.  
+`404 Not Found`: Text not found on the display.  
+`500 Internal Server Error`: Error while touching the text.
+
+#### automation
+`GET` `/stouchrest/automation`  
+[http://systapi:1337/STouchREST/automation](http://systapi:1337/STouchREST/automation)  
+Executes a sequence of commands provided as query parameters. Between each command a delay of two seconds is added, because the reply sometimes need a while. To prevent communication problems, you should always start an automation with `connect` and finish it with `disconnect`.
+
+Query Parameters:  
+Query parameters is a list of supported commands, seperated by &:  
+`connect`: Connect to the SystaComfort unit.  
+`touch=x,y`: Simulate a touch event on screen coordinates `x` and `y` as integers.  
+`touchText=text`: Simulate a touch event on the given text.  
+`touchButton=id`: Simulate a touch event on the button with the given ID.  
+`whileText==text&doAction`: While the given text is in the object tree, do the given action. `text` needs to be URL encoded, e.g. blank is %20. `doAction` is any supported command  
+`whileText!=text&doAction`: While the given text is not in the object tree, do the given action. `text` needs to be URL encoded, e.g. blank is %20. `doAction` is any supported command  
+`whileButton==id&doAction`: While the button with the given ID is in the object tree, do the given `action`. `id` is any integer,`doAction` is any supported command  
+`whileButton!=id&doAction`: While the button with the given ID is not in the object tree, do the given `action`. `id` is any integer,`doAction` is any supported command  
+`checkText==text&thenDoThisAction&elseDoThisAction`: If the given text is in the object tree, then excute the command given by `thenDoThisAction`, otherwise execute the command given in `elseDoThisAction`.  
+`checkText!=text&thenDoThisAction&elseDoThisAction`: If the given text is not in the object tree, then excute the command given by `thenDoThisAction`, otherwise execute the command given in `elseDoThisAction`.  
+`checkButton==id&thenDoThisAction&elseDoThisAction`: If the button with the given `id` is in the object tree, then execute the command given by `thenDoThisAction`, otherwise execute the command given in `elseDoThisAction`.  
+`checkButton!=id&thenDoThisAction&elseDoThisAction`: If the button with the given `id` is not in the object tree, then execute the command given by `thenDoThisAction`, otherwise execute the command given in `elseDoThisAction`.  
+`disconnect`: Disconnect from the SystaComfort unit.  
+```bash
+# switch to Heating program 1
+curl -X GET "http://systapi:1337/stouchrest/automation?connect&touch=155,141&touch=42,77&touch=157,182&whiletext!=Heating%20program%201&touchbutton=19&touchtext=Heating%20program%201&disconnect"
+# switch to Off
+curl -X GET "http://systapi:1337/stouchrest/automation?connect&touch=155,141&touch=42,77&touch=157,182&whiletext!=Off&touchbutton=20&touchtext=Off&disconnect"
+```
+Responses:
+
+`200 OK`: Automation executed successfully.  
+`500 Internal Server Error`: Command failed.
+
+## Contribute
+Steps to send your contribution are described in [CONTRIBUTING.md](CONTRIBUTING.md), but whatever you want to contribute to the project, the fastes way is to [open a new discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) and describe your contribution.
+
+
+To support you in reverse engineering the protocol for SystaRESTAPI, the server has a rudimentary [logging](#enablelogging) functionality integrated. The [dashboard](#dashboard) gives you an overview of the known values received in the last 24h and has buttons to start/stop the logging and to download all log files as zip, for easy logfile handling.  
+You can also use [monitorrawdata](#monitorrawdata) to monitor the data sent by **SystaPi** and contribute new fields that you can identify with your system (see also [monitorrawdata](#monitorrawdata)). These pages are created using [React](https://reactjs.org/), so you also can use them as starting point for creating your own dashboard.  
+
+If you want to report new fields, simply open a new [Issue](https://github.com/beep-projects/SystaPi/issues) or [Discussion](https://github.com/beep-projects/SystaPi/discussions).  
+
+<img src="resources/systapidashboard.jpg" alt="SystaPi Dashboard" style="width:45%;"/> <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;"/>  
+
+To support you in reverse engineering the protocol for STouchRESTAPI, the server has an endpoint, that provides a clickable image of the S-touch scree, which also logs the x,y coordinates of clicks on the screen, see [debugscreen](#debugscreen).
+<img src="resources/debug_screen.jpg" alt="SDebug Screen" style="width:45%;"/>  
 
 ## Known Issues
 
@@ -596,8 +749,6 @@ There are some ENC28J60 modules sold with wrong jumper settings. Make sure you s
 | correct                                                   | wrong                                                   |
 | --------------------------------------------------------- | ------------------------------------------------------- |
 | ![correct jumper settings](resources/enc28j60_right.jpg) | ![wrong jumper settings](resources/enc28j60_wrong.jpg) |
-
-
 
 ## Links
 

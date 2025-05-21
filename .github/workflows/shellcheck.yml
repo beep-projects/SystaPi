@@ -1,16 +1,19 @@
-on:
-  push:
-    branch:
-      - master
+# this action will run shellcheck on all .sh files in this project
+name: Shellcheck
 
-name: 'shellcheck'
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  shellcheck:
-    name: Shellcheck
+  build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Run ShellCheck
       uses: ludeeus/action-shellcheck@master
       env:
