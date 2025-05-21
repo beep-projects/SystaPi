@@ -23,10 +23,10 @@ class DeviceTouchSearchTest {
 
     @Test
     void testParsePasswordReplyString() {
-        String rxMessage = "1234 6 R UDP Pass";
+        String rxMessage = "0 7 1234";
         String password = DeviceTouchSearch.parsePasswordReplyString(rxMessage);
 
-        assertEquals("UDP", password);
+        assertEquals("1234", password);
     }
 
     @Test

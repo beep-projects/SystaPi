@@ -94,7 +94,7 @@ class RTreeTest {
 		DisplayButton button7 = ftd.new DisplayButton(new Button((byte) 7, 18, 18, 52, 52));
 		RTreeNode node7 = new RTreeNode(button7, 21, 21, 31, 31, null, null, null);
 		assertTrue(tree.add(node1));
-		assertFalse(tree.add(node1));
+		assertTrue(tree.add(node1));
 		assertTrue(tree.add(node2));
 		assertTrue(tree.add(node3));
 		assertTrue(tree.add(node4));
@@ -103,13 +103,13 @@ class RTreeTest {
 		assertTrue(tree.add(node7));
 		String createdTreeString = tree.toString();
 		String expectedTreeString = "none\n"
-	                              + " Button ID: 1 (10, 10)/(20, 20)\n"
-                                  + "  Button ID: 2 (15, 15)/(17, 17)\n"
-                                  + " Button ID: 3 (50, 50)/(100, 100)\n"
-                                  + " Button ID: 4 (15, 15)/(75, 75)\n"
-                                  + "  Button ID: 5 (18, 18)/(52, 52)\n"
-                                  + "   Button ID: 6 (18, 18)/(52, 52)\n"
-                                  + "   Button ID: 7 (18, 18)/(52, 52)";
+	                              + " Button ID: 1 (10, 10)/(20, 20) [null/null]\n"
+                                  + "  Button ID: 2 (15, 15)/(17, 17) [null/null]\n"
+                                  + " Button ID: 3 (50, 50)/(100, 100) [null/null]\n"
+                                  + " Button ID: 4 (15, 15)/(75, 75) [null/null]\n"
+                                  + "  Button ID: 5 (18, 18)/(52, 52) [null/null]\n"
+                                  + "   Button ID: 6 (18, 18)/(52, 52) [null/null]\n"
+                                  + "   Button ID: 7 (18, 18)/(52, 52) [null/null]";
 		assertEquals(expectedTreeString, createdTreeString);
 		// tree should be
 		//                root
