@@ -1,1 +1,3 @@
 docs/** linguist-generated
+src/freaklamarsch/systarest/tests/*.h linguist-generated
+src/freaklamarsch/systarest/tests/*.txt linguist-generated
