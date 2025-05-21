@@ -24,3 +24,4 @@ cp ./src/rawdatamonitor.html ./bin/
 cp ./src/fakeremoteportal.html ./bin/
 cp ./src/systapidashboard.html ./bin/
 cp ./src/de/freaklamarsch/systarest/tests/*.txt ./bin/de/freaklamarsch/systarest/tests/ 
+cp ./src/de/freaklamarsch/systarest/tests/*.h ./bin/de/freaklamarsch/systarest/tests/ 
