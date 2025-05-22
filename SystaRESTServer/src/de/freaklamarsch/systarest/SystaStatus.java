@@ -888,9 +888,9 @@ public class SystaStatus {
 	 */
 	public int mixer1State;
 	/**
-	 * mixerStateNames = { "off", "cool", "warm", "undef" }
+	 * mixerStateNames = { "off", "cool", "warm", "undefined" }
 	 */
-	public final String[] mixerStateNames = { "off", "cool", "warm", "undef" };
+	public final String[] mixerStateNames = { "off", "cool", "warm", "undefined" };
 	/**
 	 * Relay &amp; 0x0800
 	 */

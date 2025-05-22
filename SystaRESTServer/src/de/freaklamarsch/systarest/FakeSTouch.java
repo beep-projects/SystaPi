@@ -38,698 +38,291 @@ import java.util.function.Function;
 
 import de.freaklamarsch.systarest.DeviceTouchSearch.DeviceTouchDeviceInfo;
 import de.freaklamarsch.systarest.STouchProtocol.Button;
-import de.freaklamarsch.systarest.STouchProtocol.Coordinates;
-import de.freaklamarsch.systarest.STouchProtocol.Rectangle;
-import de.freaklamarsch.systarest.STouchProtocol.STouchCommand;
-import de.freaklamarsch.systarest.STouchProtocol.TextXY;
+    public DatagramPacket processCommands(DatagramPacket incomingPacket) {
+        // This method is now a wrapper. The main logic is in handleIncomingPacket.
+        return handleIncomingPacket(incomingPacket);
+    }
 
-/**
- * A mock implementation of the S-Touch device for testing and simulation
- * purposes. This class provides methods to simulate interactions with the
- * S-Touch device, such as connecting, disconnecting, and sending touch events.
- */
-public class FakeSTouch {
+    /**
+     * Handles an incoming datagram packet, processing the S-Touch commands within it.
+     *
+     * @param incomingPacket The packet received from the Systa controller.
+     * @return A {@link DatagramPacket} to be sent as a reply, or {@code null} if no reply is needed or an error occurs.
+     */
+    private DatagramPacket handleIncomingPacket(DatagramPacket incomingPacket) {
+        byte[] receivedBytes = incomingPacket.getData();
+        int receivedLength = incomingPacket.getLength();
 
-	private DatagramSocket socket;
-	private boolean connected = false;
-	private ExecutorService listenerService = null;
-	private Future<?> listenerFuture = null;
+        ByteBuffer receiveBuffer = ByteBuffer.wrap(receivedBytes, 0, receivedLength).asReadOnlyBuffer();
+        receiveBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-	// constants
-	private static final int TIMEOUT = 1000; // 1 second
-	private static final int MAX_RETRIES = 10;
-	private static final int APP_MINOR = 2;
-	private static final int APP_VERSION = 20;
-	private static final int BASIS_VERSION = 2201;
-	private static final int MAX_DATA_LENGTH = 4096;
+        printDebugInfo("Handling incoming packet, length = " + receivedLength);
+        if (this.debug) {
+            printByteArrayAsHex(receivedBytes, receivedLength);
+        }
 
-	private boolean debug = false; // TODO change back to false
-	int lastId = -1;
-	int lastX = -1;
-	int lastY = -1;
-	/** The display associated with this S-Touch device. */
-	private FakeSTouchDisplay display = new FakeSTouchDisplay();
+        if (receiveBuffer.remaining() < 1) {
+            printDebugInfo("Received empty or malformed packet.");
+            return null; // Not enough data for packet type
+        }
+        byte packetType = receiveBuffer.get(); // First byte is packet type
+        printDebugInfo("Received Packet Type = " + packetType);
 
-	// int rxRetryCount = 0;
-	long PktCmd;
-	int port = 0;
-	InetAddress inetAddress;
-	int cnCmd;
-	String mac;
-	byte[] password = null;
-	DeviceTouchDeviceInfo info = null;
+        if (packetType == PACKET_TYPE_COMMAND || packetType == PACKET_TYPE_COMMAND_BATCH) {
+            return processType1Or9Packet(packetType, receiveBuffer);
+        } else {
+            printDebugInfo("Unknown or unsupported packet type (" + packetType + ") received. No reply will be sent.");
+            return null; // Do not send a reply for unknown packet types
+        }
+    }
 
-	public enum ConnectionStatus {
-		SUCCESS, DEVICE_ALREADY_IN_USE, WRONG_UDP_PASSWORD, TIMEOUT, ALREADY_CONNECTED, NO_COMPATIBLE_DEVICE_FOUND
-	}
+    /**
+     * Processes command packets of type 1 (single command, deprecated by some sources) or 9 (batch of commands).
+     *
+     * @param packetType    The type of the packet (1 or 9).
+     * @param receiveBuffer The buffer containing the packet data (after the type byte).
+     * @return A reply packet, or null if a fundamental error occurs.
+     */
+    private DatagramPacket processType1Or9Packet(byte packetType, ByteBuffer receiveBuffer) {
+        if (receiveBuffer.remaining() < 4) { // PktCmd (2) + PktId (2)
+            printDebugInfo("Packet too short for PktCmd and PktId, type: " + packetType);
+            return null; // Malformed
+        }
+        this.PktCmd = STouchProtocol.readShort(receiveBuffer); // Read PktCmd
+        int pktId = STouchProtocol.readShort(receiveBuffer);   // Read PktId
+        printDebugInfo("Received PktCmd = " + this.PktCmd + ", PktId = " + pktId);
 
-	enum ReplyType {
-		NONE, OK, ERROR
-	}
+        byte[] replyBytes = new byte[MAX_DATAGRAM_LENGTH];
+        ByteBuffer replyBuffer = ByteBuffer.wrap(replyBytes);
+        replyBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-	private final Map<STouchCommand, Function<Object, Boolean>> displayMethods = new HashMap<>();
+        // Echo header back
+        replyBuffer.put(packetType);
+        STouchProtocol.writeShort(replyBuffer, (int) this.PktCmd);
+        STouchProtocol.writeShort(replyBuffer, pktId);
 
-	private void initializeDisplayActions() {
-		// TODO implement missing methods in FakeSTouchDiaplay.
-		// i.e. the ones that are mapped to return true
-		displayMethods.put(STouchCommand.DISPLAY_SWITCHON, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_SWITCHOFF, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_SETSTYLE, parameters -> this.getDisplay().setStyle((int) parameters));
-		displayMethods.put(STouchCommand.DISPLAY_SETINVERS, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_SETFORECOLOR,
-				parameters -> this.getDisplay().setForeColor((Color) parameters));
-		displayMethods.put(STouchCommand.DISPLAY_SETBACKCOLOR,
-				parameters -> this.getDisplay().setBackColor((Color) parameters));
-		displayMethods.put(STouchCommand.DISPLAY_SETFONTTYPE, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_SETPIXEL, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_MOVETO, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_LINETO, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_DRAWRECT,
-				parameters -> this.getDisplay().drawRect((Rectangle) parameters));
-		displayMethods.put(STouchCommand.DISPLAY_DRAWARC, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_DRAWROUNDRECT, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_DRAWSYMBOL, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_DELETESYMBOL, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_SETXY, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_PUTC, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_PRINT, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_PRINTXY, parameters -> this.getDisplay().addText((TextXY) parameters));
-		displayMethods.put(STouchCommand.DISPLAY_PUTCROT, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_PRINTROT, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_CALIBRATETOUCH, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_SYNCNOW, parameters -> syncnow((int) parameters));
-		displayMethods.put(STouchCommand.DISPLAY_SETBACKLIGHT, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_SETBUZZER, parameters -> true);
-		displayMethods.put(STouchCommand.DISPLAY_SETCLICK, parameters -> this.getDisplay().setClick((int) parameters));
-		displayMethods.put(STouchCommand.DISPLAY_SETBUTTON,
-				parameters -> this.getDisplay().addButton((Button) parameters));
-		displayMethods.put(STouchCommand.DISPLAY_DELBUTTON,
-				parameters -> this.getDisplay().delButton((int) parameters));
-		displayMethods.put(STouchCommand.DISPLAY_SETTEMPOFFSETS, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_GETSYSTEM, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_GOSYSTEM, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_CLEARID, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_GETRESOURCEINFO, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_ERASERESOURCE, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_FLASHRESOURCE, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_ACTIVATERESOURCE, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_SETCONFIG, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_CLEARAPP, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_FLASHAPP, parameters -> true);
-		displayMethods.put(STouchCommand.SYSTEM_ACTIVATEAPP, parameters -> true);
-	}
+        CommandProcessingResult result = processCommandLoop(receiveBuffer, replyBuffer, packetType);
 
-	public FakeSTouch() {
-		initializeDisplayActions();
-	}
+        // Finalize reply based on processing result
+        if (result.getReplyType() == ReplyType.ERROR) {
+            buildErrorReply(replyBuffer, packetType, result.getProcessedCommandsCount(), result.getIgnoredCommandsCount());
+        } else if (result.getReplyType() == ReplyType.OK) {
+            buildOkReply(replyBuffer, packetType, result.getProcessedCommandsCount(), result.getIgnoredCommandsCount());
+        }
+        // For ReplyType.NONE, replyBuffer is assumed to be already populated by a specific command handler.
 
-	/**
-	 * Enable/disable the writing of debug messages
-	 *
-	 * @param debug {@code true} enables writing of debugging info, {@code false}
-	 *              disables it.
-	 */
-	public void setDebug(boolean debug) {
-		this.debug = debug;
-	}
+        DatagramPacket replyPacket = new DatagramPacket(replyBytes, replyBuffer.position(), this.inetAddress, this.port);
 
-	/**
-	 * Retrieves the simulated display associated with this S-Touch device.
-	 *
-	 * @return the {@link FakeSTouchDisplay} instance
-	 */
-	public synchronized FakeSTouchDisplay getDisplay() {
-		return display;
-	}
+        if (this.debug) {
+            printDebugInfo("Final reply packet content (length " + replyPacket.getLength() + "):");
+            printByteArrayAsHex(replyPacket.getData(), replyPacket.getLength());
+        }
+        return replyPacket;
+    }
 
-	/**
-	 * Get the {@link DeviceTouchDeviceInfo} currently set as communication target
-	 *
-	 * @return the {@link DeviceTouchDeviceInfo}
-	 */
-	public DeviceTouchDeviceInfo getInfo() {
-		return info;
-	}
 
-	/**
-	 * Set the {@link DeviceTouchDeviceInfo} that should be used as communication
-	 * target
-	 *
-	 * @param info the info to set
-	 */
-	public boolean setInfo(DeviceTouchDeviceInfo info) {
-		if (this.connected) {
-			return false;
-		}
-		this.info = info;
-		this.mac = info.mac;
-		try {
-			this.inetAddress = InetAddress.getByName(info.ip);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			return false;
-		}
-		this.port = info.port;
-		this.password = info.password.getBytes();
-		return true;
-	}
+    /**
+     * Inner class to hold the result of command loop processing.
+     */
+    private static class CommandProcessingResult {
+        private final ReplyType replyType;
+        private final int processedCommandsCount;
+        private final int ignoredCommandsCount;
 
-	/**
-	 * Connects the simulated S-Touch device to a Paradigma SystaComfort unit. If
-	 * the {@code info} is set, this will be used as communication target, otherwise
-	 * a compatible device is searched on the configured interface.
-	 *
-	 * @return {@code true} if the connection was successful; {@code false}
-	 *         otherwise
-	 * @throws IOException          if an error occurs during sending of connection
-	 *                              messages
-	 * @throws InterruptedException if the thread gets interrupted during waiting
-	 *                              for a reply for connection messages
-	 */
-	public synchronized ConnectionStatus connect() throws IOException, InterruptedException {
-		if (this.connected) {
-			return ConnectionStatus.ALREADY_CONNECTED;
-		}
-		if (this.info == null) {
-			setInfo(searchSTouchDevice());
-		}
-		if (this.info == null) {
-			return ConnectionStatus.NO_COMPATIBLE_DEVICE_FOUND;
-		}
+        public CommandProcessingResult(ReplyType replyType, int processedCommandsCount, int ignoredCommandsCount) {
+            this.replyType = replyType;
+            this.processedCommandsCount = processedCommandsCount;
+            this.ignoredCommandsCount = ignoredCommandsCount;
+        }
 
-		DatagramPacket connectionRequest = createConnectionRequestMessage();
+        public ReplyType getReplyType() { return replyType; }
+        public int getProcessedCommandsCount() { return processedCommandsCount; }
+        public int getIgnoredCommandsCount() { return ignoredCommandsCount; }
+    }
 
-		this.socket = new DatagramSocket();
-		this.socket.setSoTimeout(TIMEOUT);
 
-		for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
-			this.socket.send(connectionRequest);
-			DatagramPacket responsePacket = receive();
-			if (responsePacket == null) {
-				continue; // retry
-			}
-			int responseLength = responsePacket.getLength();
-			byte[] responseBytes = responsePacket.getData();
-			if (responseLength == 7 && responseBytes[5] == 1) {
-				if (responseBytes[6] == 1) {
-					printDebugInfo("Connect() succeeded, starting communication");
-					this.connected = true;
-					startListening();
-					return ConnectionStatus.SUCCESS;
-				} else if (responseBytes[6] == 0) {
-					printDebugInfo("Connect() failed, wrong UDP password sent. Password: " + new String(this.password));
-					return ConnectionStatus.WRONG_UDP_PASSWORD;
-				} else if (responseBytes[6] == -2) {
-					printDebugInfo("Connect() failed, device is already in use");
-					return ConnectionStatus.DEVICE_ALREADY_IN_USE;
-				}
-			}
-		}
-		this.socket.close();
-		return ConnectionStatus.TIMEOUT;
-	}
+    /**
+     * Loops through commands in the receive buffer, processes them, and builds the reply.
+     *
+     * @param receiveBuffer The buffer to read commands from.
+     * @param replyBuffer   The buffer to write command-specific replies to (for type NONE).
+     * @param packetType    The type of the overall packet (1 or 9).
+     * @return A CommandProcessingResult summarizing the outcome.
+     */
+    private CommandProcessingResult processCommandLoop(ByteBuffer receiveBuffer, ByteBuffer replyBuffer, byte packetType) {
+        int processedCommandsCount = 0;
+        int ignoredCommandsCount = 0;
+        ReplyType overallReplyType = ReplyType.OK; // Assume OK unless an error occurs
 
-	/**
-	 * Create a DatagramPacket to send a connection request to a Paradigma
-	 * SystaComfort device.
-	 *
-	 * @return the DatatgramPacket holding the created connection request
-	 */
-	public DatagramPacket createConnectionRequestMessage() {
-		int txLen = 10;
-		byte[] headerBytes = { 8, 0, 0, 0, 0, 1 };
-		byte[] txBytes = new byte[headerBytes.length + this.password.length];
-		System.arraycopy(headerBytes, 0, txBytes, 0, headerBytes.length);
-		System.arraycopy(this.password, 0, txBytes, headerBytes.length, this.password.length);
-		DatagramPacket datagramPacket = new DatagramPacket(txBytes, txLen, this.inetAddress, this.port);
-		return datagramPacket;
-	}
+        while (receiveBuffer.hasRemaining()) {
+            printDebugInfo("Command loop: receiveBuffer position @ " + receiveBuffer.position());
+            processedCommandsCount++;
 
-	/**
-	 * Create a DatagramPacket to inform a Paradigma SystaComfort device about the
-	 * disconnection from this emulates S-Touch device.
-	 *
-	 * @return the DatatgramPacket holding the created disconnect message
-	 */
-	public DatagramPacket createDisconnectRequestMessage() {
-		int txLen = 10;
-		byte[] txBytes = { 8, 0, 0, 0, 0, 1, 0, 0, 0, 0 };
-		DatagramPacket datagramPacket = new DatagramPacket(txBytes, txLen, this.inetAddress, this.port);
-		return datagramPacket;
-	}
+            if (packetType == PACKET_TYPE_COMMAND && processedCommandsCount > MAX_COMMANDS_PACKET_TYPE_1) {
+                printDebugInfo("Exceeded max commands for packet type " + PACKET_TYPE_COMMAND + ".");
+                overallReplyType = ReplyType.ERROR;
+                break;
+            }
 
-	private void startListening() {
-		this.listenerService = Executors.newSingleThreadExecutor();
-		this.listenerFuture = this.listenerService.submit(() -> {
-			while (this.connected) {
-				DatagramPacket packet = receive();
-				if (packet != null) {
-					DatagramPacket reply = processCommands(packet);
-					if (reply != null) {
-						try {
-							if (this.connected) {
-								this.socket.send(reply);
-							} else {
-								printDebugInfo(
-										"FakeSTouch got disconnected while processing commands, not sending reply message.");
-							}
-							getDisplay().setTouch(-1, -1);
-						} catch (IOException ioe) {
-							if (this.debug) {
-								ioe.printStackTrace();
-							}
-						}
-					}
-				}
-			}
-		});
-	}
+            STouchCommand cmd = (STouchCommand) STouchProtocol.read(STouchCommand.TYPE_COMMAND, receiveBuffer);
+            if (cmd == null) {
+                printDebugInfo("Invalid or unknown command code encountered in loop.");
+                overallReplyType = ReplyType.ERROR;
+                break;
+            }
 
-	/**
-	 * Receive a message from the connected Paradigma SystaComfort unit
-	 *
-	 * @return the received DatagramPaket from the connected device, or null if no
-	 *         valid packet was received
-	 */
-	private DatagramPacket receive() {
-		DatagramPacket packet = null;
-		try {
-			byte[] rcv = new byte[MAX_DATA_LENGTH];
-			packet = new DatagramPacket(rcv, rcv.length);
-			this.socket.receive(packet);
-			if (packet.getAddress().getHostAddress().equalsIgnoreCase(this.inetAddress.getHostAddress())) {
-				return packet;
-			} else {
-				printDebugInfo("irgnoring packet from " + packet.getAddress().getHostAddress());
-				return null;
-			}
-		} catch (IOException ioe) {
-			if (this.debug) {
-				ioe.printStackTrace();
-			}
-			return null;
-		}
-	}
+            int cmdLen = cmd.length(receiveBuffer);
+            if (cmdLen < 0 || receiveBuffer.remaining() < cmdLen && cmdLen > 0 ) { // cmdLen can be 0 for parameter-less commands
+                 printDebugInfo("Invalid command length or buffer underflow for " + cmd.name() +
+                               ". Expected len=" + cmdLen + ", remaining=" + receiveBuffer.remaining());
+                overallReplyType = ReplyType.ERROR;
+                break;
+            }
 
-	/**
-	 * Disconnects the simulated S-Touch device from the SystaComfort unit.
-	 *
-	 * @throws IOException if an error occurs during disconnection
-	 */
-	public synchronized void disconnect() throws IOException {
-		if (!this.connected) {
-			return;
-		}
-		// set connected to false, so the listenerService can gracefully exit
-		this.connected = false;
-		// the thread might be stuck in the receive() function, so we force it out of
-		// that
-		if (this.listenerFuture != null) {
-			this.listenerFuture.cancel(true);
-			this.listenerFuture = null;
-		}
-		DatagramPacket disconnectMessage = createDisconnectRequestMessage();
+            if (isCommandEnabled(cmd)) {
+                Object parameters = null;
+                if (cmdLen > 0) {
+                    parameters = STouchProtocol.read(cmd, receiveBuffer);
+                    if (debug) printDebugInfo("Parameters for " + cmd.name() + ": " + parameters);
+                }
+                printDebugInfo("Processing enabled command: " + cmd.name());
+                ReplyType singleCmdReplyType = processSingleCommand(cmd, parameters, replyBuffer);
+                if (singleCmdReplyType == ReplyType.ERROR) {
+                    overallReplyType = ReplyType.ERROR;
+                    break; // Stop processing on first error
+                } else if (singleCmdReplyType == ReplyType.NONE) {
+                    // This means the command has built its own specific reply.
+                    // The overall reply type for the packet might still be OK or effectively NONE.
+                    // If multiple commands return NONE, the last one's reply might be what's sent, or they aggregate.
+                    // For simplicity, if any command has a specific reply (NONE), the overall packet reply type is also NONE.
+                    overallReplyType = ReplyType.NONE;
+                }
+                // If singleCmdReplyType is OK, overallReplyType remains OK (or NONE if previously set).
+            } else {
+                printDebugInfo("Command " + cmd.name() + " is not enabled. Skipping " + cmdLen + " bytes.");
+                if (receiveBuffer.remaining() >= cmdLen) {
+                    receiveBuffer.position(receiveBuffer.position() + cmdLen);
+                } else {
+                     printDebugInfo("Buffer underflow while skipping disabled command " + cmd.name());
+                     overallReplyType = ReplyType.ERROR; break;
+                }
+                ignoredCommandsCount++;
+            }
+        }
+        return new CommandProcessingResult(overallReplyType, processedCommandsCount, ignoredCommandsCount);
+    }
 
-		for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
-			this.socket.send(disconnectMessage);
-			DatagramPacket disconnectConfirmation = receive();
-			if (disconnectConfirmation == null) {
-				continue; // retry
-			}
-			int responseLength = disconnectConfirmation.getLength();
-			byte[] responseBytes = disconnectConfirmation.getData();
-			byte[] disconnectConfirmationBytes = { 8, 0, 0, 0, 0, 1, 0, 0, 1, -1 };
-			if (responseLength == 7 && Arrays.equals(responseBytes, 0, 6, disconnectConfirmationBytes, 0, 6)) {
-				printDebugInfo("Disconnect confirmed by " + this.inetAddress.getHostAddress());
-				break;
-			} else {
-				printDebugInfo(
-						"Unknown disconnectConfirmation message received from " + this.inetAddress.getHostAddress());
-				if (this.debug) {
-					System.out.println("responseLength == " + responseLength);
-					printByteArrayAsHex(responseBytes, responseLength);
-				}
-			}
-		}
+    /**
+     * Processes a single S-Touch command.
+     *
+     * @param cmd         The command to process.
+     * @param parameters  The parameters for the command (can be null).
+     * @param replyBuffer The buffer to write specific replies into (for commands that don't use standard OK/Error).
+     * @return The {@link ReplyType} for this specific command.
+     */
+    private ReplyType processSingleCommand(STouchCommand cmd, Object parameters, ByteBuffer replyBuffer) {
+        Function<Object, Boolean> displayAction = displayMethods.get(cmd);
+        if (displayAction != null) {
+            try {
+                if (!displayAction.apply(parameters)) {
+                    printDebugInfo("Execution of display action for " + cmd.name() + " returned false.");
+                    return ReplyType.ERROR;
+                }
+                return ReplyType.OK; // Assume display actions that return true are OK.
+            } catch (Exception e) {
+                printDebugInfo("Exception during display action for " + cmd.name() + ": " + e.getMessage());
+                if (debug) e.printStackTrace(System.err);
+                return ReplyType.ERROR;
+            }
+        }
 
-		printDebugInfo("Closing connection to " + this.inetAddress.getHostAddress());
+        // Handle system commands or others not in displayMethods map
+        switch (cmd) {
+            case SYSTEM_GETSYSTEM:
+                STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer, STouchCommand.SYSTEM_GETSYSTEM);
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 1); // Status OK
+                STouchProtocol.writeShort(replyBuffer, FakeSTouch.BASIS_SOFTWARE_VERSION / 100);
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) (FakeSTouch.BASIS_SOFTWARE_VERSION % 100));
+                STouchProtocol.writeShort(replyBuffer, FakeSTouch.APP_MAJOR_VERSION);
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) FakeSTouch.APP_MINOR_VERSION);
+                return ReplyType.NONE; // Specific reply format
+            case SYSTEM_GETRESOURCEINFO:
+                STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer, STouchCommand.SYSTEM_GETRESOURCEINFO);
+                STouchProtocol.writeShort(replyBuffer, this.getDisplay().RESSOURCE_ID);
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) this.getDisplay().FONTS_USED);
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) this.getDisplay().SYMBOLS_USED);
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) (this.getDisplay().getFonts() - this.getDisplay().FONTS_USED));
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) (this.getDisplay().getSymbs() - this.getDisplay().SYMBOLS_USED));
+                for (int i = 0; i < 4; i++) STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) -1);
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) -8);
+                for (int i = 0; i < 3; i++) STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) 0);
+                STouchProtocol.writeInt(replyBuffer, this.getDisplay().getChecksum());
+                return ReplyType.NONE;
+            case SYSTEM_ERASERESOURCE:
+            case SYSTEM_FLASHRESOURCE:
+                STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer, cmd);
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, REPLY_STATUS_OK);
+                return ReplyType.NONE;
+            case SYSTEM_ACTIVATERESOURCE:
+                STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer, STouchCommand.SYSTEM_ACTIVATERESOURCE);
+                int checksumToActivate = (parameters instanceof Integer) ? (Integer) parameters : 0; // Parameter should be Integer
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, this.getDisplay().setChecksum(checksumToActivate) ? REPLY_STATUS_OK : (byte) 2);
+                return ReplyType.NONE;
+            case SYSTEM_SETCONFIG:
+                STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer, STouchCommand.SYSTEM_SETCONFIG);
+                int newConfigVal = (parameters instanceof Integer) ? (Integer) parameters : 0; // Parameter should be Integer
+                this.getDisplay().setConfig(newConfigVal);
+                if ((this.getDisplay().getConfig() & 0x01) == 0x01) {
+                    this.cnCmd = 0;
+                    printDebugInfo("SYSTEM_SETCONFIG: Config bit 0 set, cnCmd reset to 0.");
+                }
+                STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, REPLY_STATUS_OK);
+                STouchProtocol.writeInt(replyBuffer, this.getDisplay().getConfig());
+                return ReplyType.NONE;
+            default:
+                printDebugInfo("Unhandled command in processSingleCommand: " + cmd.name());
+                return ReplyType.ERROR; // Unhandled command
+        }
+    }
 
-		this.socket.close();
+    /**
+     * Builds a standard OK reply in the provided buffer.
+     * Assumes the header (type, PktCmd, PktId) is already written.
+     */
+    private void buildOkReply(ByteBuffer replyBuffer, byte packetType, int processedCommandsCount, int ignoredCommandsCount) {
+        replyBuffer.position(PACKET_HEADER_SIZE); // Start after the echoed header
+        STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, REPLY_STATUS_OK);
+        if (packetType == PACKET_TYPE_COMMAND_BATCH) {
+            STouchProtocol.writeShort(replyBuffer, processedCommandsCount);
+        } else {
+            STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) processedCommandsCount);
+        }
+        STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) this.display.getButton());
+        STouchProtocol.writeShort(replyBuffer, this.display.getX());
+        STouchProtocol.writeShort(replyBuffer, this.display.getY());
+        STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) 0); // Reserved
+        STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) 0); // Reserved
+        STouchProtocol.writeShort(replyBuffer, this.getDisplay().getFreeCommandSpace());
+        STouchProtocol.writeShort(replyBuffer, ignoredCommandsCount);
+    }
 
-		if (this.listenerService != null) {
-			this.listenerService.shutdownNow();
-			this.listenerService = null;
-		}
-	}
+    /**
+     * Builds a standard Error reply in the provided buffer.
+     * Assumes the header (type, PktCmd, PktId) is already written.
+     */
+    private void buildErrorReply(ByteBuffer replyBuffer, byte packetType, int processedCommandsCount, int ignoredCommandsCount) {
+        replyBuffer.position(PACKET_HEADER_SIZE); // Start after the echoed header
+        STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, REPLY_STATUS_ERROR);
+        if (packetType == PACKET_TYPE_COMMAND_BATCH) {
+            STouchProtocol.writeShort(replyBuffer, processedCommandsCount);
+        } else {
+            STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, (byte) processedCommandsCount);
+        }
+        STouchProtocol.writeShort(replyBuffer, this.getDisplay().getFreeCommandSpace());
+        STouchProtocol.writeShort(replyBuffer, ignoredCommandsCount);
+    }
 
-	public DeviceTouchDeviceInfo searchSTouchDevice() {
-		return DeviceTouchSearch.search();
-	}
-
-	private void printDebugInfo(String string) {
-		if (this.debug) {
-			System.out.println(string);
-		}
-	}
-
-	private boolean syncnow(int id) {
-		id = id + 1;
-		this.cnCmd = id;
-		this.PktCmd = id;
-		return true;
-	}
-
-	/**
-	 * Simulates a touch event on the S-Touch display at the specified coordinates.
-	 *
-	 * @param x the x-coordinate of the touch
-	 * @param y the y-coordinate of the touch
-	 */
-	public void touch(int x, int y) {
-		getDisplay().setTouch(x, y);
-	}
-
-	public void printScreen() {
-		getDisplay().printContent();
-	}
-
-	public String getObjectTree() {
-		return getDisplay().getObjectTree().toString();
-	}
-
-	public BufferedImage getScreenAsImage() {
-		return getDisplay().getContentAsImage();
-	}
-
-	/**
-	 * @param addr the InetAddress this instance should use for communication
-	 */
-	public void setAddr(InetAddress addr) {
-		this.inetAddress = addr;
-	}
-
-	boolean isCommandEnabled(STouchCommand cmd) {
-		boolean enabled;
-		switch (cmd) {
-		case DISPLAY_SYNCNOW:
-		case SYSTEM_GETSYSTEM:
-		case SYSTEM_GOSYSTEM:
-		case SYSTEM_CLEARID:
-		case SYSTEM_GETRESOURCEINFO:
-		case SYSTEM_ERASERESOURCE:
-		case SYSTEM_FLASHRESOURCE:
-		case SYSTEM_ACTIVATERESOURCE:
-		case SYSTEM_SETCONFIG:
-		case SYSTEM_CLEARAPP:
-		case SYSTEM_FLASHAPP:
-		case SYSTEM_ACTIVATEAPP:
-			return true;
-		/*
-		 * case DISPLAY_SETBACKLIGHT: case DISPLAY_SETBUZZER: case DISPLAY_SETCLICK:
-		 * case DISPLAY_SETBUTTON: case DISPLAY_DELBUTTON: case DISPLAY_SETTEMPOFFSETS:
-		 */
-		default:
-			if ((this.getDisplay().config & 1) == 1) {
-				if (this.cnCmd == this.PktCmd) {
-					this.cnCmd++;
-					enabled = true;
-				} else {
-					enabled = false;
-				}
-				this.PktCmd++;
-			} else {
-				enabled = true;
-			}
-		}
-		return enabled;
-	}
-
-	public DatagramPacket processCommands(DatagramPacket packet) {
-		ReplyType replyType = ReplyType.ERROR;
-		DatagramPacket replyPacket = null;
-		byte[] rcvBuf = packet.getData();
-		int rcvLen = packet.getLength();
-		byte[] replyBuf = new byte[MAX_DATA_LENGTH];
-		ByteBuffer rcvBuffer = ByteBuffer.wrap(rcvBuf).asReadOnlyBuffer();
-		rcvBuffer.order(ByteOrder.LITTLE_ENDIAN);
-		ByteBuffer replyBuffer = ByteBuffer.wrap(replyBuf);
-		replyBuffer.order(ByteOrder.LITTLE_ENDIAN);
-		printDebugInfo("THE RECEIVED PACKET, len = " + rcvLen);
-		if (this.debug) {
-			printByteArrayAsHex(rcvBuf, rcvLen);
-		}
-		int packetType = rcvBuffer.get();
-		printDebugInfo("PACKET TYPE = " + packetType);
-		if (packetType == 1 || packetType == 9) {
-			this.PktCmd = (Integer) STouchProtocol.read(STouchCommand.TYPE_SHORT_INTEGER, rcvBuffer);
-			int pktId = (int) STouchProtocol.read(STouchCommand.TYPE_SHORT_INTEGER, rcvBuffer);
-			replyPacket = new DatagramPacket(replyBuf, 0, this.inetAddress, this.port);
-			STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, packetType);
-			STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer, (int) this.PktCmd);
-			STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer, pktId);
-			if (rcvLen >= 5) {
-				replyType = ReplyType.OK;
-			} else {
-				replyType = ReplyType.ERROR;
-			}
-			int ignoredCommandsCount = 0;
-			int processedCommandsCount = 0;
-			// loop over all received commands
-			while (true) {
-				printDebugInfo("pos @ " + rcvBuffer.position());
-				if (rcvBuffer.position() < rcvLen) {
-					printDebugInfo("process cmdIndex #" + rcvBuffer.position());
-					processedCommandsCount++;
-					if (packetType == 1 && processedCommandsCount >= 255) {
-						replyType = ReplyType.ERROR;
-					} else if (rcvLen > 5) {
-						STouchCommand cmd = (STouchCommand) STouchProtocol.read(STouchCommand.TYPE_COMMAND, rcvBuffer);
-						if (cmd != null) {
-							int cmdLen = cmd.length(rcvBuffer);
-							if (cmdLen >= 0) {
-								if (isCommandEnabled(cmd)) {
-									printDebugInfo("process cmd: " + cmd.name());
-									Object parameters = null;
-									switch (cmd) {
-									case DISPLAY_SWITCHON:
-									case DISPLAY_SWITCHOFF:
-									case DISPLAY_SETSTYLE:
-									case DISPLAY_SETINVERS:
-									case DISPLAY_SETFORECOLOR:
-									case DISPLAY_SETBACKCOLOR:
-									case DISPLAY_SETFONTTYPE:
-									case DISPLAY_SETPIXEL:
-									case DISPLAY_MOVETO:
-									case DISPLAY_LINETO:
-									case DISPLAY_DRAWRECT:
-									case DISPLAY_DRAWARC:
-									case DISPLAY_DRAWROUNDRECT:
-									case DISPLAY_DRAWSYMBOL:
-									case DISPLAY_DELETESYMBOL:
-									case DISPLAY_SETXY:
-									case DISPLAY_PUTC:
-									case DISPLAY_PRINT:
-									case DISPLAY_PRINTXY:
-									case DISPLAY_PUTCROT:
-									case DISPLAY_PRINTROT:
-									case DISPLAY_CALIBRATETOUCH:
-									case DISPLAY_SYNCNOW:
-									case DISPLAY_SETBACKLIGHT:
-									case DISPLAY_SETBUZZER:
-									case DISPLAY_SETCLICK:
-									case DISPLAY_SETBUTTON:
-									case DISPLAY_DELBUTTON:
-									case DISPLAY_SETTEMPOFFSETS:
-									case SYSTEM_GOSYSTEM:
-									case SYSTEM_CLEARID:
-									case SYSTEM_CLEARAPP:
-									case SYSTEM_FLASHAPP:
-									case SYSTEM_ACTIVATEAPP:
-										if (cmdLen > 0) {
-											parameters = STouchProtocol.read(cmd, rcvBuffer);
-											printDebugInfo("Parameters: " + parameters);
-										}
-										printDebugInfo(cmd.name());
-										Function<Object, Boolean> processor = displayMethods.get(cmd);
-										if (processor != null) {
-											// printDebugInfo(cmd.name());
-											try {
-												if (!processor.apply(parameters)) {
-													printDebugInfo("Error, stop processing");
-													replyType = ReplyType.ERROR;
-												}
-											} catch (Exception e) {
-												printDebugInfo("Error, stop processing");
-												replyType = ReplyType.ERROR;
-											}
-										} else {
-											printDebugInfo("Unknown display method type: " + cmd.name());
-											replyType = ReplyType.ERROR;
-										}
-										break;
-									case SYSTEM_GETSYSTEM:
-										printDebugInfo(cmd.name());
-										replyType = ReplyType.NONE;
-										STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer,
-												STouchCommand.SYSTEM_GETSYSTEM);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 1);
-										STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer,
-												FakeSTouch.BASIS_VERSION / 100);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer,
-												(FakeSTouch.BASIS_VERSION % 100));
-										STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer,
-												FakeSTouch.APP_VERSION);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer,
-												FakeSTouch.APP_MINOR);
-										break;
-									case SYSTEM_GETRESOURCEINFO:
-										printDebugInfo(cmd.name());
-										replyType = ReplyType.NONE;
-										STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer,
-												STouchCommand.SYSTEM_GETRESOURCEINFO);
-										STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer,
-												this.getDisplay().RESSOURCE_ID);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer,
-												this.getDisplay().FONTS_USED);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer,
-												this.getDisplay().SYMBOLS_USED);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer,
-												this.getDisplay().getFonts() - this.getDisplay().FONTS_USED);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer,
-												this.getDisplay().getSymbs() - this.getDisplay().SYMBOLS_USED);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, -1);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, -1);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, -1);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, -1);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, -8);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 0);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 0);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 0);
-										STouchProtocol.write(STouchCommand.TYPE_INTEGER, replyBuffer,
-												this.getDisplay().getChecksum());
-										break;
-									case SYSTEM_ERASERESOURCE:
-										printDebugInfo(cmd.name());
-										replyType = ReplyType.NONE;
-										STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer,
-												STouchCommand.SYSTEM_ERASERESOURCE);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 0);
-										break;
-									case SYSTEM_FLASHRESOURCE:
-										printDebugInfo(cmd.name());
-										replyType = ReplyType.NONE;
-										STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer,
-												STouchCommand.SYSTEM_FLASHRESOURCE);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 0);
-										break;
-									case SYSTEM_ACTIVATERESOURCE:
-										printDebugInfo(cmd.name());
-										replyType = ReplyType.NONE;
-										if (!this.getDisplay().setChecksum(
-												(int) STouchProtocol.read(STouchCommand.TYPE_INTEGER, rcvBuffer))) {
-											STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer,
-													STouchCommand.SYSTEM_ACTIVATERESOURCE);
-											STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 2);
-										} else {
-											STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer,
-													STouchCommand.SYSTEM_ACTIVATERESOURCE);
-											STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 0);
-										}
-										break;
-									case SYSTEM_SETCONFIG:
-										printDebugInfo(cmd.name());
-										replyType = ReplyType.NONE;
-										this.getDisplay().setConfig(
-												(int) STouchProtocol.read(STouchCommand.TYPE_INTEGER, rcvBuffer));
-										if ((this.getDisplay().config & 1) == 1) {
-											this.cnCmd = 0;
-										}
-										STouchProtocol.write(STouchCommand.TYPE_COMMAND, replyBuffer,
-												STouchCommand.SYSTEM_SETCONFIG);
-										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 0);
-										STouchProtocol.write(STouchCommand.TYPE_INTEGER, replyBuffer,
-												this.getDisplay().config);
-										break;
-									default:
-										printDebugInfo("default");
-										replyType = ReplyType.NONE;
-										rcvBuffer.position(rcvLen);
-										replyBuffer.position(0);
-										replyPacket.setLength(0);
-										break;
-									}
-									if (debug) {
-										System.out.println("reply packet after processing of: " + cmd.name());
-										System.out.println("buffer position is: " + replyBuffer.position());
-										System.out.print("The current replyBuffer: ");
-										printByteArrayAsHex(replyBuf, replyBuffer.position());
-									}
-								} else {
-									// if not emeaCmd(cmd)
-									printDebugInfo("Command is not enable, continue with next");
-									// "read" rest of the command
-									rcvBuffer.position(rcvBuffer.position() + cmdLen);
-									ignoredCommandsCount++;
-								}
-							} else {
-								replyType = ReplyType.ERROR;
-							}
-						}
-					}
-				} else {
-					pktId = pktId != 0 ? 1 : 0;
-					break;
-				}
-			}
-			if (replyType == ReplyType.ERROR) {
-				STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, -1);
-				if (packetType == 9) {
-					STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer, processedCommandsCount);
-				} else {
-					STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, processedCommandsCount);
-				}
-				STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer,
-						this.getDisplay().getFreeCommandSpace());
-				STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer, ignoredCommandsCount);
-			} else if (replyType == ReplyType.OK) {
-				if ((this.getDisplay().config & 1) == 1 && this.getDisplay().getButton() == -1) {
-					if (pktId == this.lastId) {
-						this.getDisplay().setTouch(this.lastX, this.lastY);
-					}
-				}
-				replyBuffer.position(5);
-				STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 0);
-				if (packetType == 9) {
-					STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer, processedCommandsCount);
-				} else {
-					STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, processedCommandsCount);
-				}
-				STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, this.display.getButton());
-				STouchProtocol.write(STouchCommand.DISPLAY_SETXY, replyBuffer,
-						new Coordinates(this.display.getX(), this.display.getY()));
-				STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 0);
-				STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, 0);
-				STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer,
-						this.getDisplay().getFreeCommandSpace());
-				STouchProtocol.write(STouchCommand.TYPE_SHORT_INTEGER, replyBuffer, ignoredCommandsCount);
-			}
-			replyPacket.setLength(replyBuffer.position());
-		} else {
-			printDebugInfo("Unknow packet type received. Clearing reply packet.");
-			replyPacket = null;
-		}
-		printDebugInfo("THE REPLY PACKET");
-		if (this.debug) {
-			if (replyPacket == null) {
-				System.out.println("null");
-			} else {
-				printByteArrayAsHex(replyPacket.getData(), replyPacket.getLength());
-			}
-		}
-		return replyPacket;
-	}
-
-	private void printByteArrayAsHex(byte[] bytes, int len) {
+    private void printByteArrayAsHex(byte[] bytes, int len) {
 		printByteArrayAsHex(Arrays.copyOfRange(bytes, 0, len));
 	}
 
