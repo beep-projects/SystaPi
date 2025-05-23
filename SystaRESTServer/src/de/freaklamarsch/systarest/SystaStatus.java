@@ -18,6 +18,12 @@
 */
 package de.freaklamarsch.systarest;
 
+import jakarta.json.Json;
+import jakarta.json.JsonBuilderFactory;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
+
 /**
  * Class for holding the status of a Paradigma SystaComfort II heating
  * controller. The status is build from all the known fields from a SystaWeb UDP
@@ -845,9 +851,9 @@ public class SystaStatus {
 	 */
 	public boolean chargePumpIsOn;
 	/**
-	 * log bioler charge pump = Relay &amp; 0x1000
+	 * log boiler charge pump = Relay &amp; 0x1000
 	 */
-	public boolean logBoilderChargePumpIsOn;
+	public boolean logBoilerChargePumpIsOn;
 	/**
 	 * LED boiler = Relay &amp; 0x2000
 	 * 
@@ -870,11 +876,11 @@ public class SystaStatus {
 	/**
 	 * Relay &amp; 0x0002
 	 */
-	public boolean unknowRelayState1IsOn;
+	public boolean unknownRelayState1IsOn;
 	/**
 	 * Relay &amp; 0x0004
 	 */
-	public boolean unknowRelayState2IsOn;
+	public boolean unknownRelayState2IsOn;
 	/**
 	 * Relay &amp; 0x0008
 	 */
@@ -894,7 +900,7 @@ public class SystaStatus {
 	/**
 	 * Relay &amp; 0x0800
 	 */
-	public boolean unknowRelayState5IsOn;
+	public boolean unknownRelayState5IsOn;
 
 	/**
 	 * Fehlerstatus (65535 = OK)<br/>
@@ -1091,4 +1097,190 @@ public class SystaStatus {
 	 */
 	public String timestampString;
 
+	public JsonObject toJsonObject(JsonBuilderFactory jsonFactory) {
+		JsonObjectBuilder builder = jsonFactory.createObjectBuilder();
+
+		builder.add("outsideTemp", outsideTemp);
+		builder.add("circuit1FlowTemp", circuit1FlowTemp);
+		builder.add("circuit1ReturnTemp", circuit1ReturnTemp);
+		builder.add("hotWaterTemp", hotWaterTemp);
+		builder.add("bufferTempTop", bufferTempTop);
+		builder.add("bufferTempBottom", bufferTempBottom);
+		builder.add("circulationTemp", circulationTemp);
+		builder.add("circuit2FlowTemp", circuit2FlowTemp);
+		builder.add("circuit2ReturnTemp", circuit2ReturnTemp);
+		builder.add("roomTempActual1", roomTempActual1);
+		builder.add("roomTempActual2", roomTempActual2);
+		builder.add("collectorTempActual", collectorTempActual);
+		builder.add("boilerFlowTemp", boilerFlowTemp);
+		builder.add("boilerReturnTemp", boilerReturnTemp);
+		builder.add("logBoilerFlowTemp", logBoilerFlowTemp);
+		builder.add("logBoilerReturnTemp", logBoilerReturnTemp);
+		builder.add("logBoilerBufferTempTop", logBoilerBufferTempTop);
+		builder.add("swimmingpoolTemp", swimmingpoolTemp);
+		builder.add("swimmingpoolFlowTemp", swimmingpoolFlowTemp);
+		builder.add("swimmingpoolReturnTemp", swimmingpoolReturnTemp);
+		builder.add("hotWaterTempSet", hotWaterTempSet);
+		builder.add("roomTempSet1", roomTempSet1);
+		builder.add("circuit1FlowTempSet", circuit1FlowTempSet);
+		builder.add("circuit2FlowTempSet", circuit2FlowTempSet);
+		builder.add("roomTempSet2", roomTempSet2);
+		builder.add("bufferTempSet", bufferTempSet);
+		builder.add("boilerTempSet", boilerTempSet);
+
+		builder.add("operationMode", operationMode);
+		if (operationMode >= 0 && operationMode < operationModes.length) {
+			builder.add("operationModeName", operationModes[operationMode]);
+		} else {
+			builder.add("operationModeName", "unknown");
+		}
+
+		builder.add("boilerOperationMode", boilerOperationMode);
+		if (boilerOperationMode >= 0 && boilerOperationMode < boilerOperationModeNames.length) {
+			builder.add("boilerOperationModeName", boilerOperationModeNames[boilerOperationMode]);
+		} else {
+			builder.add("boilerOperationModeName", "unknown");
+		}
+
+		builder.add("roomTempSetNormal", roomTempSetNormal);
+		builder.add("roomTempSetComfort", roomTempSetComfort);
+		builder.add("roomTempSetLowering", roomTempSetLowering);
+
+		builder.add("heatingOperationMode", heatingOperationMode);
+		if (heatingOperationMode >= 0 && heatingOperationMode < heatingOperationModes.length) {
+			builder.add("heatingOperationModeName", heatingOperationModes[heatingOperationMode]);
+		} else {
+			builder.add("heatingOperationModeName", "unknown");
+		}
+
+		builder.add("controlledBy", controlledBy);
+		if (controlledBy >= 0 && controlledBy < controlMethods.length) {
+			builder.add("controlledByName", controlMethods[controlledBy]);
+		} else {
+			builder.add("controlledByName", "unknown");
+		}
+
+		builder.add("heatingCurveBasePoint", heatingCurveBasePoint);
+		builder.add("heatingCurveGradient", heatingCurveGradient);
+		builder.add("maxFlowTemp", maxFlowTemp);
+		builder.add("heatingLimitTemp", heatingLimitTemp);
+		builder.add("heatingLimitTeampLowering", heatingLimitTeampLowering);
+		builder.add("antiFreezeOutsideTemp", antiFreezeOutsideTemp);
+		builder.add("heatUpTime", heatUpTime);
+		builder.add("roomImpact", roomImpact);
+		builder.add("boilerSuperelevation", boilerSuperelevation);
+		builder.add("heatingCircuitSpreading", heatingCircuitSpreading);
+		builder.add("heatingPumpSpeedMin", heatingPumpSpeedMin);
+		builder.add("heatingPumpSpeedActual", heatingPumpSpeedActual);
+		builder.add("mixerRuntime", mixerRuntime);
+		builder.add("roomTempCorrection", roomTempCorrection);
+		builder.add("underfloorHeatingBasePoint", underfloorHeatingBasePoint);
+		builder.add("underfloorHeatingGradient", underfloorHeatingGradient);
+		builder.add("hotWaterTempNormal", hotWaterTempNormal);
+		builder.add("hotWaterTempComfort", hotWaterTempComfort);
+
+		builder.add("hotWaterOperationMode", hotWaterOperationMode);
+		if (hotWaterOperationMode >= 0 && hotWaterOperationMode < hotWaterOperationModes.length) {
+			builder.add("hotWaterOperationModeName", hotWaterOperationModes[hotWaterOperationMode]);
+		} else {
+			builder.add("hotWaterOperationModeName", "unknown");
+		}
+
+		builder.add("hotWaterHysteresis", hotWaterHysteresis);
+		builder.add("hotWaterTempMax", hotWaterTempMax);
+		builder.add("heatingPumpOverrun", heatingPumpOverrun);
+		builder.add("bufferTempMax", bufferTempMax);
+		builder.add("bufferTempMin", bufferTempMin);
+
+		builder.add("bufferType", bufferType);
+		if (bufferType >= 0 && bufferType < bufferTypeNames.length) {
+			builder.add("bufferTypeName", bufferTypeNames[bufferType]);
+		} else {
+			builder.add("bufferTypeName", "unknown");
+		}
+
+		builder.add("boilerHysteresis", boilerHysteresis);
+		builder.add("boilerOperationTime", boilerOperationTime);
+		builder.add("boilerShutdownTemp", boilerShutdownTemp);
+		builder.add("boilerPumpSpeedMin", boilerPumpSpeedMin);
+		builder.add("boilerPumpSpeedActual", boilerPumpSpeedActual);
+		builder.add("circulationPumpOverrun", circulationPumpOverrun);
+		builder.add("circulationHysteresis", circulationHysteresis);
+		builder.add("circulationLockoutTimePushButton", circulationLockoutTimePushButton);
+		builder.add("adjustRoomTempBy", adjustRoomTempBy);
+		builder.add("boilerOperationTimeHours", boilerOperationTimeHours);
+		builder.add("boilerOperationTimeMinutes", boilerOperationTimeMinutes);
+		builder.add("burnerNumberOfStarts", burnerNumberOfStarts);
+		builder.add("solarPowerActual", solarPowerActual);
+		builder.add("solarGainDay", solarGainDay);
+		builder.add("solarGainTotal", solarGainTotal);
+		builder.add("systemNumberOfStarts", systemNumberOfStarts);
+		builder.add("circuit1LeadTime", circuit1LeadTime);
+		builder.add("circuit2LeadTime", circuit2LeadTime);
+		builder.add("circuit3LeadTime", circuit3LeadTime);
+		builder.add("relay", relay);
+
+		builder.add("heatingPumpIsOn", heatingPumpIsOn);
+		builder.add("chargePumpIsOn", chargePumpIsOn);
+		builder.add("logBoilerChargePumpIsOn", logBoilerChargePumpIsOn);
+		builder.add("boilerLedIsOn", boilerLedIsOn);
+		builder.add("circulationPumpIsOn", circulationPumpIsOn);
+		builder.add("boilerIsOn", boilerIsOn);
+		builder.add("burnerIsOn", burnerIsOn);
+		builder.add("unknownRelayState1IsOn", unknownRelayState1IsOn);
+		builder.add("unknownRelayState2IsOn", unknownRelayState2IsOn);
+		builder.add("mixer1IsOnWarm", mixer1IsOnWarm);
+		builder.add("mixer1IsOnCool", mixer1IsOnCool);
+		
+		builder.add("mixer1State", mixer1State);
+		if (mixer1State >= 0 && mixer1State < mixerStateNames.length) {
+			builder.add("mixer1StateName", mixerStateNames[mixer1State]);
+		} else {
+			builder.add("mixer1StateName", "unknown");
+		}
+		
+		builder.add("unknownRelayState5IsOn", unknownRelayState5IsOn);
+		builder.add("error", error);
+		builder.add("operationModeX", operationModeX);
+		builder.add("heatingOperationModeX", heatingOperationModeX);
+		builder.add("logBoilerBufferTempMin", logBoilerBufferTempMin);
+		builder.add("logBoilerTempMin", logBoilerTempMin);
+		builder.add("logBoilerSpreadingMin", logBoilerSpreadingMin);
+		builder.add("logBoilerPumpSpeedMin", logBoilerPumpSpeedMin);
+		builder.add("logBoilerPumpSpeedActual", logBoilerPumpSpeedActual);
+		builder.add("logBoilerSettings", logBoilerSettings);
+		builder.add("logBoilerParallelOperation", logBoilerParallelOperation);
+
+		builder.add("logBoilerOperationMode", logBoilerOperationMode);
+		if (logBoilerOperationMode >= 0 && logBoilerOperationMode < logBoilerOperationModeNames.length) {
+			builder.add("logBoilerOperationModeName", logBoilerOperationModeNames[logBoilerOperationMode]);
+		} else {
+			builder.add("logBoilerOperationModeName", "unknown");
+		}
+		
+		builder.add("boilerHeatsBuffer", boilerHeatsBuffer);
+
+		builder.add("circuit1OperationMode", circuit1OperationMode);
+		if (circuit1OperationMode >= 0 && circuit1OperationMode < circuit1OperationModeNames.length) {
+			builder.add("circuit1OperationModeName", circuit1OperationModeNames[circuit1OperationMode]);
+		} else {
+			builder.add("circuit1OperationModeName", "unknown");
+		}
+
+		builder.add("circulationOperationMode", circulationOperationMode);
+		if (circulationOperationMode >= 0 && circulationOperationMode < circulationOperationModeNames.length) {
+			builder.add("circulationOperationModeName", circulationOperationModeNames[circulationOperationMode]);
+		} else {
+			builder.add("circulationOperationModeName", "unknown");
+		}
+
+		builder.add("timestamp", timestamp);
+		if (timestampString != null) {
+			builder.add("timestampString", timestampString);
+		} else {
+			builder.addNull("timestampString");
+		}
+
+		return builder.build();
+	}
 }
