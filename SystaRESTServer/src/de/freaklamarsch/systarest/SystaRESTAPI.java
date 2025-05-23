@@ -65,6 +65,7 @@ import jakarta.ws.rs.core.StreamingOutput;
 @Path("{systarest : (?i)systarest}")
 public class SystaRESTAPI {
 	public final static String PROP_PARADIGMA_IP = "PARADIGMA_IP";
+	public static final String PROP_LOG_DIR = "de.freaklamarsch.systarest.LogDirectory"; // New property for log directory
 	private static FakeSystaWeb fsw = null;
 	private static Thread t = null;
 	private final Map<String, Object> config = new HashMap<>();
@@ -125,6 +126,17 @@ public class SystaRESTAPI {
 			if (confInetAddress != null) {
 				fsw.setInetAddress(confInetAddress);
 			}
+
+			// Set custom log directory if provided in config
+			Object logDirPathProperty = config.getProperty(PROP_LOG_DIR);
+			if (logDirPathProperty instanceof String) {
+				String logDirPath = (String) logDirPathProperty;
+				if (logDirPath != null && !logDirPath.isEmpty()) {
+					System.out.println("[SystaRESTAPI] start: Setting custom log directory: " + logDirPath);
+					fsw.setLogFileRootPath(logDirPath);
+				}
+			}
+
 			try {
 				t.start();
 			} catch (Exception e) {
