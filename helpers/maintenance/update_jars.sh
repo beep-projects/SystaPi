@@ -105,8 +105,7 @@ for old_jar in "${!jar_updates[@]}"; do
     new_jar_path="$JAR_DIR/$new_jar"
 
     echo "Downloading $new_jar to $new_jar_path from $jar_url"
-    curl -L -o "$new_jar_path" "$jar_url"
-    if [ $? -ne 0 ]; then
+    if ! curl -L -o "$new_jar_path" "$jar_url"; then
         echo "Error downloading $new_jar. Please check URL or network."
         # set -e will handle exit
     fi
@@ -121,8 +120,7 @@ for new_jar in "${!jars_to_add[@]}"; do
         echo "Warning: JAR $new_jar already exists. Skipping download."
     else
         echo "Downloading $new_jar to $new_jar_path from $jar_url"
-        curl -L -o "$new_jar_path" "$jar_url"
-        if [ $? -ne 0 ]; then
+        if ! curl -L -o "$new_jar_path" "$jar_url"; then
             echo "Error downloading $new_jar. Please check URL or network."
             # set -e will handle exit
         fi

@@ -15,16 +15,14 @@ if [[ "$repo_root" != "$current_dir" || "$repo_name" != "SystaPi" ]]; then
 fi
 
 # Switch to the main branch
-git checkout main
-if [ $? -ne 0 ]; then
+if ! git checkout main; then
   echo "Error: Failed to checkout main branch."
   # In a CI/testing environment, this might not be a fatal error if already on main or a specific commit.
   # For this script's purpose, we'll report it but not necessarily exit if pull can still work.
 fi
 
 # Pull the latest changes
-git pull origin main
-if [ $? -ne 0 ]; then
+if ! git pull origin main; then
   echo "Error: Failed to pull latest changes from origin main."
   # Depending on policy, one might choose to exit here.
   # For now, we'll try to list JARs anyway if the directory exists.
@@ -42,8 +40,7 @@ fi
 
 # List JAR files and save to current_jars.txt
 echo "Listing JAR files in $JAR_DIR..."
-ls "$JAR_DIR" > "$OUTPUT_FILE"
-if [ $? -ne 0 ]; then
+if ! ls "$JAR_DIR" > "$OUTPUT_FILE"; then
   echo "Error: Failed to list JAR files in $JAR_DIR."
   exit 1
 fi
