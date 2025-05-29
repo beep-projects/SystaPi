@@ -72,11 +72,38 @@ import java.lang.reflect.Field; // Added for getFakeSystaWebInstance
 import java.lang.reflect.Method; // Added for feedDataToFakeSystaWeb
 import java.lang.reflect.InvocationTargetException; // Added for reflection on getInstance
 import de.freaklamarsch.systarest.FakeSystaWeb; // Added for FakeSystaWeb type
+import java.util.ArrayList; // Added for testData list
+import java.util.List; // Added for testData list
+// org.junit.jupiter.api.BeforeAll is already imported
+// java.nio.ByteOrder is already imported
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // fix incompatibility with JUnit5
 class SystaRESTAPITest extends JerseyTest {
 	// private static final String logDir = "./SystaLogs"; // No longer needed
+
+    private static final List<ByteBuffer> testData = new ArrayList<>();
+    private static final String[] TEST_DATA_FILES = {
+        "src/de/freaklamarsch/systarest/tests/data00_09_00.txt", // IDX_DATA00_09_00
+        "src/de/freaklamarsch/systarest/tests/data01_09_00.txt", // IDX_DATA01_09_00
+        "src/de/freaklamarsch/systarest/tests/data02_09_01.txt", // IDX_DATA02_09_01
+        "src/de/freaklamarsch/systarest/tests/data03_09_02.txt", // IDX_DATA03_09_02
+        "src/de/freaklamarsch/systarest/tests/data04_09_03.txt", // IDX_DATA04_09_03
+        "src/de/freaklamarsch/systarest/tests/data05_09_00.txt", // IDX_DATA05_09_00
+        "src/de/freaklamarsch/systarest/tests/data06_09_01.txt", // IDX_DATA06_09_01
+        "src/de/freaklamarsch/systarest/tests/data07_09_02.txt", // IDX_DATA07_09_02
+        "src/de/freaklamarsch/systarest/tests/data08_09_03.txt"  // IDX_DATA08_09_03
+    };
+
+    private static final int IDX_DATA00_09_00 = 0;
+    private static final int IDX_DATA01_09_00 = 1;
+    private static final int IDX_DATA02_09_01 = 2;
+    private static final int IDX_DATA03_09_02 = 3;
+    private static final int IDX_DATA04_09_03 = 4;
+    private static final int IDX_DATA05_09_00 = 5;
+    private static final int IDX_DATA06_09_01 = 6;
+    private static final int IDX_DATA07_09_02 = 7;
+    private static final int IDX_DATA08_09_03 = 8;
 
 	@TempDir
     public Path tempDir; // JUnit 5 TempDir
@@ -84,8 +111,22 @@ class SystaRESTAPITest extends JerseyTest {
 
 	// do not name this setup()
 	@BeforeAll // fix incompatibility with JUnit5
-	public void before() throws Exception {
-		System.out.println("BEFORE");
+	public static void initializeTestData() { // Made static as @BeforeAll for non-PER_CLASS lifecycle requires it
+	    // However, this class uses PER_CLASS, so instance method @BeforeAll is also fine.
+	    // Let's stick to static as per instruction for data init.
+	    for (String filePath : TEST_DATA_FILES) {
+	        ByteBuffer buffer = ByteBuffer.allocate(1048); // Default size
+	        buffer.order(ByteOrder.LITTLE_ENDIAN); // Set ByteOrder before passing to helper
+	        readHexTextIntoByteBuffer(buffer, filePath); // Call the existing static helper
+	        testData.add(buffer);
+	    }
+	    System.out.println("Test data initialized. Loaded " + testData.size() + " buffers.");
+	}
+
+	// Instance @BeforeAll for JerseyTest setup
+	@BeforeAll // fix incompatibility with JUnit5
+	public void before() throws Exception { // This is an instance method due to PER_CLASS
+		System.out.println("BEFORE (Instance setup)");
         super.setUp(); // Call JerseyTest's setup
 	}
 
@@ -373,7 +414,7 @@ class SystaRESTAPITest extends JerseyTest {
 		// For this test, we are primarily interested in the change due to feeding data.
 
 		// Feed the first data packet (type 0x01, logged to logInt)
-		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data02_09_01.txt");
+		feedDataToFakeSystaWeb(testData.get(IDX_DATA02_09_01));
 
 		JsonObject jsonAfterFirstFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
 		assertEquals(initialDataPacketsProcessed + 1, jsonAfterFirstFeed.getInt("dataPacketsProcessed"), "Data packets processed should increment by 1 after first feed");
@@ -393,7 +434,7 @@ class SystaRESTAPITest extends JerseyTest {
 		int logBufferedAfterFirstFeed = jsonAfterFirstFeed.getInt("logBufferedEntries");
 
 		// Feed the second data packet (type 0x02, also logged to logInt)
-		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data03_09_02.txt");
+		feedDataToFakeSystaWeb(testData.get(IDX_DATA03_09_02));
 
 		JsonObject jsonAfterSecondFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
 		assertEquals(dataPacketsProcessedAfterFirstFeed + 1, jsonAfterSecondFeed.getInt("dataPacketsProcessed"), "Data packets processed should increment by 1 after second feed");
@@ -440,22 +481,15 @@ class SystaRESTAPITest extends JerseyTest {
 	    // int initialLogBufferedEntries = statusBeforeFeed.getInt("logBufferedEntries"); // For debugging
 
 	    // Feed 3 packets
-	    String[] filesToFeed = {
-	        "src/de/freaklamarsch/systarest/tests/data00_09_00.txt", // Raw (type 0x00) -> logRaw (+1 entry)
-	        "src/de/freaklamarsch/systarest/tests/data02_09_01.txt", // Raw + Int (type 0x01) -> logRaw (+1), logInt (+1)
-	        "src/de/freaklamarsch/systarest/tests/data03_09_02.txt"  // Raw + Int (type 0x02) -> logRaw (+1), logInt (+1)
-	    };
 	    // Expected behavior with entriesPerFile = 2:
-	    // After P1: raw_buffer=1. logRaw_files=initial. logInt_files=initial.
-	    // After P2: raw_buffer=0 (raw_file_1 written), int_buffer=1. logRaw_files=initial+1. logInt_files=initial.
-	    // After P3: raw_buffer=1, int_buffer=0 (int_file_1 written). logRaw_files=initial+1. logInt_files=initial+1.
+	    // After P1 (IDX_DATA00_09_00, type 0x00 -> raw): raw_buffer=1. logRaw_files=initial. logInt_files=initial.
+	    // After P2 (IDX_DATA02_09_01, type 0x01 -> raw+int): raw_buffer=0 (raw_file_1 written), int_buffer=1. logRaw_files=initial+1. logInt_files=initial.
+	    // After P3 (IDX_DATA03_09_02, type 0x02 -> raw+int): raw_buffer=1, int_buffer=0 (int_file_1 written). logRaw_files=initial+1. logInt_files=initial+1.
 	    // Total expected files = initial + 2.
 
-	    for (String dataFile : filesToFeed) {
-	        feedDataToFakeSystaWeb(dataFile);
-	        // Optional: Short delay if status updates are not perfectly immediate.
-	        // try { Thread.sleep(50); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-	    }
+		feedDataToFakeSystaWeb(testData.get(IDX_DATA00_09_00));
+		feedDataToFakeSystaWeb(testData.get(IDX_DATA02_09_01));
+		feedDataToFakeSystaWeb(testData.get(IDX_DATA03_09_02));
 	    
 	    JsonObject statusAfterFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
 	    // int packetsReceivedAfterFeed = statusAfterFeed.getInt("packetsReceived"); // Keep for reference or remove
@@ -470,7 +504,7 @@ class SystaRESTAPITest extends JerseyTest {
 	    // System.out.println("Initial logBufferedEntries: " + initialLogBufferedEntries);
 	    // System.out.println("LogBufferedEntries after feed: " + logBufferedEntriesAfterFeed);
 
-	    assertEquals(initialDataPacketsProcessed + filesToFeed.length, dataPacketsProcessedAfterFeed,
+	    assertEquals(initialDataPacketsProcessed + 3, dataPacketsProcessedAfterFeed, // Adjusted to reflect 3 calls
 	            "Data packets processed should match the number of data files fed after re-config.");
 	            
 	    assertTrue(logFilesWrittenAfterFeed >= initialLogFilesWritten + 2,
@@ -622,7 +656,7 @@ class SystaRESTAPITest extends JerseyTest {
 
 		// Feed some data to ensure logs are generated
 		// Assuming 'data00_09_00.txt' is a valid test data file accessible from the test execution path
-		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data00_09_00.txt");
+		feedDataToFakeSystaWeb(testData.get(IDX_DATA00_09_00));
 		
 		// Check service status after feeding data
 		JsonObject statusJsonAfterDataFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
@@ -668,8 +702,8 @@ class SystaRESTAPITest extends JerseyTest {
 
 		// Feed some data to ensure logs are generated and buffered
 		// Using a different data file for variety, and calling multiple times
-		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data01_09_00.txt");
-		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data02_09_01.txt"); // Feed another packet
+		feedDataToFakeSystaWeb(testData.get(IDX_DATA01_09_00));
+		feedDataToFakeSystaWeb(testData.get(IDX_DATA02_09_01)); // Feed another packet
 
 		// Check service status after feeding data and before disabling logging
 		JsonObject statusBeforeDisable = target("/systarest/servicestatus").request().get(JsonObject.class);
@@ -891,11 +925,11 @@ class SystaRESTAPITest extends JerseyTest {
 	}
 
 	/**
-	 * Loads data from a file and feeds it to the FakeSystaWeb instance's processDatagram method.
+	 * Feeds the provided ByteBuffer to the FakeSystaWeb instance's processDatagram method.
 	 *
-	 * @param filePath Path to the hexText data file.
+	 * @param dataBuffer The ByteBuffer containing the data to be fed.
 	 */
-	private void feedDataToFakeSystaWeb(String filePath) {
+	private void feedDataToFakeSystaWeb(ByteBuffer dataBuffer) {
 		try {
 			FakeSystaWeb fsw = getFakeSystaWebInstance();
 			if (fsw == null) {
@@ -903,9 +937,7 @@ class SystaRESTAPITest extends JerseyTest {
 				return; // Should be unreachable
 			}
 
-			ByteBuffer dataBuffer = ByteBuffer.allocate(1048).order(ByteOrder.LITTLE_ENDIAN);
-			// Assuming readHexTextIntoByteBuffer is in the same class
-			readHexTextIntoByteBuffer(dataBuffer, filePath);
+			dataBuffer.rewind(); // Ensure buffer position is reset before use
 
 			Method processDatagramMethod = FakeSystaWeb.class.getDeclaredMethod("processDatagram", ByteBuffer.class);
 			processDatagramMethod.setAccessible(true);
