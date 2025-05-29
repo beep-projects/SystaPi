@@ -366,7 +366,8 @@ class SystaRESTAPITest extends JerseyTest {
 
 		// Get initial service status after enabling logging
 		JsonObject jsonInitial = target("/systarest/servicestatus").request().get(JsonObject.class);
-		int initialPacketsReceived = jsonInitial.getInt("packetsReceived");
+		// int initialPacketsReceived = jsonInitial.getInt("packetsReceived"); // Keep for reference or remove
+		int initialDataPacketsProcessed = jsonInitial.getInt("dataPacketsProcessed");
 		int initialLogBufferedEntries = jsonInitial.getInt("logBufferedEntries");
 		// Initial logFilesWritten might be 0 or more depending on prior state or auto-flush on logger init.
 		// For this test, we are primarily interested in the change due to feeding data.
@@ -375,7 +376,7 @@ class SystaRESTAPITest extends JerseyTest {
 		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data02_09_01.txt");
 
 		JsonObject jsonAfterFirstFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
-		assertEquals(initialPacketsReceived + 1, jsonAfterFirstFeed.getInt("packetsReceived"), "Packets received should increment by 1 after first feed");
+		assertEquals(initialDataPacketsProcessed + 1, jsonAfterFirstFeed.getInt("dataPacketsProcessed"), "Data packets processed should increment by 1 after first feed");
 		// Each packet of type 0x01 (data02_09_01) should result in one entry to logInt.
 		// FakeSystaWeb.processDatagram also logs every packet to logRaw.
 		// So, logBufferedEntries should increase by at least 1 (from logInt) + 1 (from logRaw) if both are active and configured.
@@ -387,14 +388,15 @@ class SystaRESTAPITest extends JerseyTest {
 
 
 		// Store current values
-		int packetsAfterFirstFeed = jsonAfterFirstFeed.getInt("packetsReceived");
+		// int packetsAfterFirstFeed = jsonAfterFirstFeed.getInt("packetsReceived"); // Keep for reference or remove
+		int dataPacketsProcessedAfterFirstFeed = jsonAfterFirstFeed.getInt("dataPacketsProcessed");
 		int logBufferedAfterFirstFeed = jsonAfterFirstFeed.getInt("logBufferedEntries");
 
 		// Feed the second data packet (type 0x02, also logged to logInt)
 		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data03_09_02.txt");
 
 		JsonObject jsonAfterSecondFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
-		assertEquals(packetsAfterFirstFeed + 1, jsonAfterSecondFeed.getInt("packetsReceived"), "Packets received should increment by 1 after second feed");
+		assertEquals(dataPacketsProcessedAfterFirstFeed + 1, jsonAfterSecondFeed.getInt("dataPacketsProcessed"), "Data packets processed should increment by 1 after second feed");
 		// Similar to the first feed, this packet (type 0x02) should also add to logInt and logRaw.
 		assertEquals(logBufferedAfterFirstFeed + 2, jsonAfterSecondFeed.getInt("logBufferedEntries"), "Log buffered entries should increase by 2 after second feed (logInt + logRaw)");
 
@@ -433,7 +435,8 @@ class SystaRESTAPITest extends JerseyTest {
 	    // Get status again after re-configuring
 	    JsonObject statusBeforeFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
 	    int initialLogFilesWritten = statusBeforeFeed.getInt("logFilesWritten");
-	    int initialPacketsReceived = statusBeforeFeed.getInt("packetsReceived"); // Reset initial counts
+	    // int initialPacketsReceived = statusBeforeFeed.getInt("packetsReceived"); // Keep for reference or remove
+	    int initialDataPacketsProcessed = statusBeforeFeed.getInt("dataPacketsProcessed");
 	    // int initialLogBufferedEntries = statusBeforeFeed.getInt("logBufferedEntries"); // For debugging
 
 	    // Feed 3 packets
@@ -455,19 +458,20 @@ class SystaRESTAPITest extends JerseyTest {
 	    }
 	    
 	    JsonObject statusAfterFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
-	    int packetsReceivedAfterFeed = statusAfterFeed.getInt("packetsReceived");
+	    // int packetsReceivedAfterFeed = statusAfterFeed.getInt("packetsReceived"); // Keep for reference or remove
+	    int dataPacketsProcessedAfterFeed = statusAfterFeed.getInt("dataPacketsProcessed");
 	    int logFilesWrittenAfterFeed = statusAfterFeed.getInt("logFilesWritten");
 	    // int logBufferedEntriesAfterFeed = statusAfterFeed.getInt("logBufferedEntries"); // For debugging
 
 	    // System.out.println("Initial logFilesWritten: " + initialLogFilesWritten);
 	    // System.out.println("LogFilesWritten after feed: " + logFilesWrittenAfterFeed);
-	    // System.out.println("Initial packetsReceived: " + initialPacketsReceived);
-	    // System.out.println("PacketsReceived after feed: " + packetsReceivedAfterFeed);
+	    // System.out.println("Initial dataPacketsProcessed: " + initialDataPacketsProcessed);
+	    // System.out.println("DataPacketsProcessed after feed: " + dataPacketsProcessedAfterFeed);
 	    // System.out.println("Initial logBufferedEntries: " + initialLogBufferedEntries);
 	    // System.out.println("LogBufferedEntries after feed: " + logBufferedEntriesAfterFeed);
 
-	    assertEquals(initialPacketsReceived + filesToFeed.length, packetsReceivedAfterFeed,
-	            "Packets received should match the number of data files fed after re-config.");
+	    assertEquals(initialDataPacketsProcessed + filesToFeed.length, dataPacketsProcessedAfterFeed,
+	            "Data packets processed should match the number of data files fed after re-config.");
 	            
 	    assertTrue(logFilesWrittenAfterFeed >= initialLogFilesWritten + 2,
 	            "At least two new log files should be written (one for raw, one for int data). " +
@@ -622,7 +626,7 @@ class SystaRESTAPITest extends JerseyTest {
 		
 		// Check service status after feeding data
 		JsonObject statusJsonAfterDataFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
-		assertTrue(statusJsonAfterDataFeed.getInt("packetsReceived") > 0, "Packets should have been received after feeding data");
+		assertTrue(statusJsonAfterDataFeed.getInt("dataPacketsProcessed") > 0, "Data packets should have been processed after feeding data");
 		// Note: logBufferedEntries might be 0 if entriesPerFile=1 causes immediate flush after one packet.
 		// However, FakeSystaWeb.processDatagram logs to two loggers (raw and int).
 		// If data00_09_00.txt is type 0x01, it logs to intData. If it's another type, it might only log to raw.
@@ -669,7 +673,7 @@ class SystaRESTAPITest extends JerseyTest {
 
 		// Check service status after feeding data and before disabling logging
 		JsonObject statusBeforeDisable = target("/systarest/servicestatus").request().get(JsonObject.class);
-		assertTrue(statusBeforeDisable.getInt("packetsReceived") > 0, "Packets should have been received after feeding data.");
+		assertTrue(statusBeforeDisable.getInt("dataPacketsProcessed") > 0, "Data packets should have been processed after feeding data.");
 		// With entriesPerFile = 5 and 2 packets fed, we expect buffered entries.
 		assertTrue(statusBeforeDisable.getInt("logBufferedEntries") > 0, "Log entries should be buffered before disabling logging.");
 		// It's also possible that logFilesWritten is already > 0 if a file got filled and flushed by DataLogger directly.

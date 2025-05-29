@@ -61,7 +61,8 @@ public class FakeSystaWeb implements Runnable {
 		public final boolean running;
 		public final boolean connected;
 		public final String lastTimestamp;
-		public final long dataPacketsReceived;
+		public final long dataPacketsReceived; // This is for UDP packets via socket.receive
+		public final long dataPacketsProcessed; // This is for packets via processDatagram
 		public final String localAddress;
 		public final int localPort;
 		public final InetAddress remoteAddress;
@@ -75,7 +76,7 @@ public class FakeSystaWeb implements Runnable {
 		public final int loggerBufferedEntries;
 		public final String commitDate;
 
-		public FakeSystaWebStatus(boolean running, boolean connected, long dataPacketsReceived, String timestamp,
+		public FakeSystaWebStatus(boolean running, boolean connected, long udpPacketsReceived, long processedPackets, String timestamp,
 				String localAddress, int localPort, InetAddress remoteAddress, int remotePort, boolean saveLoggedData,
 				int capacity, String logFilePrefix, String logEntryDelimiter, String logFileRootPath,
 				int writerFileCount, int bufferedEntries, String commitDate) {
@@ -83,7 +84,8 @@ public class FakeSystaWeb implements Runnable {
 			this.running = running;
 			this.connected = connected;
 			this.lastTimestamp = timestamp;
-			this.dataPacketsReceived = dataPacketsReceived;
+			this.dataPacketsReceived = udpPacketsReceived; // Renamed parameter for clarity
+			this.dataPacketsProcessed = processedPackets; // Added new field
 			this.localAddress = localAddress;
 			this.localPort = localPort;
 			this.remoteAddress = remoteAddress;
@@ -180,7 +182,8 @@ public class FakeSystaWeb implements Runnable {
 
 	private int readIndex = -1;
 	private int writeIndex = -1;
-	private long dataPacketsReceived = 0;
+	private long dataPacketsReceived = 0; // Counts UDP packets received by socket
+	private long dataPacketsProcessed = 0; // Counts packets processed by processDatagram
 	private byte[][] replyHeader = new byte[RING_BUFFER_SIZE][8];
 	private Integer[][] intData = new Integer[RING_BUFFER_SIZE][MAX_NUMBER_ENTRIES*MAX_NUMBER_DATA_PACKETS];
 	private long[] timestamp = new long[RING_BUFFER_SIZE];
@@ -222,7 +225,7 @@ public class FakeSystaWeb implements Runnable {
 		// connected
 		boolean connected = (readIndex < 0) ? false
 				: (timestamp[readIndex] > 0 && (Instant.now().toEpochMilli() - timestamp[readIndex] < 120));
-		return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.getTimestampString(),
+		return new FakeSystaWebStatus(this.running, connected, this.dataPacketsReceived, this.dataPacketsProcessed, this.getTimestampString(),
 				this.inetAddress, FakeSystaWeb.PORT, this.remoteAddress, this.remotePort, dls.saveLoggedData, dls.capacity,
 				dls.logFilePrefix, dls.logEntryDelimiter, dls.logFileRootPath, dls.writerFileCount, dls.bufferedEntries,
 				FakeSystaWeb.commitDate);
@@ -497,6 +500,7 @@ public class FakeSystaWeb implements Runnable {
 	 * @param data ByteBuffer that holds the raw data of the Datagram
 	 */
 	private void processDatagram(ByteBuffer data) {
+		this.dataPacketsProcessed++;
 		writeIndex = (readIndex + 1) % RING_BUFFER_SIZE;
 		timestamp[writeIndex] = Instant.now().toEpochMilli();
 		remoteAddress = receivePacket.getAddress();

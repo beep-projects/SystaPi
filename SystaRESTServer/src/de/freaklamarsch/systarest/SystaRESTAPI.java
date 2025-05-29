@@ -222,6 +222,7 @@ public class SystaRESTAPI {
 									.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault())))
 					.add("connected", fsws.connected).add("running", fsws.running)
 					.add("lastDataReceivedAt", fsws.lastTimestamp).add("packetsReceived", fsws.dataPacketsReceived)
+					.add("dataPacketsProcessed", fsws.dataPacketsProcessed) // Added new field here
 					.add("paradigmaListenerIP", fsws.localAddress).add("paradigmaListenerPort", fsws.localPort)
 					.add("paradigmaIP", (fsws.remoteAddress == null) ? "" : fsws.remoteAddress.getHostAddress())
 					.add("paradigmaPort", fsws.remotePort).add("loggingData", fsws.logging)
