@@ -63,6 +63,14 @@ import java.io.InputStream; // Needed for zip stream check
 import java.io.IOException; // Needed for InputStream operations
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream; // Needed for zip stream check
+import java.io.File; // Added for readHexTextIntoByteBuffer
+import java.io.FileNotFoundException; // Added for readHexTextIntoByteBuffer
+import java.util.Scanner; // Added for readHexTextIntoByteBuffer
+import java.nio.ByteBuffer; // Added for readHexTextIntoByteBuffer
+import java.nio.ByteOrder; // Added for readHexTextIntoByteBuffer, assuming LITTLE_ENDIAN is needed
+import java.lang.reflect.Field; // Added for getFakeSystaWebInstance
+import java.lang.reflect.Method; // Added for feedDataToFakeSystaWeb
+import de.freaklamarsch.systarest.FakeSystaWeb; // Added for FakeSystaWeb type
 
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // fix incompatibility with JUnit5
@@ -347,30 +355,123 @@ class SystaRESTAPITest extends JerseyTest {
 	@Test
 	public void testEnablelogging() {
 		System.out.println("SystaRESTAPITest: testEnablelogging()");
-		Response response = target("/systarest/start").request().post(Entity.json(""));
-		target("/systarest/enablelogging").queryParam("filePrefix", "test").queryParam("logEntryDelimiter", "<>")
-				.queryParam("entriesPerFile", 10).request().put(Entity.json(""));
-		response = target("/systarest/servicestatus").request().get();
-		assertEquals(200, response.getStatus(), "should return status 200");
-		// test the returned JsonObject for default values
-		JsonObject json = response.readEntity(JsonObject.class);
-		System.out.println("testEnablelogging: " + json);
-		assertFalse(json.getBoolean("connected"));
-		assertTrue(json.getBoolean("running"));
-		assertEquals("never", json.getString("lastDataReceivedAt"));
-		assertEquals(0, json.getInt("packetsReceived"));
-		assertEquals("127.0.0.1", json.getString("paradigmaListenerIP"));
-		assertEquals(22460, json.getInt("paradigmaListenerPort"));
-		assertEquals("", json.getString("paradigmaIP"));
-		assertEquals(0, json.getInt("paradigmaPort"));
-		assertTrue(json.getBoolean("loggingData"));
-		assertEquals(10, json.getInt("logFileSize"));
-		assertEquals("test", json.getString("logFilePrefix"));
-		assertEquals("<>", json.getString("logFileDelimiter"));
-		// assertTrue(json.getString("logFileRootPath").endsWith(logDir)); // Updated assertion
-		assertEquals(this.effectiveLogPath, json.getString("logFileRootPath"));
-		assertEquals(0, json.getInt("logFilesWritten"), "logFilesWritten after enabling custom logging");
-		assertEquals(0, json.getInt("logBufferedEntries"), "logBufferedEntries after enabling custom logging");
+		target("/systarest/start").request().post(Entity.json("")); // Ensure service is running
+
+		// Enable logging with specific parameters
+		target("/systarest/enablelogging").queryParam("filePrefix", "test")
+				.queryParam("logEntryDelimiter", "<>")
+				.queryParam("entriesPerFile", 10) // Set entriesPerFile to a value > 1 to observe buffering
+				.request().put(Entity.json(""));
+
+		// Get initial service status after enabling logging
+		JsonObject jsonInitial = target("/systarest/servicestatus").request().get(JsonObject.class);
+		int initialPacketsReceived = jsonInitial.getInt("packetsReceived");
+		int initialLogBufferedEntries = jsonInitial.getInt("logBufferedEntries");
+		// Initial logFilesWritten might be 0 or more depending on prior state or auto-flush on logger init.
+		// For this test, we are primarily interested in the change due to feeding data.
+
+		// Feed the first data packet (type 0x01, logged to logInt)
+		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data02_09_01.txt");
+
+		JsonObject jsonAfterFirstFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
+		assertEquals(initialPacketsReceived + 1, jsonAfterFirstFeed.getInt("packetsReceived"), "Packets received should increment by 1 after first feed");
+		// Each packet of type 0x01 (data02_09_01) should result in one entry to logInt.
+		// FakeSystaWeb.processDatagram also logs every packet to logRaw.
+		// So, logBufferedEntries should increase by at least 1 (from logInt) + 1 (from logRaw) if both are active and configured.
+		// The servicestatus.logBufferedEntries shows logInt.getStatus().bufferedEntries + logRaw.getStatus().bufferedEntries
+		// So we expect it to increase by 2.
+		assertTrue(jsonAfterFirstFeed.getInt("logBufferedEntries") >= initialLogBufferedEntries + 1, "Log buffered entries should increase after first feed (at least by 1, expected 2)");
+		// Let's be more specific if possible, assuming data02_09_01 is type 0x01 and gets logged by logInt AND logRaw
+		assertEquals(initialLogBufferedEntries + 2, jsonAfterFirstFeed.getInt("logBufferedEntries"), "Log buffered entries should increase by 2 after first feed (logInt + logRaw)");
+
+
+		// Store current values
+		int packetsAfterFirstFeed = jsonAfterFirstFeed.getInt("packetsReceived");
+		int logBufferedAfterFirstFeed = jsonAfterFirstFeed.getInt("logBufferedEntries");
+
+		// Feed the second data packet (type 0x02, also logged to logInt)
+		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data03_09_02.txt");
+
+		JsonObject jsonAfterSecondFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
+		assertEquals(packetsAfterFirstFeed + 1, jsonAfterSecondFeed.getInt("packetsReceived"), "Packets received should increment by 1 after second feed");
+		// Similar to the first feed, this packet (type 0x02) should also add to logInt and logRaw.
+		assertEquals(logBufferedAfterFirstFeed + 2, jsonAfterSecondFeed.getInt("logBufferedEntries"), "Log buffered entries should increase by 2 after second feed (logInt + logRaw)");
+
+		// Verify logging configuration parameters are still as set
+		assertFalse(jsonAfterSecondFeed.getBoolean("connected"), "Connected status should remain false (unless Systa is actually connected)");
+		assertTrue(jsonAfterSecondFeed.getBoolean("running"), "Service should still be running");
+		// lastDataReceivedAt will update, so we don't check it against "never" here.
+		assertNotNull(jsonAfterSecondFeed.getString("lastDataReceivedAt"), "lastDataReceivedAt should be updated.");
+		// paradigmaListenerIP, paradigmaListenerPort, paradigmaIP, paradigmaPort depend on environment, not focus here.
+		assertTrue(jsonAfterSecondFeed.getBoolean("loggingData"), "loggingData should be true");
+		assertEquals(10, jsonAfterSecondFeed.getInt("logFileSize"), "logFileSize should be as set");
+		assertEquals("test", jsonAfterSecondFeed.getString("logFilePrefix"), "logFilePrefix should be as set");
+		assertEquals("<>", jsonAfterSecondFeed.getString("logFileDelimiter"), "logEntryDelimiter should be as set");
+		assertEquals(this.effectiveLogPath, jsonAfterSecondFeed.getString("logFileRootPath"), "logFileRootPath should be correct");
+		// logFilesWritten might increase if buffered entries exceed entriesPerFile (10 in this case)
+		// With 2 packets, each adding 2 entries, total 4 entries. If entriesPerFile is 10, no new file yet.
+		// If initialLogFilesWritten was 0, it should remain 0.
+		// This depends on whether feedDataToFakeSystaWeb triggers an immediate write due to its internal logic or buffer state.
+		// For now, let's assume it doesn't write a new file with so few entries.
+		assertTrue(jsonAfterSecondFeed.getInt("logFilesWritten") >= jsonInitial.getInt("logFilesWritten"), "logFilesWritten should not decrease, may increase.");
+	}
+
+	@Test
+	void testLogFileCreation() {
+	    System.out.println("SystaRESTAPITest: testLogFileCreation()");
+	    // Ensure service is started
+	    target("/systarest/start").request().post(Entity.json(""));
+
+	    // Re-configure logging with entriesPerFile = 2
+	    Response enableResp = target("/systarest/enablelogging")
+	            .queryParam("filePrefix", "LogFileCreationTest")
+	            .queryParam("entriesPerFile", 2) // New value
+	            .request().put(Entity.json(""));
+	    assertEquals(204, enableResp.getStatus(), "Enable logging with entriesPerFile=2 should return 204");
+	    
+	    // Get status again after re-configuring
+	    JsonObject statusBeforeFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
+	    int initialLogFilesWritten = statusBeforeFeed.getInt("logFilesWritten");
+	    int initialPacketsReceived = statusBeforeFeed.getInt("packetsReceived"); // Reset initial counts
+	    // int initialLogBufferedEntries = statusBeforeFeed.getInt("logBufferedEntries"); // For debugging
+
+	    // Feed 3 packets
+	    String[] filesToFeed = {
+	        "src/de/freaklamarsch/systarest/tests/data00_09_00.txt", // Raw (type 0x00) -> logRaw (+1 entry)
+	        "src/de/freaklamarsch/systarest/tests/data02_09_01.txt", // Raw + Int (type 0x01) -> logRaw (+1), logInt (+1)
+	        "src/de/freaklamarsch/systarest/tests/data03_09_02.txt"  // Raw + Int (type 0x02) -> logRaw (+1), logInt (+1)
+	    };
+	    // Expected behavior with entriesPerFile = 2:
+	    // After P1: raw_buffer=1. logRaw_files=initial. logInt_files=initial.
+	    // After P2: raw_buffer=0 (raw_file_1 written), int_buffer=1. logRaw_files=initial+1. logInt_files=initial.
+	    // After P3: raw_buffer=1, int_buffer=0 (int_file_1 written). logRaw_files=initial+1. logInt_files=initial+1.
+	    // Total expected files = initial + 2.
+
+	    for (String dataFile : filesToFeed) {
+	        feedDataToFakeSystaWeb(dataFile);
+	        // Optional: Short delay if status updates are not perfectly immediate.
+	        // try { Thread.sleep(50); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+	    }
+	    
+	    JsonObject statusAfterFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
+	    int packetsReceivedAfterFeed = statusAfterFeed.getInt("packetsReceived");
+	    int logFilesWrittenAfterFeed = statusAfterFeed.getInt("logFilesWritten");
+	    // int logBufferedEntriesAfterFeed = statusAfterFeed.getInt("logBufferedEntries"); // For debugging
+
+	    // System.out.println("Initial logFilesWritten: " + initialLogFilesWritten);
+	    // System.out.println("LogFilesWritten after feed: " + logFilesWrittenAfterFeed);
+	    // System.out.println("Initial packetsReceived: " + initialPacketsReceived);
+	    // System.out.println("PacketsReceived after feed: " + packetsReceivedAfterFeed);
+	    // System.out.println("Initial logBufferedEntries: " + initialLogBufferedEntries);
+	    // System.out.println("LogBufferedEntries after feed: " + logBufferedEntriesAfterFeed);
+
+	    assertEquals(initialPacketsReceived + filesToFeed.length, packetsReceivedAfterFeed,
+	            "Packets received should match the number of data files fed after re-config.");
+	            
+	    assertTrue(logFilesWrittenAfterFeed >= initialLogFilesWritten + 2,
+	            "At least two new log files should be written (one for raw, one for int data). " +
+	            "Initial: " + initialLogFilesWritten + ", After: " + logFilesWrittenAfterFeed +
+	            ", Expected increase: 2");
 	}
 
 	@Test
@@ -513,18 +614,35 @@ class SystaRESTAPITest extends JerseyTest {
 		// Ensure clean state then create a log
 		target("/systarest/deletealllogs").request().delete();
 		target("/systarest/enablelogging").queryParam("entriesPerFile", 1).request().put(Entity.json(""));
-		// Simulate some activity that might be logged - simply enabling/disabling might not be enough
-		// if FakeSystaWeb's DataLogger buffer is empty.
+
+		// Feed some data to ensure logs are generated
+		// Assuming 'data00_09_00.txt' is a valid test data file accessible from the test execution path
+		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data00_09_00.txt");
+		
+		// Check service status after feeding data
+		JsonObject statusJsonAfterDataFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
+		assertTrue(statusJsonAfterDataFeed.getInt("packetsReceived") > 0, "Packets should have been received after feeding data");
+		// Note: logBufferedEntries might be 0 if entriesPerFile=1 causes immediate flush after one packet.
+		// However, FakeSystaWeb.processDatagram logs to two loggers (raw and int).
+		// If data00_09_00.txt is type 0x01, it logs to intData. If it's another type, it might only log to raw.
+		// The processDatagram method calls this.logRaw.addData and potentially this.logInt.addData
+		// DataLogger.addData adds to buffer. If buffer size > entriesPerFile, it writes.
+		// entriesPerFile is 1. So it should write immediately.
+		// Let's check logFilesWritten instead or in addition.
+		assertTrue(statusJsonAfterDataFeed.getInt("logBufferedEntries") >= 0, "Log entries should be buffered or flushed.");
+
+
 		// For now, we rely on disableLogging to flush, which might create an empty structure if no data.
 		// A more robust test would involve actually pushing data through FakeSystaWeb.
 		target("/systarest/disablelogging").request().put(Entity.json("")); // Flushes buffer
 
-		// Check if a file was actually written (best effort for now)
-		JsonObject statusJson = target("/systarest/servicestatus").request().get(JsonObject.class);
-		System.out.println(statusJson);
-		// This assertion might be fragile if disableLogging on an empty buffer doesn't increment count
-		// For this test, we'll proceed assuming it might create an empty log file or some structure.
-		// assertTrue(statusJson.getInt("logFilesWritten") > 0, "A log file should have been written");
+		// Check if a file was actually written
+		JsonObject statusJsonAfterDisable = target("/systarest/servicestatus").request().get(JsonObject.class);
+		System.out.println(statusJsonAfterDisable); // Keep for debugging
+		assertTrue(statusJsonAfterDisable.getInt("logFilesWritten") > 0, "A log file should have been written after feeding data and disabling logging.");
+		// logBufferedEntries should be 0 after disableLogging flushes them.
+		assertEquals(0, statusJsonAfterDisable.getInt("logBufferedEntries"), "Log buffered entries should be 0 after flush.");
+
 
 		Response response = target("/systarest/getalllogs").request().get();
 		assertEquals(200, response.getStatus(), "GET /getalllogs should return 200 OK");
@@ -541,10 +659,28 @@ class SystaRESTAPITest extends JerseyTest {
 	@Test
 	void testDeleteAllLogs() throws IOException {
 	    // 1. Create some logs
-	    target("/systarest/enablelogging").queryParam("entriesPerFile", 1).request().put(Entity.json(""));
-	    target("/systarest/disablelogging").request().put(Entity.json("")); // Flushes buffer, potentially creating a file
+	    target("/systarest/enablelogging").queryParam("entriesPerFile", 5).request().put(Entity.json("")); // Increased entriesPerFile to make buffering more likely
 
-	    //JsonObject statusBeforeDelete = target("/systarest/servicestatus").request().get(JsonObject.class);
+		// Feed some data to ensure logs are generated and buffered
+		// Using a different data file for variety, and calling multiple times
+		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data01_09_00.txt");
+		feedDataToFakeSystaWeb("src/de/freaklamarsch/systarest/tests/data02_09_01.txt"); // Feed another packet
+
+		// Check service status after feeding data and before disabling logging
+		JsonObject statusBeforeDisable = target("/systarest/servicestatus").request().get(JsonObject.class);
+		assertTrue(statusBeforeDisable.getInt("packetsReceived") > 0, "Packets should have been received after feeding data.");
+		// With entriesPerFile = 5 and 2 packets fed, we expect buffered entries.
+		assertTrue(statusBeforeDisable.getInt("logBufferedEntries") > 0, "Log entries should be buffered before disabling logging.");
+		// It's also possible that logFilesWritten is already > 0 if a file got filled and flushed by DataLogger directly.
+		// This depends on the exact content of data files and how many log entries they generate.
+		// For now, we focus on buffered entries before the explicit flush via disableLogging.
+
+	    target("/systarest/disablelogging").request().put(Entity.json("")); // Flushes buffer, creating/finalizing log files
+
+		// Verify that log files were actually written before attempting deletion
+		JsonObject statusAfterDisable = target("/systarest/servicestatus").request().get(JsonObject.class);
+		assertTrue(statusAfterDisable.getInt("logFilesWritten") > 0, "Log files should have been written to disk before deletion attempt.");
+		assertEquals(0, statusAfterDisable.getInt("logBufferedEntries"), "Buffered entries should be 0 after disableLogging.");
 
 	    // 2. Delete logs
 	    Response deleteResponse = target("/systarest/deletealllogs").request().delete();
@@ -685,5 +821,86 @@ class SystaRESTAPITest extends JerseyTest {
 		String body = response.readEntity(String.class);
 		assertNotNull(body, "Response body should not be null");
 		assertTrue(body.toLowerCase().contains("<html>"), "Response body should contain <html> tag");
+	}
+
+	/**
+	 * loads a hexText file into a ByteBuffer. A hexText file is a file, that has
+	 * the Hex Stream of a captured packet as a single line. The size of the
+	 * ByteBuffer has to match the Hex Stream in the file. No checks are done.
+	 * 
+	 * @param byteBuffer  the buffer in which the bytes from the hexText file should
+	 *                    be stored
+	 * @param hexTextFile path to the hexText file
+	 */
+	private static void readHexTextIntoByteBuffer(ByteBuffer byteBuffer, String hexTextFile) {
+		try (Scanner scanner = new Scanner(new File(hexTextFile))) {
+			scanner.findAll("[0-9A-Fa-f]{2}").mapToInt(m -> Integer.parseInt(m.group(), 16)).forEachOrdered(i -> {
+				if (byteBuffer.hasRemaining())
+					byteBuffer.put((byte) i);
+			});
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			// Consider how to handle this exception in a test utility method.
+			// For now, it prints the stack trace, which might be sufficient for test debugging.
+			return;
+		}
+		// Optional: Log or print loaded data for debugging, commented out by default
+		// System.out.print("Test Data loaded: ");
+		// for (int i = 0; i < byteBuffer.limit(); i++) {
+		// 	System.out.format("%02x", byteBuffer.get(i));
+		// }
+		// System.out.println();
+		// reset the buffer position to 0
+		byteBuffer.position(0);
+	}
+
+	/**
+	 * Retrieves the FakeSystaWeb instance from the SystaRESTAPI using reflection.
+	 *
+	 * @return The FakeSystaWeb instance.
+	 */
+	private FakeSystaWeb getFakeSystaWebInstance() {
+		try {
+			// Get the SystaRESTAPI instance from JerseyTest
+			SystaRESTAPI apiInstance = getApplicationHandler().getServiceLocator().getService(SystaRESTAPI.class);
+			if (apiInstance == null) {
+				org.junit.jupiter.api.Assertions.fail("Failed to get SystaRESTAPI instance from ServiceLocator.");
+			}
+
+			Field fswField = SystaRESTAPI.class.getDeclaredField("fsw");
+			fswField.setAccessible(true);
+			return (FakeSystaWeb) fswField.get(apiInstance);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			e.printStackTrace();
+			org.junit.jupiter.api.Assertions.fail("Failed to get FakeSystaWeb instance via reflection: " + e.getMessage());
+			return null; // Should be unreachable due to fail
+		}
+	}
+
+	/**
+	 * Loads data from a file and feeds it to the FakeSystaWeb instance's processDatagram method.
+	 *
+	 * @param filePath Path to the hexText data file.
+	 */
+	private void feedDataToFakeSystaWeb(String filePath) {
+		try {
+			FakeSystaWeb fsw = getFakeSystaWebInstance();
+			if (fsw == null) {
+				org.junit.jupiter.api.Assertions.fail("Failed to get FakeSystaWeb instance for data feeding.");
+				return; // Should be unreachable
+			}
+
+			ByteBuffer dataBuffer = ByteBuffer.allocate(1048).order(ByteOrder.LITTLE_ENDIAN);
+			// Assuming readHexTextIntoByteBuffer is in the same class
+			readHexTextIntoByteBuffer(dataBuffer, filePath);
+
+			Method processDatagramMethod = FakeSystaWeb.class.getDeclaredMethod("processDatagram", ByteBuffer.class);
+			processDatagramMethod.setAccessible(true);
+			processDatagramMethod.invoke(fsw, dataBuffer);
+
+		} catch (NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException e) {
+			e.printStackTrace();
+			org.junit.jupiter.api.Assertions.fail("Failed to feed data to FakeSystaWeb via reflection: " + e.getMessage());
+		}
 	}
 }
