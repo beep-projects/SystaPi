@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
+import java.nio.file.Files;
 import java.nio.file.Path; // For @TempDir
 // Reflection for changeDefaultLogDir is no longer needed
 // import java.lang.invoke.MethodHandles;
@@ -36,7 +37,9 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.stream.Stream;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -58,6 +61,7 @@ import jakarta.ws.rs.core.MediaType; // Needed for content type checks
 import jakarta.ws.rs.core.Response;
 import java.io.InputStream; // Needed for zip stream check
 import java.io.IOException; // Needed for InputStream operations
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream; // Needed for zip stream check
 
 
@@ -72,44 +76,73 @@ class SystaRESTAPITest extends JerseyTest {
 	// do not name this setup()
 	@BeforeAll // fix incompatibility with JUnit5
 	public void before() throws Exception {
-		super.setUp();
+		System.out.println("BEFORE");
+        super.setUp(); // Call JerseyTest's setup
 	}
 
 	// do not name this tearDown()
 	@AfterAll // fix incompatibility with JUnit5
 	public void after() throws Exception {
-		super.tearDown();
+		System.out.println("AFTER");
+		super.tearDown(); // Call JerseyTest's tearDown first
+        if (tempDir != null) {
+            try {
+                deleteDirectoryRecursively(tempDir);
+            } catch (IOException e) {
+                System.err.println("Failed to delete temp directory: " + tempDir + " - " + e.getMessage());
+                // Optionally, decide if this failure should fail the test run,
+                // but typically cleanup failures are just logged.
+            }
+        }
 	}
+
+    private static void deleteDirectoryRecursively(Path path) throws IOException {
+        if (Files.exists(path)) {
+            try (Stream<Path> walk = Files.walk(path)) {
+                walk.sorted(Comparator.reverseOrder())
+                    .forEach(p -> {
+                        try {
+                            Files.delete(p);
+                        } catch (IOException e) {
+                            System.err.println("Failed to delete path: " + p + " - " + e.getMessage());
+                        }
+                    });
+            }
+        }
+    }
 
 	@Override
 	public Application configure() {
-		System.out.println("SystaRESTAPITest: configure()");
-		enable(TestProperties.LOG_TRAFFIC);
-		enable(TestProperties.DUMP_ENTITY);
-		// load interfaces
-		String paradigmaIfaceName = "lo";
-		// get IPv4 addresses for interfaces
-		String paradigmIPv4 = getIPv4Address(paradigmaIfaceName);
-		assertNotNull("For working properly, SystaRESTAPI needs a configured interface", paradigmIPv4);
-		System.out.println("[RESTServer] Interface for connecting to Paradigma Systa Comfort II: " + paradigmIPv4);
-		// changeDefaultLogDir(logDir); // Removed reflection hack
+		// Initialize tempDir before JerseyTest's setUp which calls configure()
+        try {
+            tempDir = Files.createTempDirectory("systaTestLogs");
+        } catch (IOException e) {
+            System.err.println("Failed to create temp directory: " + e.getMessage());
+        }
+		System.out.println("CONFIGURE");
+    System.out.println("[SystaRESTAPITest] configure: Entered method."); // New print
+    enable(TestProperties.LOG_TRAFFIC);
+    enable(TestProperties.DUMP_ENTITY);
+    // load interfaces
+    String paradigmaIfaceName = "lo";
+    // get IPv4 addresses for interfaces
+    String paradigmIPv4 = getIPv4Address(paradigmaIfaceName);
+    assertNotNull("For working properly, SystaRESTAPI needs a configured interface", paradigmIPv4);
+    System.out.println("[RESTServer] Interface for connecting to Paradigma Systa Comfort II: " + paradigmIPv4);
 
-		this.effectiveLogPath = tempDir.resolve("systa_api_test_logs").toString();
-        System.out.println("[SystaRESTAPITest] configure: Setting log directory to: " + this.effectiveLogPath);
+    // Diagnostic prints for tempDir and effectiveLogPath
+    System.out.println("[SystaRESTAPITest] configure: tempDir path is: " + (tempDir == null ? "null" : tempDir.toString())); // New print
+    System.out.println("[SystaRESTAPITest] configure: Attempting to resolve effectiveLogPath..."); // New print
+    
+    this.effectiveLogPath = tempDir.resolve("systa_api_test_logs").toString();
+    
+    System.out.println("[SystaRESTAPITest] configure: Successfully resolved effectiveLogPath."); // New print
+    System.out.println("[SystaRESTAPITest] configure: Setting log directory to: " + this.effectiveLogPath); // Existing print (now confirmed after successful resolve)
 
 		ResourceConfig config = new ResourceConfig(SystaRESTAPI.class);
 		config.property(SystaRESTAPI.PROP_PARADIGMA_IP, paradigmIPv4);
 		config.property(SystaRESTAPI.PROP_LOG_DIR, this.effectiveLogPath); // Set the log directory property
 		return config;
-	}
-
-	@Test
-	void testStartAndStop() {
-			Response response = target("/systarest/start").request().post(null);
-			assertEquals(204, response.getStatus());
-
-			response = target("/systarest/stop").request().post(null);
-			assertEquals(204, response.getStatus());
 	}
 
 	@Test
@@ -251,10 +284,10 @@ class SystaRESTAPITest extends JerseyTest {
 		System.out.println("SystaRESTAPITest: testStart()");
 		Response response = target("/systarest/stop").request().post(Entity.json(""));
 		response = target("/systarest/start").request().post(Entity.json(""));
-		assertEquals("should return status 204", 204, response.getStatus());
+		assertEquals(204, response.getStatus(), "should return status 204");
 		// test the status of the REST API service if it reflects the running state
 		response = target("/systarest/servicestatus").request().get();
-		assertEquals("should return status 200", 200, response.getStatus());
+		assertEquals(200, response.getStatus(), "should return status 200");
 		JsonObject json = response.readEntity(JsonObject.class);
 		System.out.println("testStart: " + json);
 		assertFalse(json.getBoolean("connected"));
@@ -287,10 +320,10 @@ class SystaRESTAPITest extends JerseyTest {
 		System.out.println("SystaRESTAPITest: testStop()");
 		Response response = target("/systarest/start").request().post(Entity.json(""));
 		response = target("/systarest/stop").request().post(Entity.json(""));
-		assertEquals("should return status 204", 204, response.getStatus());
+		assertEquals(204, response.getStatus(), "should return status 204");
 		// test the status of the REST API service if it reflects the running state
 		response = target("/systarest/servicestatus").request().get();
-		assertEquals("should return status 200", 200, response.getStatus());
+		assertEquals(200, response.getStatus(), "should return status 200");
 		JsonObject json = response.readEntity(JsonObject.class);
 		System.out.println("testStop: " + json);
 		assertFalse(json.getBoolean("connected"));
@@ -305,7 +338,7 @@ class SystaRESTAPITest extends JerseyTest {
 		assertEquals(60, json.getInt("logFileSize"));
 		assertEquals("DataLogger", json.getString("logFilePrefix"));
 		assertEquals(";", json.getString("logFileDelimiter"));
-		assertTrue(json.getString("logFileRootPath").endsWith(logDir));
+		assertTrue(json.getString("logFileRootPath").endsWith(this.effectiveLogPath));
 		assertEquals(";", json.getString("logFileDelimiter"));
 		assertEquals(0, json.getInt("logFilesWritten"));
 		assertEquals(0, json.getInt("logBufferedEntries"));
@@ -318,7 +351,7 @@ class SystaRESTAPITest extends JerseyTest {
 		target("/systarest/enablelogging").queryParam("filePrefix", "test").queryParam("logEntryDelimiter", "<>")
 				.queryParam("entriesPerFile", 10).request().put(Entity.json(""));
 		response = target("/systarest/servicestatus").request().get();
-		assertEquals("should return status 200", 200, response.getStatus());
+		assertEquals(200, response.getStatus(), "should return status 200");
 		// test the returned JsonObject for default values
 		JsonObject json = response.readEntity(JsonObject.class);
 		System.out.println("testEnablelogging: " + json);
@@ -456,19 +489,23 @@ class SystaRESTAPITest extends JerseyTest {
 
 	@Test
 	void testGetAllLogs_NoLogs() throws IOException {
-		// Ensure clean state
-		target("/systarest/deletealllogs").request().delete();
+	    // Ensure clean state
+	    target("/systarest/deletealllogs").request().delete();
 
-		Response response = target("/systarest/getalllogs").request().get();
-		assertEquals(200, response.getStatus(), "GET /getalllogs should return 200 OK even with no logs");
-		assertEquals(MediaType.APPLICATION_OCTET_STREAM, response.getMediaType().toString(), "Content-Type should be application/zip (octet-stream by Jersey default for File)"); // Jersey might return application/octet-stream for File by default
-		assertNotNull(response.getHeaderString("Content-Disposition"), "Content-Disposition header should be present");
-		assertTrue(response.getHeaderString("Content-Disposition").contains(".zip"), "Content-Disposition should suggest a zip filename");
+	    Response response = target("/systarest/getalllogs").request().get();
+	    assertEquals(200, response.getStatus(), "GET /getalllogs should return 200 OK even with no logs");
+	    assertEquals(MediaType.APPLICATION_OCTET_STREAM, response.getMediaType().toString(), "Content-Type should be application/zip");
+	    assertNotNull(response.getHeaderString("Content-Disposition"), "Content-Disposition header should be present");
+	    assertTrue(response.getHeaderString("Content-Disposition").contains(".zip"), "Content-Disposition should suggest a zip filename");
 
-		InputStream zipStream = response.readEntity(InputStream.class);
-		ZipInputStream zis = new ZipInputStream(zipStream);
-		assertNull(zis.getNextEntry(), "Zip stream should be empty (no entries)");
-		zis.close();
+	    InputStream zipStream = response.readEntity(InputStream.class);
+	    ZipInputStream zis = new ZipInputStream(zipStream);
+
+	    // Correct way to verify no entries exist
+	    ZipEntry entry = zis.getNextEntry();
+	    assertTrue(entry == null, "Zip stream should be empty (no entries)");
+
+	    zis.close();
 	}
 
 	@Test
@@ -484,13 +521,14 @@ class SystaRESTAPITest extends JerseyTest {
 
 		// Check if a file was actually written (best effort for now)
 		JsonObject statusJson = target("/systarest/servicestatus").request().get(JsonObject.class);
+		System.out.println(statusJson);
 		// This assertion might be fragile if disableLogging on an empty buffer doesn't increment count
 		// For this test, we'll proceed assuming it might create an empty log file or some structure.
 		// assertTrue(statusJson.getInt("logFilesWritten") > 0, "A log file should have been written");
 
 		Response response = target("/systarest/getalllogs").request().get();
 		assertEquals(200, response.getStatus(), "GET /getalllogs should return 200 OK");
-		assertEquals(MediaType.APPLICATION_OCTET_STREAM, response.getMediaType().toString(), "Content-Type should be application/zip");
+		assertEquals("application/zip", response.getMediaType().toString(), "Content-Type should be application/zip");
 		assertNotNull(response.getHeaderString("Content-Disposition"), "Content-Disposition header should be present");
 
 		InputStream zipStream = response.readEntity(InputStream.class);
@@ -502,31 +540,34 @@ class SystaRESTAPITest extends JerseyTest {
 	
 	@Test
 	void testDeleteAllLogs() throws IOException {
-		// 1. Create some logs
-		target("/systarest/enablelogging").queryParam("entriesPerFile", 1).request().put(Entity.json(""));
-		target("/systarest/disablelogging").request().put(Entity.json("")); // Flushes buffer, potentially creating a file
+	    // 1. Create some logs
+	    target("/systarest/enablelogging").queryParam("entriesPerFile", 1).request().put(Entity.json(""));
+	    target("/systarest/disablelogging").request().put(Entity.json("")); // Flushes buffer, potentially creating a file
 
-		JsonObject statusBeforeDelete = target("/systarest/servicestatus").request().get(JsonObject.class);
-		// We proceed if files were written, or test that delete works even if no files (should be idempotent)
-		// int filesWrittenBefore = statusBeforeDelete.getInt("logFilesWritten");
-		// System.out.println("Files written before delete: " + filesWrittenBefore);
+	    //JsonObject statusBeforeDelete = target("/systarest/servicestatus").request().get(JsonObject.class);
 
-		// 2. Delete logs
-		Response deleteResponse = target("/systarest/deletealllogs").request().delete();
-		assertEquals(204, deleteResponse.getStatus(), "DELETE /deletealllogs should return 204 No Content");
+	    // 2. Delete logs
+	    Response deleteResponse = target("/systarest/deletealllogs").request().delete();
+	    assertEquals(204, deleteResponse.getStatus(), "DELETE /deletealllogs should return 204 No Content");
 
-		// 3. Verify logs are deleted
-		JsonObject statusAfterDelete = target("/systarest/servicestatus").request().get(JsonObject.class);
-		assertEquals(0, statusAfterDelete.getInt("logFilesWritten"), "logFilesWritten should be 0 after delete");
+	    // 3. Verify logs are deleted
+	    JsonObject statusAfterDelete = target("/systarest/servicestatus").request().get(JsonObject.class);
+	    assertEquals(0, statusAfterDelete.getInt("logFilesWritten"), "logFilesWritten should be 0 after delete");
 
-		// 4. Verify getalllogs returns an empty zip
-		Response getResponse = target("/systarest/getalllogs").request().get();
-		assertEquals(200, getResponse.getStatus(), "GET /getalllogs after delete should return 200 OK");
-		InputStream zipStream = getResponse.readEntity(InputStream.class);
-		ZipInputStream zis = new ZipInputStream(zipStream);
-		assertNull(zis.getNextEntry(), "Zip stream should be empty after delete");
-		zis.close();
+	    // 4. Verify getalllogs returns an empty zip
+	    Response getResponse = target("/systarest/getalllogs").request().get();
+	    assertEquals(200, getResponse.getStatus(), "GET /getalllogs after delete should return 200 OK");
+	    
+	    InputStream zipStream = getResponse.readEntity(InputStream.class);
+	    ZipInputStream zis = new ZipInputStream(zipStream);
+
+	    // Correct way to verify no entries exist
+	    ZipEntry entry = zis.getNextEntry();
+	    assertTrue(entry == null, "Zip stream should be empty after delete");
+
+	    zis.close();
 	}
+
 
 	// --- Data Retrieval JSON Endpoint Tests ---
 

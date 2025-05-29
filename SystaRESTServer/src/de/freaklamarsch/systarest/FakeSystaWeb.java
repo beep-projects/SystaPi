@@ -95,7 +95,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2025-05-26T21:05:25+00:00";
+			this.commitDate = "2025-05-29T06:48:09+00:00";
 		}
 	}
 
@@ -147,7 +147,7 @@ public class FakeSystaWeb implements Runnable {
 	}
 
     // Constants 
-	private static final String commitDate = "2025-05-26T21:05:25+00:00";
+	private static final String commitDate = "2025-05-29T06:48:09+00:00";
     private static final int PORT = 22460;
     private static final int MAX_DATA_LENGTH = 1048;
     private static final int MAX_NUMBER_ENTRIES = 256;
@@ -204,6 +204,11 @@ public class FakeSystaWeb implements Runnable {
 		}*/
         Arrays.stream(intData).forEach(data -> Arrays.fill(data, 0));
 		Arrays.fill(timestamp, -1);
+	}
+
+	public void setLogFileRootPath(String path) {
+		logInt.setLogFileRootPath(path);
+		logRaw.setLogFileRootPath(path);
 	}
 
     /**
