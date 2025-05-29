@@ -70,6 +70,7 @@ import java.nio.ByteBuffer; // Added for readHexTextIntoByteBuffer
 import java.nio.ByteOrder; // Added for readHexTextIntoByteBuffer, assuming LITTLE_ENDIAN is needed
 import java.lang.reflect.Field; // Added for getFakeSystaWebInstance
 import java.lang.reflect.Method; // Added for feedDataToFakeSystaWeb
+import java.lang.reflect.InvocationTargetException; // Added for reflection on getInstance
 import de.freaklamarsch.systarest.FakeSystaWeb; // Added for FakeSystaWeb type
 
 
@@ -860,19 +861,27 @@ class SystaRESTAPITest extends JerseyTest {
 	 * @return The FakeSystaWeb instance.
 	 */
 	private FakeSystaWeb getFakeSystaWebInstance() {
+		SystaRESTAPI apiInstance = null;
 		try {
-			// Get the SystaRESTAPI instance using the static getter
-			SystaRESTAPI apiInstance = SystaRESTAPI.getInstance();
-			if (apiInstance == null) {
-				org.junit.jupiter.api.Assertions.fail("Failed to get SystaRESTAPI instance. Ensure the service was configured and started.");
-			}
+			Method getInstanceMethod = SystaRESTAPI.class.getDeclaredMethod("getInstance");
+			getInstanceMethod.setAccessible(true);
+			apiInstance = (SystaRESTAPI) getInstanceMethod.invoke(null); // null for static method
+		} catch (NoSuchMethodException | IllegalAccessException | java.lang.reflect.InvocationTargetException e) {
+			e.printStackTrace();
+			org.junit.jupiter.api.Assertions.fail("Failed to get SystaRESTAPI instance via reflection on getInstance(): " + e.getMessage());
+		}
 
+		if (apiInstance == null) {
+			org.junit.jupiter.api.Assertions.fail("Failed to get SystaRESTAPI instance. getInstance() returned null or reflection failed.");
+		}
+
+		try {
 			Field fswField = SystaRESTAPI.class.getDeclaredField("fsw");
 			fswField.setAccessible(true);
 			return (FakeSystaWeb) fswField.get(apiInstance);
 		} catch (NoSuchFieldException | IllegalAccessException e) {
 			e.printStackTrace();
-			org.junit.jupiter.api.Assertions.fail("Failed to get FakeSystaWeb instance via reflection: " + e.getMessage());
+			org.junit.jupiter.api.Assertions.fail("Failed to get FakeSystaWeb instance's fsw field via reflection: " + e.getMessage());
 			return null; // Should be unreachable due to fail
 		}
 	}
