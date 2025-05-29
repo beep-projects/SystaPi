@@ -70,6 +70,7 @@ public class SystaRESTAPI {
 	private static Thread t = null;
 	private final Map<String, Object> config = new HashMap<>();
 	private final JsonBuilderFactory jsonFactory = Json.createBuilderFactory(config);
+	private static SystaRESTAPI instance;
 
 	/**
 	 * Create SystaRESTAPI object which provides the Jersey REST API resource for
@@ -79,6 +80,7 @@ public class SystaRESTAPI {
 	 *               {@code PROP_PARADIGMA_IP} for configuring the used IP address
 	 */
 	public SystaRESTAPI(@Context ResourceConfig config) {
+		instance = this; // Set the static instance
 		// constructor is called for each request, so make sure only one FakeSystaWeb is
 		// created, or the socket will be blocked
 		if (fsw == null) {
@@ -86,6 +88,15 @@ public class SystaRESTAPI {
 			start(config);
 		}
 		// printAPI();
+	}
+
+	/**
+	 * Returns the singleton instance of SystaRESTAPI.
+	 * This is package-private for access from tests or other closely related classes.
+	 * @return The SystaRESTAPI instance.
+	 */
+	static SystaRESTAPI getInstance() {
+	    return instance;
 	}
 
 	/**

@@ -861,10 +861,10 @@ class SystaRESTAPITest extends JerseyTest {
 	 */
 	private FakeSystaWeb getFakeSystaWebInstance() {
 		try {
-			// Get the SystaRESTAPI instance from JerseyTest
-			SystaRESTAPI apiInstance = getApplicationHandler().getServiceLocator().getService(SystaRESTAPI.class);
+			// Get the SystaRESTAPI instance using the static getter
+			SystaRESTAPI apiInstance = SystaRESTAPI.getInstance();
 			if (apiInstance == null) {
-				org.junit.jupiter.api.Assertions.fail("Failed to get SystaRESTAPI instance from ServiceLocator.");
+				org.junit.jupiter.api.Assertions.fail("Failed to get SystaRESTAPI instance. Ensure the service was configured and started.");
 			}
 
 			Field fswField = SystaRESTAPI.class.getDeclaredField("fsw");
