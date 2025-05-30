@@ -519,7 +519,6 @@ class FakeSystaWebTest {
 			}
 			LOG_PATH.setAccessible(true);
 			LOG_PATH.set(DataLogger.class, newDir);
-			System.out.print("[FakeSystaWebTest] changeDefaultLogDir to: " + newDir);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -562,7 +561,7 @@ class FakeSystaWebTest {
 			e.printStackTrace();
 			return;
 		}
-		System.out.print("[FakeSystaWebTest] Test Data loaded: ");
+		System.out.print("Test Data loaded: ");
 		for (int i = 0; i < byteBuffer.limit(); i++) {
 			System.out.format("%02x", byteBuffer.get(i));
 		}
