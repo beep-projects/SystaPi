@@ -347,9 +347,8 @@ public class DataLogger<T> {
 	}
 
 	private synchronized boolean writeLoggedDataToFile() {
-		boolean success = true; // Initialize success to true
 		if (checkAndFixBufferSync() == false) {
-			return false; // Or handle as appropriate if success flag is to be used for this too
+			return false;
 		}
 		String[][] fileContent = convertBuffersToStringArray();
 		// make sure the log dir exists
@@ -359,62 +358,7 @@ public class DataLogger<T> {
 		}
 		String fileName = logFileRootPath + File.separator + logFilePrefix + "-" + logFilename + "-" + writerFileCount
 				+ ".txt";
-		
-		// The actual file writing logic is in writeLogFile, so we adapt that or assume this method was intended to have the try-catch
-		// For now, let's assume the try-catch for file writing is what we need to modify.
-		// The current structure calls writeLogFile which returns boolean.
-		// Let's adjust to fit the spirit of the request by modifying where the error is handled.
-		// The prompt's example implies the try-catch is directly in the method being modified.
-		// The current writeLogFile handles the exception and prints. Let's modify *that*.
-		// No, the prompt clearly shows try-catch within the "saveBuffer" (which we've identified as writeLoggedDataToFile).
-		// The current writeLoggedDataToFile *delegates* the try-catch to writeLogFile.
-		// This means the prompt's structure doesn't perfectly map.
-		// I will modify `writeLogFile` as it's the one with the try-catch.
-		// However, the prompt asks to modify `saveBuffer` (now `writeLoggedDataToFile`).
-		// Let's re-evaluate. The boolean `success` variable is best used within the method that *can* fail.
-		// `writeLoggedDataToFile` calls `writeLogFile`. `writeLogFile` returns boolean.
-		// So, `writeLoggedDataToFile` already gets a success status.
-
-		// Sticking to the prompt structure as closely as possible:
-		// The prompt's example shows a try-catch block for file writing *within* the method being modified.
-		// In the current code, `writeLoggedDataToFile` calls `writeLogFile`, and `writeLogFile` has the try-catch.
-		// I will add the `e.printStackTrace()` to the `catch` block in `writeLogFile`.
-		// The `boolean success = true;` can be added to `writeLoggedDataToFile` and used to wrap its logic,
-		// but the actual error handling (and thus `e.printStackTrace()`) is in `writeLogFile`.
-
-		// Given the prompt's example, it expects the try-catch to be in the method it names.
-		// Since `writeLoggedDataToFile` is the closest analogue that *initiates* the save operation,
-		// and `writeLogFile` is a helper, I will modify `writeLogFile` to include the printStackTrace,
-		// and then ensure `writeLoggedDataToFile` correctly uses the success.
-		// The prompt's `if (success)` block logic is already present in `writeLogFile` (implicitly by returning true/false)
-		// and `writeLoggedDataToFile` uses this return.
-
-		// Let's adhere to the prompt: modify the method that *initiates* the save and has the overall success logic.
-		// This means `writeLoggedDataToFile` should manage the `success` flag based on `writeLogFile`'s return.
-		// And `writeLogFile` is where `e.printStackTrace()` should go.
-
-		// Modifying `writeLoggedDataToFile` to use the `success` variable as described in the prompt:
-		if (!writeLogFile(fileContent, fileName)) {
-		    success = false;
-		}
-
-		if (success) {
-			// This part is slightly different from the example as clearing buffer is not here.
-			// The existing writeLogFile handles the success print and counter increment.
-			// The prompt's example has buffer clearing logic here, which is not in the original writeLoggedDataToFile.
-			// The original writeLoggedDataToFile doesn't directly clear the buffer; convertBuffersToStringArray does.
-			// The prompt's example has this structure:
-			// try { ... } catch { success = false; } if (success) { filesWrittenCount++; buffer.clear(); }
-			// The current code structure is:
-			// writeLoggedDataToFile -> calls convertBuffersToStringArray (which clears buffers by removing from them)
-			//                       -> calls writeLogFile (which has try-catch, prints success/error, increments filesWrittenCount)
-			// So, the `success` variable in `writeLoggedDataToFile` would reflect the outcome of `writeLogFile`.
-			// The printStackTrace will be added to `writeLogFile`.
-		} else if (forceWrite && !this.dataBuffer.isEmpty()) { // `forceWrite` is not a param here. This was from example.
-	        // Decide how to handle buffer if a forced write fails.
-	        // For now, focusing on error reporting. Current code might leave data in buffer.
-	    }
-		return success; // Return the success status
+		return writeLogFile(fileContent, fileName);
 	}
 
 	/**
@@ -495,7 +439,7 @@ public class DataLogger<T> {
 			System.out.println("[DataLogger] wrote " + fileName);
 		} catch (IOException e) {
 			System.out.println("[DataLogger] An error occurred while trying to write " + fileName);
-			e.printStackTrace(); // ADDED THIS LINE as per original intent for the method containing the try-catch
+			e.printStackTrace();
 			return false;
 		}
 		return true;
