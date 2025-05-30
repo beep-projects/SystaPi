@@ -97,7 +97,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2025-05-30T11:45:53+00:00";
+			this.commitDate = "2025-05-30T13:34:39+00:00";
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 	}
 
     // Constants 
-	private static final String commitDate = "2025-05-30T11:45:53+00:00";
+	private static final String commitDate = "2025-05-30T13:34:39+00:00";
     private static final int PORT = 22460;
     private static final int MAX_DATA_LENGTH = 1048;
     private static final int MAX_NUMBER_ENTRIES = 256;
@@ -506,7 +506,9 @@ public class FakeSystaWeb implements Runnable {
 		timestamp[writeIndex] = Instant.now().toEpochMilli();
 		remoteAddress = receivePacket.getAddress();
 		remotePort = receivePacket.getPort();
+		System.out.println("[FakeSystaWeb] processDatagram: call logRaw.addData");
 		logRaw.addData(toByteArray(receivePacket.getData()), timestamp[writeIndex]);
+		System.out.println("[FakeSystaWeb] processDatagram: logRaw.addData returned");
 		for(int i=0;i<8;i++) {
 		  // 0..5: MAC address of SystaComfort Ethernet port:
 		  // 6..7: counter, incremented by 1 for each packet

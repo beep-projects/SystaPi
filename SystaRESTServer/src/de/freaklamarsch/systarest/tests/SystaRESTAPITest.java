@@ -364,15 +364,27 @@ class SystaRESTAPITest extends JerseyTest {
 	    int initialLogFilesWritten = statusBeforeFeed.getInt("logFilesWritten");
 	    int initialPacketsProcessed = statusBeforeFeed.getInt("packetsProcessed");
 
+	    try {
 		feedDataToFakeSystaWeb(testData.get(IDX_DATA01_09_00));
+		Thread.sleep(200);
 		feedDataToFakeSystaWeb(testData.get(IDX_DATA02_09_01));
+		Thread.sleep(200);
 		feedDataToFakeSystaWeb(testData.get(IDX_DATA03_09_02));
+		Thread.sleep(200);
 		feedDataToFakeSystaWeb(testData.get(IDX_DATA04_09_03));
+		Thread.sleep(200);
 		feedDataToFakeSystaWeb(testData.get(IDX_DATA05_09_00));
+		Thread.sleep(200);
 		feedDataToFakeSystaWeb(testData.get(IDX_DATA06_09_01));
+		Thread.sleep(200);
 		feedDataToFakeSystaWeb(testData.get(IDX_DATA07_09_02));
+		Thread.sleep(200);
 		feedDataToFakeSystaWeb(testData.get(IDX_DATA08_09_03));
-	    
+		Thread.sleep(200);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	    JsonObject statusAfterFeed = target("/systarest/servicestatus").request().get(JsonObject.class);
 	    System.out.println(statusAfterFeed);
 	    int packetsProcessedAfterFeed = statusAfterFeed.getInt("packetsProcessed");

@@ -340,7 +340,10 @@ public class DataLogger<T> {
 		// outside
 		// array changes
 		T[] d = Arrays.copyOf(data, data.length);
-		dataBuffer.add(d);
+		boolean dataAdded = dataBuffer.add(d);
+		if(!dataAdded) {
+			System.out.println("[DataLogger] addData: data was not added to the buffer");
+		}
 		if (timestampBuffer.isFull() && saveLoggedData) {
 			writeLoggedDataToFile();
 		}
