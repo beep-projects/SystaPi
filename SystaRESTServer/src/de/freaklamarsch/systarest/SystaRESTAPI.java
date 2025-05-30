@@ -127,7 +127,7 @@ public class SystaRESTAPI {
 	@POST
 	@Path("{start : (?i)start}")
 	public void start(@Context ResourceConfig config) {
-		System.out.println("SystaRESTAPI] start: called");
+		System.out.println("[SystaRESTAPI] start: called");
 		if (t == null || !t.isAlive()) {
 			// in Java you can start a thread only once, so we need a new one
 			t = new Thread(fsw);
@@ -222,7 +222,7 @@ public class SystaRESTAPI {
 									.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault())))
 					.add("connected", fsws.connected).add("running", fsws.running)
 					.add("lastDataReceivedAt", fsws.lastTimestamp).add("packetsReceived", fsws.dataPacketsReceived)
-					.add("dataPacketsProcessed", fsws.dataPacketsProcessed) // Added new field here
+					.add("packetsProcessed", fsws.dataPacketsProcessed) // Added new field here
 					.add("paradigmaListenerIP", fsws.localAddress).add("paradigmaListenerPort", fsws.localPort)
 					.add("paradigmaIP", (fsws.remoteAddress == null) ? "" : fsws.remoteAddress.getHostAddress())
 					.add("paradigmaPort", fsws.remotePort).add("loggingData", fsws.logging)

@@ -97,7 +97,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2025-05-29T06:48:09+00:00";
+			this.commitDate = "2025-05-30T11:45:53+00:00";
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 	}
 
     // Constants 
-	private static final String commitDate = "2025-05-29T06:48:09+00:00";
+	private static final String commitDate = "2025-05-30T11:45:53+00:00";
     private static final int PORT = 22460;
     private static final int MAX_DATA_LENGTH = 1048;
     private static final int MAX_NUMBER_ENTRIES = 256;
@@ -166,7 +166,7 @@ public class FakeSystaWeb implements Runnable {
 	private static final int WRITER_MAX_DATA = 60;
 	private static final String DELIMITER = ";";
 	private static final String PREFIX = "SystaREST";
-	private static final String LOG_PATH = System.getProperty("user.home") + File.separator + "logs";
+	private static String LOG_PATH = System.getProperty("user.home") + File.separator + "logs";
 	private static final String logFileFilterString = ".*-(raw|data)-[0-9]+\\.txt";
 	private static final FilenameFilter logFileFilter = (dir, name) -> name.matches(logFileFilterString);
 	/*private static final FilenameFilter logFileFilter = new FilenameFilter() {
@@ -210,6 +210,7 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	public void setLogFileRootPath(String path) {
+		LOG_PATH = path;
 		logInt.setLogFileRootPath(path);
 		logRaw.setLogFileRootPath(path);
 	}
@@ -461,13 +462,13 @@ public class FakeSystaWeb implements Runnable {
 			return;
 		}
 		running = true;
-		System.out.println("[FakeSystaWeb] trying to open DatagramSocket for UDP communication on "+inetAddress+":"+PORT);
+		System.out.println("[FakeSystaWeb] run: trying to open DatagramSocket for UDP communication on "+inetAddress+":"+PORT);
 		// try to open the listening socket
 		try {
 			InetAddress ip = InetAddress.getByName(inetAddress);
 			socket = new DatagramSocket(PORT, ip);
 		} catch (Exception e) {
-			System.out.println("[FakeSystaWeb] exception thrown when trying to open DatagramSocket");
+			System.out.println("[FakeSystaWeb] run: exception thrown when trying to open DatagramSocket");
 			e.printStackTrace();
 			running = false;
 			if (socket != null && !socket.isClosed()) {
@@ -477,7 +478,7 @@ public class FakeSystaWeb implements Runnable {
 		}
 		stopRequested = false;
 		dataPacketsReceived = 0;
-		System.out.println("[FakeSystaWeb] UDP communication with Paradigma SystaComfort II started");
+		System.out.println("[FakeSystaWeb] run: UDP communication with Paradigma SystaComfort II started");
 		while (!stopRequested) {
 			receiveNextDatagram();
 			if(receivePacket.getLength() == 0) {
@@ -490,7 +491,7 @@ public class FakeSystaWeb implements Runnable {
 				typeOfLastReceivedMessage.notifyAll();
 			}
 		}
-		System.out.println("[FakeSystaWeb] UDP communication with Paradigma SystaComfort II stopped");
+		System.out.println("[FakeSystaWeb] run: UDP communication with Paradigma SystaComfort II stopped");
 		socket.close();
 		stopRequested = false;
 		running = false;
@@ -550,7 +551,7 @@ public class FakeSystaWeb implements Runnable {
 			typeOfLastReceivedMessage = MessageType.OK;
 			break;
 		  default:
-			System.out.println("[FakeSystaWeb] unknown message type received " + String.format("0x%02X", type));
+			System.out.println("[FakeSystaWeb] processDatagram: unknown message type received " + String.format("0x%02X", type));
 			typeOfLastReceivedMessage = MessageType.ERR;
 		}
 	}
@@ -567,9 +568,9 @@ public class FakeSystaWeb implements Runnable {
 			receivePacket.setLength(0);
 			if (stopRequested) {
 				// this exception should be thrown if the socket is closed on request
-				System.out.println("[FakeSystaWeb] call to receive UDP packets got interrupted");
+				System.out.println("[FakeSystaWeb] receiveNextDatagram: call to receive UDP packets got interrupted");
 			} else {
-				System.out.println("[FakeSystaWeb] IOException thrown when waiting for data on "+inetAddress+":"+PORT);
+				System.out.println("[FakeSystaWeb] receiveNextDatagram: IOException thrown when waiting for data on "+inetAddress+":"+PORT);
 				e.printStackTrace();
 			}
 		}
@@ -627,11 +628,11 @@ public class FakeSystaWeb implements Runnable {
 			socket.send(replyPacket);
 		} catch (IOException ioe) {
 			// do nothing
-			System.out.println("[FakeSystaWeb] could not send reply: IOException, " + ioe.getMessage());
+			System.out.println("[FakeSystaWeb] send: could not send reply: IOException, " + ioe.getMessage());
 		}
 		 catch (IllegalArgumentException iae) {
 				// do nothing
-				System.out.println("[FakeSystaWeb] could not send reply: IllegalArgumentException, " + iae.getMessage());
+				System.out.println("[FakeSystaWeb] send: could not send reply: IllegalArgumentException, " + iae.getMessage());
 		}
 	}
 
@@ -726,9 +727,9 @@ public class FakeSystaWeb implements Runnable {
 			ZipOutputStream zos = new ZipOutputStream(fos);
 			// no checked needed, if the folder does not exist, it is empty
 			File folderToBeZipped = new File(LOG_PATH);
-
+			System.out.println(LOG_PATH);
 			File[] files = folderToBeZipped.listFiles(logFileFilter);
-			System.out.println("[FakeSystaWeb] found " + files.length + " files to be zipped");
+			System.out.println("[FakeSystaWeb] getAllLogs: found " + files.length + " files to be zipped");
 			for (File file : files) {
 				if (file.isDirectory()) {
 					// ignore directories
@@ -754,15 +755,21 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	public int deleteAllLogs() {
+	    File logDirectory = new File(LOG_PATH);
+	    if (!logDirectory.exists() || !logDirectory.isDirectory()) {
+	        System.out.println("[FakeSystaWeb] deleteAllLogs: LOG_PATH does not exist or is not a directory.");
+	        return 0;
+	    }
+
 		AtomicInteger i = new AtomicInteger(0);
-		Arrays.stream(new File(LOG_PATH).listFiles(logFileFilter)).forEach(file -> {
+		Arrays.stream(logDirectory.listFiles(logFileFilter)).forEach(file -> {
 			if (file.delete()) {
-				System.out.println("[FakeSystaWeb] deleted "+file.getName());
+				System.out.println("[FakeSystaWeb] deleteAllLogs: deleted "+file.getName());
 				i.incrementAndGet();
 			}
 		});
 		if(i.get() != (logRaw.getWriterFileCount()+logInt.getWriterFileCount())) {
-			System.out.println("[FakeSystaWeb] missmatch in numbers. Deleted "+i.get()+" files, but loggers had counted "+(logRaw.getWriterFileCount()+logInt.getWriterFileCount())+" files.");
+			System.out.println("[FakeSystaWeb] deleteAllLogs: missmatch in numbers. Deleted "+i.get()+" files, but loggers had counted "+(logRaw.getWriterFileCount()+logInt.getWriterFileCount())+" files.");
 		}
 		logRaw.setWriterFileCount(0);
 		logInt.setWriterFileCount(0);
