@@ -25,8 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.nio.file.Files;
 import java.nio.file.Path; // For @TempDir
 // Reflection for changeDefaultLogDir is no longer needed
@@ -61,19 +59,16 @@ import jakarta.ws.rs.core.Application;
 import jakarta.ws.rs.core.MediaType; // Needed for content type checks
 import jakarta.ws.rs.core.Response;
 import java.io.InputStream; // Needed for zip stream check
-import java.io.OutputStream;
 import java.io.IOException; // Needed for InputStream operations
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream; // Needed for zip stream check
 import java.io.File; // Added for readHexTextIntoByteBuffer
 import java.io.FileNotFoundException; // Added for readHexTextIntoByteBuffer
-import java.io.FileOutputStream;
 import java.util.Scanner; // Added for readHexTextIntoByteBuffer
 import java.nio.ByteBuffer; // Added for readHexTextIntoByteBuffer
 import java.nio.ByteOrder; // Added for readHexTextIntoByteBuffer, assuming LITTLE_ENDIAN is needed
 import java.lang.reflect.Field; // Added for getFakeSystaWebInstance
 import java.lang.reflect.Method; // Added for feedDataToFakeSystaWeb
-import java.lang.reflect.InvocationTargetException; // Added for reflection on getInstance
 import de.freaklamarsch.systarest.FakeSystaWeb; // Added for FakeSystaWeb type
 import java.util.ArrayList; // Added for testData list
 import java.util.List; // Added for testData list

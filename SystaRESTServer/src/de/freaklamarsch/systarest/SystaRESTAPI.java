@@ -57,15 +57,16 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 
 /**
- /**
- * A REST API for interacting with the Paradigma SystaComfort system.
- * This API provides endpoints for retrieving system status, monitoring raw data, and managing logging.
- * This class is intended to be run by a {@link SystaRESTServer}
+ * /** A REST API for interacting with the Paradigma SystaComfort system. This
+ * API provides endpoints for retrieving system status, monitoring raw data, and
+ * managing logging. This class is intended to be run by a
+ * {@link SystaRESTServer}
  */
 @Path("{systarest : (?i)systarest}")
 public class SystaRESTAPI {
 	public final static String PROP_PARADIGMA_IP = "PARADIGMA_IP";
-	public static final String PROP_LOG_DIR = "de.freaklamarsch.systarest.LogDirectory"; // New property for log directory
+	public static final String PROP_LOG_DIR = "de.freaklamarsch.systarest.LogDirectory"; // New property for log
+																							// directory
 	private static FakeSystaWeb fsw = null;
 	private static Thread t = null;
 	private final Map<String, Object> config = new HashMap<>();
@@ -91,12 +92,13 @@ public class SystaRESTAPI {
 	}
 
 	/**
-	 * Returns the singleton instance of SystaRESTAPI.
-	 * This is package-private for access from tests or other closely related classes.
+	 * Returns the singleton instance of SystaRESTAPI. This is package-private for
+	 * access from tests or other closely related classes.
+	 * 
 	 * @return The SystaRESTAPI instance.
 	 */
 	static SystaRESTAPI getInstance() {
-	    return instance;
+		return instance;
 	}
 
 	/**
