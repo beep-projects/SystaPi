@@ -2,7 +2,7 @@
 <img src="systapi/banner.png" alt="SystaPi" style="width:100%;"/>
 </div>
 
-<sup>\[[Back to README](..\README.md)\]</sup>
+<sup>\[[Back to README](../README.md)\]</sup>
 
 Welcome future contributor, this document shall give you an overview of the Java services developed for SystaPi and give you a starting point for extending their functionality.  
 The project is set up without any sophisticated build pipeline, you just need to run the `build.sh` for compiling the code.
@@ -576,4 +576,4 @@ public DatagramPacket processCommands(DatagramPacket packet) {
 By following these steps, you can define new commands and integrate their handling into the `FakeSTouch` simulation. Remember to thoroughly test any new commands or UI elements.
 """
 
-<sup>\[[Back to Contents](#contents)\] \[[Back to README](..\README.md)\]</sup>
+<sup>\[[Back to Contents](#contents)\] \[[Back to README](../README.md)\]</sup>

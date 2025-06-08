@@ -3,7 +3,7 @@
 </div>
 
 # Reverse Engineering of Protocols
-<sup>\[[Back to README](..\README.md)\]</sup>
+<sup>\[[Back to README](../README.md)\]</sup>
 
 The SystaComfort communicates with the [S-Touch app](https://www.paradigma.de/produkte/regelungen-2/s-touch-app-2/) or the [SystaWeb portal](https://www.paradigma.de/produkte/apps-mehr/systaweb/).
 
@@ -82,4 +82,4 @@ stateDiagram-v2
     
     Crash --> [*]
 ```
-<sup>\[[Back to README](..\README.md)\] \[[Back to top](#reverse-engineering-of-protocols)\]</sup>
+<sup>\[[Back to README](../README.md)\] \[[Back to top](#reverse-engineering-of-protocols)\]</sup>

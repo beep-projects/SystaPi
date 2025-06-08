@@ -3,7 +3,7 @@
 </div>
 
 # How to contribute to SystaPi
-<sup>\[[Back to README](..\README.md)\]</sup>
+<sup>\[[Back to README](../README.md)\]</sup>
 
 Great that you're reading this, because every volunteer is truly welcome to improve this project. This page shall help you to get the needed information on how you can contribute. If you do not find the needed information on this page, just [open a new discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) for that topic.
 ## Contents
@@ -34,4 +34,4 @@ Great that you're reading this, because every volunteer is truly welcome to impr
 
 - If you have collected positive feedback in the [Discussions](https://github.com/beep-projects/SystaPi/discussions) and finished your work, [open a new pull request](https://github.com/beep-projects/SystaPi/compare) with the patch.
 
-<sup>\[[Back to README](..\README.md)\] \[[Back to top](#how-to-contribute-to-systapi)\]</sup>
+<sup>\[[Back to README](../README.md)\] \[[Back to top](#how-to-contribute-to-systapi)\]</sup>
