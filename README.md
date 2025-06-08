@@ -108,6 +108,7 @@ SystaPi
 ```
 
 ## Parts List
+<sup>\[[Back to Content](#content)\]</sup>
 
 This is what I am using for this project, but any Raspberry Pi with at least one Ethernet interface and a second WiFi or Ethernet interface should do the job. The required size of the Micro SD card depends on the amount of data you want to log. Logging data of one day requires ~100 MB.
 
@@ -125,6 +126,7 @@ Of course you also need a Paradigma SystaComfort or Paradigmy SystaComfort II. T
 | **Basis**        |   | `V0.23`          |   | `V0.34`           |   | `V0.23`           |
 
 ## Installation
+<sup>\[[Back to Content](#content)\]</sup>
 
 For easy installation I have created some scripts that configure the Raspberry Pi OS automatically on a Micro SD card. These scripts are not actively maintained, so they might stop working at some time. If auto configuration fails, step through the files `firstrun.sh` and `secondrun.sh` and run the commands manually on your `systapi`. Your are also welcome to fix the scripts and create a pull request to this repository.
 
@@ -144,6 +146,8 @@ You have to make sure that your Paradigma SystaComfort unit is sending unencrypt
  [english](https://github.com/xgcssch/SystaComfortPrometheusExporter#configure-systacomfort-controller)/[german](https://github.com/xgcssch/SystaComfortPrometheusExporter/blob/main/README_de.md#voraussetzungen)
 
 ### Linux
+<sup>\[[Back to Content](#content)\]</sup>
+
 <details>
 <summary>Expand instructions</summary>
 
@@ -223,6 +227,8 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 </details>
 
 ### Windows / manual installation
+<sup>\[[Back to Content](#content)\]</sup>
+
 <details>
 <summary>Expand instructions</summary>
 
@@ -301,6 +307,8 @@ For troubleshooting, you can check the progress by checking the logs. After 5 mi
 </details>
 
 ### Troubleshooting the installation
+<sup>\[[Back to Content](#content)\]</sup>
+
 
 1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong.
 2. If the pi does not boot, check if you did step 7 in case of a manual installation.
@@ -310,6 +318,8 @@ Each script creates a log file, so check `firstrun.log`, `secondrun.log` and `th
 `systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
 
 ## The SystaRESTServer
+<sup>\[[Back to Content](#content)\]</sup>
+
 Per default, the SystaREST server is listening on port `1337`, you can change this by editing `/home/pi/SystaRESTServer/bin/SystaREST.properties`.
 The hostname of the Raspberry Pi is set to `systapi`.
 There are two services running by default. The first one is **SystaREST** for reading values from a SystaComfort unit and the second one is **STouchREST** which emulates the S-Touch app for providing write access to the SystaComfort unit.
@@ -318,6 +328,8 @@ The root path for the both services are: `systarest`, or `SystaREST` and  `stouc
 By default you should be able to access the server via `http://systapi:1337/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the IP assigned to your server by the router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 
 ### The SystaREST API
+<sup>\[[Back to Content](#content)\]</sup>
+
 <details>
 <summary>Expand API description</summary>
 
@@ -436,7 +448,7 @@ curl "http://systapi:1337/SystaREST/rawdata"
 ```
 
 #### dashboard
-<a id="dashboard"></a>
+
 `GET` `/SystaREST/dashboard`  
 [http://systapi:1337/SystaREST/dashboard](http://systapi:1337/SystaREST/dashboard)  
 
@@ -770,10 +782,11 @@ Responses:
 </details>
 
 ## Contribute
+<sup>\[[Back to Content](#content)\]</sup>
 
-I highly appreciate contributions, especially information to help refine the understanding of the Paradigma communication protocols, as this project relies on reverse engineering. Information relevant for code contributions are given in [DEVELOPMENT.md](DEVELOPMENT.md).
+I highly appreciate contributions, especially information to help refine the understanding of the Paradigma communication protocols, as this project relies on reverse engineering. Information relevant for code contributions are given in [DEVELOPMENT.md](resources/DEVELOPMENT.md).
 
-**Before contributing, please read the [CONTRIBUTING.md](CONTRIBUTING.md) guide.** It provides detailed instructions on how to report bugs, submit patches, ask questions, and propose new features.
+**Before contributing, please read the [CONTRIBUTING.md](resources/CONTRIBUTING.md) guide.** It provides detailed instructions on how to report bugs, submit patches, ask questions, and propose new features.
 
 **Key ways to contribute:**
 
@@ -783,13 +796,14 @@ I highly appreciate contributions, especially information to help refine the und
         *   **SystaREST API:** Use the [logging features](#enablelogging), explore the [dashboard](#dashboard), and utilize [monitorrawdata](#monitorrawdata) to capture and analyze data from your system.
         *   **STouchREST API:** The [debugscreen](#debugscreen) can help you understand S-Touch interactions.
     *   **Sharing your findings:** If you discover new fields or protocol details, please [start a new discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) to share your insights. This is the preferred way to report such information.
-*   **Bug Reports & Fixes:** If you find a bug, please check existing [Issues](https://github.com/beep-projects/SystaPi/issues) and then submit a new one if needed. Patches are welcome via Pull Requests (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+*   **Bug Reports & Fixes:** If you find a bug, please check existing [Issues](https://github.com/beep-projects/SystaPi/issues) and then submit a new one if needed. Patches are welcome via Pull Requests (see [CONTRIBUTING.md](resources/CONTRIBUTING.md)).
 *   **Feature Enhancements:** If you have ideas for new features or improvements to existing ones, please discuss them first in [Discussions](https://github.com/beep-projects/SystaPi/discussions).
 
 <img src="resources/systapidashboard.jpg" alt="SystaPi Dashboard" style="width:45%;"/> <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;"/>
 <img src="resources/debug_screen.jpg" alt="Debug Screen" style="width:45%;"/>
 
 ## Known Issues
+<sup>\[[Back to Content](#content)\]</sup>
 
 There are some ENC28J60 modules sold with wrong jumper settings. Make sure you set the jumpers as in the picture on the left (vertically connecting the PINs).
 
@@ -798,10 +812,11 @@ There are some ENC28J60 modules sold with wrong jumper settings. Make sure you s
 | ![correct jumper settings](resources/enc28j60_right.jpg) | ![wrong jumper settings](resources/enc28j60_wrong.jpg) |
 
 ## Links
+<sup>\[[Back to Content](#content)\]</sup>
 
 * [SystaREST Javadoc](http://beep-projects.github.io/SystaPi)
 * [Paradigma Downloads](http://www.paradigma.de/software/)
 * [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/)
 * [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter)
-* [ParadigmaHeatingReader](https://github.com/kayr7/ParadigmaHeatingReader) also read [protocols](https://github.com/beep-projects/SystaPi/blob/main/resources/protocols.md) if you want to buils anything on top of that (S-touch App)
+* [ParadigmaHeatingReader](https://github.com/kayr7/ParadigmaHeatingReader) also read [protocols](resources/protocols.md) if you want to buils anything on top of that (S-touch App)
 
