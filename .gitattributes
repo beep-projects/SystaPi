@@ -1,5 +1,6 @@
-docs/** linguist-generated
+docs/** linguist-documentation
 SystaRESTServer/bin/** linguist-generated
+SystaRESTServer/lib/** linguist-vendored
 SystaRESTServer/src/de/freaklamarsch/systarest/tests/*.h linguist-generated
 SystaRESTServer/src/de/freaklamarsch/systarest/tests/*.txt linguist-generated
 SystaRESTServer/src/*.html linguist-generated
