@@ -21,7 +21,7 @@ The project is set up without any sophisticated build pipeline, you just need to
     - [Step 1: Define its Base Structure as an Object in `STouchProtocol.java`](#step-1-define-its-base-structure-as-an-object-in-stouchprotocoljava)
     - [Step 2: Create an `ObjectReaderWriter` for the New Object in `STouchProtocol.java`](#step-2-create-an-objectreaderwriter-for-the-new-object-in-stouchprotocoljava)
     - [Step 3: Create a Display Object in `FakeSTouchDisplay.java`](#step-3-create-a-display-object-in-fakestouchdisplayjava)
-    - [Step 4: Handle the Command in `FakeSTouch.java` (Not explicitly requested but implied for functionality)](#step-4-handle-the-command-in-fakestouchjava-not-explicitly-requested-but-implied-for-functionality)
+    - [Step 4: Handle the Command in `FakeSTouch.java`](#step-4-handle-the-command-in-fakestouchjava)
   - [5. How to Implement a New Command](#5-how-to-implement-a-new-command)
     - [Step 1: Define the Command in `STouchProtocol.java`](#step-1-define-the-command-in-stouchprotocoljava)
     - [Step 2: Implement Handling in `processCommands` of `FakeSTouch.java`](#step-2-implement-handling-in-processcommands-of-fakestouchjava)
@@ -166,7 +166,7 @@ To make the new attribute accessible, you'll typically add it to the `SystaStatu
 
 By following these steps, you can extend `FakeSystaWeb` to support new attributes from the Paradigma heating system.
 
-# FakeSTouch Development Documentation
+# FakeSTouch
 
 <div align="center">
 <img src="resources/fakestouch_classes.excalidraw.png" alt="FakeSyTouch" style="width:100%;"/>
@@ -428,7 +428,7 @@ public class FakeSTouchDisplay {
 }
 ```
 
-### Step 4: Handle the Command in `FakeSTouch.java` (Not explicitly requested but implied for functionality)
+### Step 4: Handle the Command in `FakeSTouch.java`
 
 You would then need to make `FakeSTouch.java` call `display.setProgressBar()` when it processes the `DISPLAY_SETPROGRESSBAR` command.
 

@@ -8,9 +8,9 @@
 
 # SystaPi, SystaREST and STouchREST
 
-**SystaPi** provides REST APIs for communication with [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs. It is build for running on any Raspberry Pi, but you should easily get it running on any Linux you like.  
-The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. The server is running two services, **SystaRESTAPI** for reading values from the Sytsa Comfort unit and **STouchRESTAPI** for writing to the Systa Comfort, e.g. selecting the operation mode.  
-**Important Note:** The communication protocols use by the Systa Comfort unit are not publicly documented! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. Therefore, **please [contribute](#contribute) information from your system!**  
+The goal of **SystaPi** is to make the [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) compatible with home automation system via REST APIs. It is developed for running on a Raspberry Pi, but you should easily get it running on any Linux you like.  
+The project contains an installation script to setup a Raspberry Pi as SystaPi, which runs the SystaREST server. SystaREST server provides two services, **SystaRESTAPI** for reading values from the SytsaComfort unit and **STouchRESTAPI** for writing to the SystaComfort, e.g. selecting the operation mode.  
+**Important Note:** The communication protocols use by the SystaComfort unit are not publicly documented! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. Therefore, **please [contribute](#contribute) information from your system!**  
 
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).  
 
@@ -36,9 +36,9 @@ This quick guide is for using SystaPi just as it is meant to be.
     *   **Recommended:** Follow the installation instructions for [Linux](#linux) if you are comfortable with it, as it provides an automated setup script.
     *   **Alternative:** Use the [Windows / manual installation](#windows--manual-installation) guide for more control or if you're not using Linux for the setup.
 3.  **Accessing the API:**
-    *   You should then be able to access the SystaREST server's WADL at `http://systapi:1337/application.wadl?detail=true` (or using the Pi's IP address if hostname resolution isn't working).
+    *   You should then be able to access the SystaREST server's WADL at [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true) (or using the Pi's IP address if hostname resolution isn't working).
     *   Explore the [SystaREST API](#the-systarest-api) and [STouchREST API](#the-stouchrest-api) sections to understand how to query data and control your system. The `curl` examples are a good starting point.
-    *   The [dashboard](#dashboard) (`http://systapi:1337/SystaREST/dashboard`) provides a web interface to view data.
+    *   The [dashboard](#dashboard) ([http://systapi:1337/SystaREST/dashboard](http://systapi:1337/SystaREST/dashboard)) provides a web interface to view data.
 4.  **Home Automation Integration:** Use the REST APIs to integrate with your preferred home automation system (e.g., Home Assistant, OpenHAB). Please share your work by opening a [discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) on it.
 
 For developers or those wishing to understand the project structure deeply, please see [DEVELOPMENT.md](DEVELOPMENT.md), [protocols.md](resources/protocols.md) and the [Contribute](#contribute) sections.
@@ -180,7 +180,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    # but you also can enter your passphrase as plain text, if you accept the potential insecurity of that approach
    SSID=MY_WIFI
    WPA_PASSPHRASE=3755b1112a687d1d37973547f94d218e6673f99f73346967a6a11f4ce386e41e
-   # define the network to use for communication between systapi and Systa Comfort
+   # define the network to use for communication between systapi and SystaComfort
    # change if you use the same network range on your wifi network
    IP_PREFIX="192.168.1"
    # configure your timezone and key board settings
@@ -259,7 +259,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    # but you also can enter your passphrase as plain text, if you accept the potential insecurity of that approach
    SSID=MY_WIFI
    WPA_PASSPHRASE=3755b1112a687d1d37973547f94d218e6673f99f73346967a6a11f4ce386e41e
-   # define the network to use for communication between systapi and Systa Comfort
+   # define the network to use for communication between systapi and SystaComfort
    # change if you use the same network range on your wifi network
    IP_PREFIX="192.168.1"
    # configure your timezone and key board settings
@@ -312,7 +312,7 @@ Each script creates a log file, so check `firstrun.log`, `secondrun.log` and `th
 ## The SystaRESTServer
 Per default, the SystaREST server is listening on port `1337`, you can change this by editing `/home/pi/SystaRESTServer/bin/SystaREST.properties`.
 The hostname of the Raspberry Pi is set to `systapi`.
-There are two services running by default. The first one is **SystaREST** for reading values from a Systa Comfort unit and the second one is **STouchREST** which emulates the S-Touch app for providing write access to the Systa Comfort unit.
+There are two services running by default. The first one is **SystaREST** for reading values from a SystaComfort unit and the second one is **STouchREST** which emulates the S-Touch app for providing write access to the SystaComfort unit.
 The paths and method names on the REST server are implemented case insensitive.
 The root path for the both services are: `systarest`, or `SystaREST` and  `stouchrest`, or `STouchREST`, or any variation of that.
 By default you should be able to access the server via `http://systapi:1337/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the IP assigned to your server by the router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
@@ -406,7 +406,7 @@ curl "http://systapi:1337/SystaREST/servicestatus"
 
 `GET` `/SystaREST/rawdata`  
 [http://systapi:1337/SystaREST/rawdata](http://systapi:1337/SystaREST/rawdata)  
-Returns the raw data received from the Paradigma Systa Comfort with added timestamp information.
+Returns the raw data received from the Paradigma SystaComfort with added timestamp information.
 
 ```bash
 curl "http://systapi:1337/SystaREST/rawdata"
@@ -436,7 +436,7 @@ curl "http://systapi:1337/SystaREST/rawdata"
 ```
 
 #### dashboard
-
+<a id="dashboard"></a>
 `GET` `/SystaREST/dashboard`  
 [http://systapi:1337/SystaREST/dashboard](http://systapi:1337/SystaREST/dashboard)  
 
@@ -453,7 +453,7 @@ Optional parameters:
 
 * `theme` default `SystaREST` other possible value `systaweb` 
 
-Returns a React-based HTML page for monitoring of the raw data received from the Paradigma Systa Comfort. The content of the page should automatically refresh, but be aware that the SystaComfort sends its data only every minute, so parameter changes on the unit will be displayed with some lag. Call this function from your browser, to see something like:
+Returns a React-based HTML page for monitoring of the raw data received from the Paradigma SystaComfort. The content of the page should automatically refresh, but be aware that the SystaComfort sends its data only every minute, so parameter changes on the unit will be displayed with some lag. Call this function from your browser, to see something like:
 
 | [http://systapi:1337/SystaREST/monitorrawdata](http://systapi:1337/SystaREST/monitorrawdata) |   | [http://systapi:1337/SystaREST/monitorrawdata?theme=systaweb](http://systapi:1337/SystaREST/monitorrawdata?theme=systaweb) |
 |----------------------------------------------------------------------------------------------|---|----------------------------------------------------------------------------------------------------------------------------|
