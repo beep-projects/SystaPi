@@ -43,7 +43,7 @@ This quick guide is for using SystaPi just as it is meant to be.
 
 For developers or those wishing to understand the project structure deeply, please see [DEVELOPMENT.md](DEVELOPMENT.md), [protocols.md](resources/protocols.md) and the [Contribute](#contribute) sections.
 
-## Content
+## Contents
 
 - [Project Status](#project-status)
 - [Getting Started](#getting-started)
@@ -81,6 +81,7 @@ For developers or those wishing to understand the project structure deeply, plea
 - [Links](#links)
 
 ## Directory Structure of this Project
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 ```
 SystaPi
@@ -108,7 +109,7 @@ SystaPi
 ```
 
 ## Parts List
-<sup>\[[Back to Content](#content)\]</sup>
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 This is what I am using for this project, but any Raspberry Pi with at least one Ethernet interface and a second WiFi or Ethernet interface should do the job. The required size of the Micro SD card depends on the amount of data you want to log. Logging data of one day requires ~100 MB.
 
@@ -126,7 +127,7 @@ Of course you also need a Paradigma SystaComfort or Paradigmy SystaComfort II. T
 | **Basis**        |   | `V0.23`          |   | `V0.34`           |   | `V0.23`           |
 
 ## Installation
-<sup>\[[Back to Content](#content)\]</sup>
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 For easy installation I have created some scripts that configure the Raspberry Pi OS automatically on a Micro SD card. These scripts are not actively maintained, so they might stop working at some time. If auto configuration fails, step through the files `firstrun.sh` and `secondrun.sh` and run the commands manually on your `systapi`. Your are also welcome to fix the scripts and create a pull request to this repository.
 
@@ -146,7 +147,7 @@ You have to make sure that your Paradigma SystaComfort unit is sending unencrypt
  [english](https://github.com/xgcssch/SystaComfortPrometheusExporter#configure-systacomfort-controller)/[german](https://github.com/xgcssch/SystaComfortPrometheusExporter/blob/main/README_de.md#voraussetzungen)
 
 ### Linux
-<sup>\[[Back to Content](#content)\]</sup>
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 <details>
 <summary>Expand instructions</summary>
@@ -227,7 +228,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 </details>
 
 ### Windows / manual installation
-<sup>\[[Back to Content](#content)\]</sup>
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 <details>
 <summary>Expand instructions</summary>
@@ -307,8 +308,7 @@ For troubleshooting, you can check the progress by checking the logs. After 5 mi
 </details>
 
 ### Troubleshooting the installation
-<sup>\[[Back to Content](#content)\]</sup>
-
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong.
 2. If the pi does not boot, check if you did step 7 in case of a manual installation.
@@ -318,7 +318,7 @@ Each script creates a log file, so check `firstrun.log`, `secondrun.log` and `th
 `systemctl status SystaRESTServer.service` will show you if the service is running or died for some reason
 
 ## The SystaRESTServer
-<sup>\[[Back to Content](#content)\]</sup>
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 Per default, the SystaREST server is listening on port `1337`, you can change this by editing `/home/pi/SystaRESTServer/bin/SystaREST.properties`.
 The hostname of the Raspberry Pi is set to `systapi`.
@@ -328,7 +328,7 @@ The root path for the both services are: `systarest`, or `SystaREST` and  `stouc
 By default you should be able to access the server via `http://systapi:1337/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the IP assigned to your server by the router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 
 ### The SystaREST API
-<sup>\[[Back to Content](#content)\]</sup>
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 <details>
 <summary>Expand API description</summary>
@@ -782,7 +782,7 @@ Responses:
 </details>
 
 ## Contribute
-<sup>\[[Back to Content](#content)\]</sup>
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 I highly appreciate contributions, especially information to help refine the understanding of the Paradigma communication protocols, as this project relies on reverse engineering. Information relevant for code contributions are given in [DEVELOPMENT.md](resources/DEVELOPMENT.md).
 
@@ -803,7 +803,7 @@ I highly appreciate contributions, especially information to help refine the und
 <img src="resources/debug_screen.jpg" alt="Debug Screen" style="width:45%;"/>
 
 ## Known Issues
-<sup>\[[Back to Content](#content)\]</sup>
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 There are some ENC28J60 modules sold with wrong jumper settings. Make sure you set the jumpers as in the picture on the left (vertically connecting the PINs).
 
@@ -812,7 +812,7 @@ There are some ENC28J60 modules sold with wrong jumper settings. Make sure you s
 | ![correct jumper settings](resources/enc28j60_right.jpg) | ![wrong jumper settings](resources/enc28j60_wrong.jpg) |
 
 ## Links
-<sup>\[[Back to Content](#content)\]</sup>
+<sup>\[[Back to Contents](#contents)\]</sup>
 
 * [SystaREST Javadoc](http://beep-projects.github.io/SystaPi)
 * [Paradigma Downloads](http://www.paradigma.de/software/)
