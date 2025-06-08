@@ -57,7 +57,7 @@ public class STouchRESTAPI {
 	private static FakeSTouch fst = null;
 
 	public STouchRESTAPI() {
-		if(fst == null) {
+		if (fst == null) {
 			fst = new FakeSTouch();
 		}
 	}
@@ -145,7 +145,7 @@ public class STouchRESTAPI {
 	 * @return a {@link Response} indicating the result of the touch event
 	 */
 	@POST
-	@Path("/touch")
+	@Path("{touch : (?i)touch}")
 	public Response touch(@QueryParam("x") int x, @QueryParam("y") int y) {
 		fst.touch(x, y);
 		return Response.ok().build();
@@ -292,28 +292,28 @@ public class STouchRESTAPI {
 	/**
 	 * Executes a sequence of commands provided as query parameters.
 	 *
-	 * @param queryParams the commands to execute. Supported commands are: connect
-	 *                    connect to the SystaComfort unit touch=x,y emulate a touch
-	 *                    event on screen coordinates x and y touchText=text emulate
-	 *                    a touch event on the given text, if it is in the object
-	 *                    tree of the screen touchButton=id emulate a touch event on
-	 *                    the button with the given id, if it is in the object tree
-	 *                    of the screen whileText=text&amp;doAction while the given
-	 *                    text is in the object tree of the screen, do the given
-	 *                    action whileButton=id&amp;doAction while the button with
-	 *                    the given id is in the object tree of the screen, do the
-	 *                    given action
-	 *                    checkText=text&amp;theDoThisAction&amp;elseDoThisAction if
-	 *                    the given text is in the object tree of the screen, then
-	 *                    do the first action, else do the second
-	 *                    checkButton=id&amp;theDoThisAction&amp;elseDoThisAction if
-	 *                    the button with the given id is in the object tree of the
-	 *                    screen, then do the first action, else do the second
-	 *                    disconnect disconnect from the SystaComfort unit
+	 * @param uriInfo uriInfo is parsed to retrieve the query parameters, which are
+	 *                the commands that assemble the automation. Supported commands
+	 *                are: connect connect to the SystaComfort unit touch=x,y
+	 *                emulate a touch event on screen coordinates x and y
+	 *                touchText=text emulate a touch event on the given text, if it
+	 *                is in the object tree of the screen touchButton=id emulate a
+	 *                touch event on the button with the given id, if it is in the
+	 *                object tree of the screen whileText=text&amp;doAction while
+	 *                the given text is in the object tree of the screen, do the
+	 *                given action whileButton=id&amp;doAction while the button with
+	 *                the given id is in the object tree of the screen, do the given
+	 *                action checkText=text&amp;theDoThisAction&amp;elseDoThisAction
+	 *                if the given text is in the object tree of the screen, then do
+	 *                the first action, else do the second
+	 *                checkButton=id&amp;theDoThisAction&amp;elseDoThisAction if the
+	 *                button with the given id is in the object tree of the screen,
+	 *                then do the first action, else do the second disconnect
+	 *                disconnect from the SystaComfort unit
 	 * @return a {@link Response} indicating the result of the automation
 	 */
 	@GET
-	@Path("automation")
+	@Path("{automation : (?i)automation}")
 	public Response automation(@Context UriInfo uriInfo) {
 		String query = uriInfo.getRequestUri().getQuery();
 		String[] commandArray = query.split("&");

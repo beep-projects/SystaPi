@@ -8,9 +8,9 @@
 
 # SystaPi, SystaREST and STouchREST
 
-**SystaPi** provides a REST API for communication with [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs.
-The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. The server is running two services, SystaRESTAPI for reading values from the Sytsa Comfort unit and STouchRESTAPI for writing to the Systa Comfort, e.g. selecting the operation mode.  
-**Important Note:** The communication protocols use by the Systa Comfort unit are not publicly available! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. **Please [contribute](#contribute) information from your system!**  
+**SystaPi** provides REST APIs for communication with [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) units. The goal of this project is to make the Paradigma system compatible with every home automation system that supports REST APIs. It is build for running on any Raspberry Pi, but you should easily get it running on any Linux you like.  
+The project contains an installation script to setup a Raspberry Pi as SystaPi for running the SystaREST server. The server is running two services, **SystaRESTAPI** for reading values from the Sytsa Comfort unit and **STouchRESTAPI** for writing to the Systa Comfort, e.g. selecting the operation mode.  
+**Important Note:** The communication protocols use by the Systa Comfort unit are not publicly documented! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. Therefore, **please [contribute](#contribute) information from your system!**  
 
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).  
 
@@ -19,31 +19,29 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
 
 ## Project Status
 
-This project is currently [**MAINTAINER TO FILL IN: e.g., actively maintained, in maintenance mode, looking for new maintainers, archived**].
+This project is updated irregularly or provided with new features.
 
 Key points:
-*   **Latest Release:** [vX.Y.Z](link-to-release) - *(Maintainer: Please verify and update this link if it differs from v2.2 mentioned in the installation guide).*
-*   **Known Limitations:** While comprehensive, be aware that the communication protocols are reverse-engineered. Compatibility with all Paradigma system versions is not guaranteed. See [Known Issues](#known-issues) and [Contribute](#contribute) for more details.
-*   **Future Development:** [**MAINTAINER TO FILL IN: e.g., No major new features are planned / We are working on X / Community contributions for Y are welcome.**]
-*   **Installation Scripts:** The provided installation scripts (`install_systapi.sh`, `SystaPi_files/*.sh`) are offered as-is and may require updates for the latest Raspberry Pi OS versions. Manual installation steps are also provided.
+*   **Latest Release:** [2.2 "Bookworm"](https://github.com/beep-projects/SystaPi/releases/tag/2.2)
+*   **Future Development:** New releases are always prepared on the **main** branch. Currently version **"3.0 S-Touch"** is in preparation. If you want to get a sneak peek on it, check it out and [contribute](#contribute) your test results.
+*   **Known Limitations:** Compatibility with any SystaComfort software versions is not guaranteed. See [Known Issues](#known-issues) and [Contribute](#contribute) for more details.
+*   **Installation Scripts:** The provided installation scripts (`install_systapi.sh`, `SystaPi_files/*.sh`) are offered as-is and may require updates for the latest Raspberry Pi OS versions.
 
 ## Getting Started
 
-This guide is for users who want to set up and use SystaPi with their Paradigma heating system.
+This quick guide is for using SystaPi just as it is meant to be.
 
-1.  **Hardware:** Obtain the necessary [Hardware Components](#parts-list) (Raspberry Pi Zero WH, ENC28J60 Ethernet HAT, SD card).
+1.  **Hardware:** Use any Raspberry Pi, best support is given for the [Hardware Components](#parts-list) that I use.
 2.  **Installation:**
-    *   **Recommended:** Follow the [Linux](#linux) installation instructions if you are comfortable with it, as it provides an automated setup script.
+    *   **Recommended:** Follow the installation instructions for [Linux](#linux) if you are comfortable with it, as it provides an automated setup script.
     *   **Alternative:** Use the [Windows / manual installation](#windows--manual-installation) guide for more control or if you're not using Linux for the setup.
-    *   **Important:** Pay close attention to the configuration details in `firstrun.sh` as described in the installation guides.
-3.  **Verification:** Once your Raspberry Pi (SystaPi) is set up and connected to your Paradigma SystaComfort unit, wait for the system to initialize (can take ~20 minutes as noted in the installation guide).
-4.  **Accessing the API:**
+3.  **Accessing the API:**
     *   You should then be able to access the SystaREST server's WADL at `http://systapi:1337/application.wadl?detail=true` (or using the Pi's IP address if hostname resolution isn't working).
     *   Explore the [SystaREST API](#the-systarest-api) and [STouchREST API](#the-stouchrest-api) sections to understand how to query data and control your system. The `curl` examples are a good starting point.
     *   The [dashboard](#dashboard) (`http://systapi:1337/SystaREST/dashboard`) provides a web interface to view data.
-5.  **Home Automation Integration:** Use the REST APIs to integrate with your preferred home automation system (e.g., Home Assistant, OpenHAB). A sample [Home Assistant water heater configuration](#waterheater) is provided.
+4.  **Home Automation Integration:** Use the REST APIs to integrate with your preferred home automation system (e.g., Home Assistant, OpenHAB). Please share your work by opening a [discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) on it.
 
-For developers or those wishing to understand the project structure deeply, please see the [Directory Structure](#directory-structure-of-this-project) and [Contribute](#contribute) sections.
+For developers or those wishing to understand the project structure deeply, please see [DEVELOPMENT.md](DEVELOPMENT.md), [protocols.md](resources/protocols.md) and the [Contribute](#contribute) sections.
 
 ## Content
 
@@ -146,6 +144,8 @@ You have to make sure that your Paradigma SystaComfort unit is sending unencrypt
  [english](https://github.com/xgcssch/SystaComfortPrometheusExporter#configure-systacomfort-controller)/[german](https://github.com/xgcssch/SystaComfortPrometheusExporter/blob/main/README_de.md#voraussetzungen)
 
 ### Linux
+<details>
+<summary>Expand instructions</summary>
 
 For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto a Micro SD card. The script was mainly written out of curiosity to see how that could work. So it has no added sanity checks and you should use it with care. Check each step, when asked to confirm. If unsure, follow the manual installation guide.
 
@@ -220,8 +220,11 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
    ssh -x beep@systapi.local
    tail -f /boot/secondrun.log
    ```
+</details>
 
 ### Windows / manual installation
+<details>
+<summary>Expand instructions</summary>
 
 1. Install Raspberry Pi OS following this [guide](https://www.raspberrypi.com/documentation/computers/getting-started.html#installing-the-operating-system).
    [Raspberry Pi OS Lite](https://www.raspberrypi.org/software/operating-systems/#raspberry-pi-os-32-bit) is sufficient.
@@ -295,6 +298,7 @@ For troubleshooting, you can check the progress by checking the logs. After 5 mi
     ssh -x beep@systapi.local
     tail -f /boot/secondrun.log
     ```
+</details>
 
 ### Troubleshooting the installation
 
@@ -308,12 +312,14 @@ Each script creates a log file, so check `firstrun.log`, `secondrun.log` and `th
 ## The SystaRESTServer
 Per default, the SystaREST server is listening on port `1337`, you can change this by editing `/home/pi/SystaRESTServer/bin/SystaREST.properties`.
 The hostname of the Raspberry Pi is set to `systapi`.
-There are two services running by default. The first one is SystaREST for reading values from a Systa Comfort unit and the second one is STouchREST which emulates the S-Touch app for providing write access to the Systa Comfort unit.
+There are two services running by default. The first one is **SystaREST** for reading values from a Systa Comfort unit and the second one is **STouchREST** which emulates the S-Touch app for providing write access to the Systa Comfort unit.
 The paths and method names on the REST server are implemented case insensitive.
 The root path for the both services are: `systarest`, or `SystaREST` and  `stouchrest`, or `STouchREST`, or any variation of that.
 By default you should be able to access the server via `http://systapi:1337/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the IP assigned to your server by the router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 
 ### The SystaREST API
+<details>
+<summary>Expand API description</summary>
 
 If a command is called which should retrieve data from the SystaREST, but the communication is not running, `start` is automatically called, but the reply will be empty until the first data packet is received from the Paradigma SystaComfort. Data packets are sent every minute.
 
@@ -627,7 +633,11 @@ stop the logging of received data packets. This writes all currently stored data
 ```bash
 curl -X PUT http://systapi:1337/SystaREST/disblelogging
 ```
+</details>
+
 ### The STouchREST API
+<details>
+<summary>Expand instructions</summary>
 
 The `STouchREST` API emulates the S-Touch app to interact with the Paradigma SystaComfort system. It provides endpoints for connecting to the device, simulating touch events, retrieving the screen state, and automating sequences of actions.
 
@@ -757,12 +767,13 @@ Responses:
 
 `200 OK`: Automation executed successfully.  
 `500 Internal Server Error`: Command failed.
+</details>
 
 ## Contribute
 
-We highly appreciate contributions, especially information to help refine our understanding of the Paradigma communication protocols, as this project relies on reverse engineering.
+I highly appreciate contributions, especially information to help refine the understanding of the Paradigma communication protocols, as this project relies on reverse engineering. Information relevant for code contributions are given in [DEVELOPMENT.md](DEVELOPMENT.md).
 
-**Before contributing, please read our [CONTRIBUTING.md](CONTRIBUTING.md) guide.** It provides detailed instructions on how to report bugs, submit patches, ask questions, and propose new features.
+**Before contributing, please read the [CONTRIBUTING.md](CONTRIBUTING.md) guide.** It provides detailed instructions on how to report bugs, submit patches, ask questions, and propose new features.
 
 **Key ways to contribute:**
 
@@ -772,7 +783,7 @@ We highly appreciate contributions, especially information to help refine our un
         *   **SystaREST API:** Use the [logging features](#enablelogging), explore the [dashboard](#dashboard), and utilize [monitorrawdata](#monitorrawdata) to capture and analyze data from your system.
         *   **STouchREST API:** The [debugscreen](#debugscreen) can help you understand S-Touch interactions.
     *   **Sharing your findings:** If you discover new fields or protocol details, please [start a new discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) to share your insights. This is the preferred way to report such information.
-*   **Bug Reports & Fixes:** If you find a bug, please check existing [Issues](https://github.com/beep-projects/SystaPi/issues) and then submit a new one if needed. Patches are welcome via Pull Requests (see `CONTRIBUTING.md`).
+*   **Bug Reports & Fixes:** If you find a bug, please check existing [Issues](https://github.com/beep-projects/SystaPi/issues) and then submit a new one if needed. Patches are welcome via Pull Requests (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 *   **Feature Enhancements:** If you have ideas for new features or improvements to existing ones, please discuss them first in [Discussions](https://github.com/beep-projects/SystaPi/discussions).
 
 <img src="resources/systapidashboard.jpg" alt="SystaPi Dashboard" style="width:45%;"/> <img src="resources/rawData_react_html.jpg" alt="rawData_react_html" style="width:45%;"/>
