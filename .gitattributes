@@ -2,3 +2,4 @@ docs/** linguist-generated
 SystaRESTServer/bin/** linguist-generated
 SystaRESTServer/src/de/freaklamarsch/systarest/tests/*.h linguist-generated
 SystaRESTServer/src/de/freaklamarsch/systarest/tests/*.txt linguist-generated
+SystaRESTServer/src/*.html linguist-generated
