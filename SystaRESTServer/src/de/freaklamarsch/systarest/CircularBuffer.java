@@ -87,7 +87,6 @@ public class CircularBuffer<E> {
      *         is disabled
      */
 	public boolean add(E element) {
-
 		if (isNotFull() || overwrite) {
 
 			int nextWriteIndex = writeIndex + 1;

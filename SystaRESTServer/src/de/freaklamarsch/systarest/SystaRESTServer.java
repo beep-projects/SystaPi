@@ -40,10 +40,11 @@ import jakarta.ws.rs.core.UriBuilder;
 
 /**
  * The main function of this class starts an
- * {@link com.sun.net.httpserver.HttpServer} for providing {@link SystaRESTAPI} and {@link STouchRESTAPI}.
- * The main method requires a configured SystaREST.properties for setting the
- * interfaces that should be used. One interface is used for the connection to the Paradigma
- * SystaComfort II and one for accessing the REST APIs.
+ * {@link com.sun.net.httpserver.HttpServer} for providing {@link SystaRESTAPI}
+ * and {@link STouchRESTAPI}. The main method requires a configured
+ * SystaREST.properties for setting the interfaces that should be used. One
+ * interface is used for the connection to the Paradigma SystaComfort II and one
+ * for accessing the REST APIs.
  */
 public class SystaRESTServer {
 
@@ -71,7 +72,8 @@ public class SystaRESTServer {
 			System.out.println(restAPIIfaceName + " and/or " + paradigmaIfaceName
 					+ " are not configured properly. Please check your configuration. I am exiting now!");
 			System.out.println("[SystaRESTServer] Interface for Paradigma RESTAPI: " + restAPIIPv4);
-			System.out.println("[SystaRESTServer] Interface for connecting to Paradigma SystaComfort II: " + paradigmIPv4);
+			System.out.println(
+					"[SystaRESTServer] Interface for connecting to Paradigma SystaComfort II: " + paradigmIPv4);
 			System.exit(1);
 		}
 
@@ -83,7 +85,7 @@ public class SystaRESTServer {
 		URI baseUri = UriBuilder.fromUri("http://" + restAPIIPv4 + "/")
 				.port(Integer.parseInt(props.getProperty("RESTAPI_PORT"))).build();
 		ResourceConfig config = new ResourceConfig(SystaRESTAPI.class);
-		//config.register(new STouchRESTAPI());
+		// config.register(new STouchRESTAPI());
 		config.register(STouchRESTAPI.class);
 		config.register(new CorsFilter());
 		config.property(SystaRESTAPI.PROP_PARADIGMA_IP, paradigmIPv4);
@@ -111,7 +113,7 @@ public class SystaRESTServer {
 			e.printStackTrace();
 		}
 		server.stop(0);
-        System.out.println("[SystaRESTServer] Server stopped");
+		System.out.println("[SystaRESTServer] Server stopped");
 	}
 
 	/**

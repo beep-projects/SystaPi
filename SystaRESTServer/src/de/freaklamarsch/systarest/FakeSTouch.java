@@ -428,7 +428,7 @@ public class FakeSTouch {
 		this.inetAddress = addr;
 	}
 
-	boolean isCommandEnabled(STouchCommand cmd) {
+	private boolean isCommandEnabled(STouchCommand cmd) {
 		boolean enabled;
 		switch (cmd) {
 		case DISPLAY_SYNCNOW:
@@ -594,9 +594,10 @@ public class FakeSTouch {
 										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer,
 												this.getDisplay().SYMBOLS_USED);
 										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer,
-												this.getDisplay().getFonts() - this.getDisplay().FONTS_USED);
+												this.getDisplay().getFontsAvailable() - this.getDisplay().FONTS_USED);
 										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer,
-												this.getDisplay().getSymbs() - this.getDisplay().SYMBOLS_USED);
+												this.getDisplay().getSymbolsAvailable()
+														- this.getDisplay().SYMBOLS_USED);
 										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, -1);
 										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, -1);
 										STouchProtocol.write(STouchCommand.TYPE_BYTE, replyBuffer, -1);

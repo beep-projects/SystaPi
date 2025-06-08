@@ -21,8 +21,6 @@ package de.freaklamarsch.systarest;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -231,6 +229,44 @@ public class FakeSTouchDisplay {
 		}
 	}
 
+	public FakeSTouchDisplay() {
+		check();
+	}
+
+	private boolean check() {
+		this.checksum = 0;
+		try {
+			long l1 = checksumByte[3];
+			long l2 = checksumByte[2];
+			long l3 = checksumByte[1];
+			long l4 = checksumByte[0];
+			long l5 = 0L;
+			byte b = 0;
+			while (true) {
+				int i = checksumByte.length;
+				if (b < i) {
+					long l6 = checksumByte[b + 3];
+					long l7 = checksumByte[b + 2];
+					long l8 = checksumByte[b + 1];
+					i = checksumByte[b + 0];
+					long l9 = i;
+					b += 4;
+					l5 = ((l6 & 0xFFL) << 24L | (l7 & 0xFFL) << 16L | (l8 & 0xFFL) << 8L | (l9 & 0xFFL) << 0L)
+							+ (0xFFFFFFFFL & l5);
+					continue;
+				}
+				if (l5 != ((l1 & 0xFFL) << 24L | (l2 & 0xFFL) << 16L | (l3 & 0xFFL) << 8L | (l4 & 0xFFL) << 0L)) {
+					return false;
+				}
+				this.checksum = (int) l5;
+				return true;
+			}
+		} catch (Exception exception) {
+			exception.printStackTrace();
+			return false;
+		}
+	}
+
 	public synchronized boolean delButton(int id) {
 		if (id == -1 || id == 255) {
 			// -1 is used as clear all flag
@@ -275,9 +311,9 @@ public class FakeSTouchDisplay {
 		buttons.clear();
 	}
 
-	public int[] display_GetFrameBuffer() {
-		return new int[] {};
-	}
+	/*
+	 * public int[] display_GetFrameBuffer() { return new int[] {}; }
+	 */
 
 	public synchronized void setTouch(int id, int x, int y) {
 		// remove existing touch marker
@@ -368,10 +404,6 @@ public class FakeSTouchDisplay {
 		return false; // Text not found
 	}
 
-	public FakeSTouchDisplay() {
-		check();
-	}
-
 	public boolean setChecksum(int checksum) {
 		this.checksumByte = ByteBuffer.allocate(4).putInt(checksum).array();
 		if (!check()) {
@@ -391,40 +423,6 @@ public class FakeSTouchDisplay {
 			return false;
 		}
 		return true;
-	}
-
-	public boolean check() {
-		this.checksum = 0;
-		try {
-			long l1 = checksumByte[3];
-			long l2 = checksumByte[2];
-			long l3 = checksumByte[1];
-			long l4 = checksumByte[0];
-			long l5 = 0L;
-			byte b = 0;
-			while (true) {
-				int i = checksumByte.length;
-				if (b < i) {
-					long l6 = checksumByte[b + 3];
-					long l7 = checksumByte[b + 2];
-					long l8 = checksumByte[b + 1];
-					i = checksumByte[b + 0];
-					long l9 = i;
-					b += 4;
-					l5 = ((l6 & 0xFFL) << 24L | (l7 & 0xFFL) << 16L | (l8 & 0xFFL) << 8L | (l9 & 0xFFL) << 0L)
-							+ (0xFFFFFFFFL & l5);
-					continue;
-				}
-				if (l5 != ((l1 & 0xFFL) << 24L | (l2 & 0xFFL) << 16L | (l3 & 0xFFL) << 8L | (l4 & 0xFFL) << 0L)) {
-					return false;
-				}
-				this.checksum = (int) l5;
-				return true;
-			}
-		} catch (Exception exception) {
-			exception.printStackTrace();
-			return false;
-		}
 	}
 
 	public int getChecksum() {
@@ -555,11 +553,11 @@ public class FakeSTouchDisplay {
 		return rectangles.add(rect);
 	}
 
-	public int getFonts() {
+	public int getFontsAvailable() {
 		return FONTS_AVAILABLE;
 	}
 
-	public int getSymbs() {
+	public int getSymbolsAvailable() {
 		return SYMBOLS_AVAILABLE;
 	}
 

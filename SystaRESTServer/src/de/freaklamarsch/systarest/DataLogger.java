@@ -30,13 +30,13 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * A utility class for logging data entries represented as
- * {@code T[]} to delimited text files. The default delimiter used for this is
- * {@code ;}, making it a logger for CSV files. The {@code DataLogger} has a
- * defined capacity, which is the number of elements that can be stored.
- * Depending on the {@link #saveLoggedData} setting, adding new elements will
- * trigger {@link #writeLoggedDataToFile} and empty the {@link #dataBuffer} or
- * just overwrite the oldest element stored.
+ * A utility class for logging data entries represented as {@code T[]} to
+ * delimited text files. The default delimiter used for this is {@code ;},
+ * making it a logger for CSV files. The {@code DataLogger} has a defined
+ * capacity, which is the number of elements that can be stored. Depending on
+ * the {@link #saveLoggedData} setting, adding new elements will trigger
+ * {@link #writeLoggedDataToFile} and empty the {@link #dataBuffer} or just
+ * overwrite the oldest element stored.
  */
 public class DataLogger<T> {
 
@@ -340,7 +340,10 @@ public class DataLogger<T> {
 		// outside
 		// array changes
 		T[] d = Arrays.copyOf(data, data.length);
-		dataBuffer.add(d);
+		boolean dataAdded = dataBuffer.add(d);
+		if (!dataAdded) {
+			System.out.println("[DataLogger] addData: data was not added to the buffer");
+		}
 		if (timestampBuffer.isFull() && saveLoggedData) {
 			writeLoggedDataToFile();
 		}

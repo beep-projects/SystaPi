@@ -57,18 +57,21 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
 
 /**
- /**
- * A REST API for interacting with the Paradigma SystaComfort system.
- * This API provides endpoints for retrieving system status, monitoring raw data, and managing logging.
- * This class is intended to be run by a {@link SystaRESTServer}
+ * /** A REST API for interacting with the Paradigma SystaComfort system. This
+ * API provides endpoints for retrieving system status, monitoring raw data, and
+ * managing logging. This class is intended to be run by a
+ * {@link SystaRESTServer}
  */
 @Path("{systarest : (?i)systarest}")
 public class SystaRESTAPI {
 	public final static String PROP_PARADIGMA_IP = "PARADIGMA_IP";
+	public static final String PROP_LOG_DIR = "de.freaklamarsch.systarest.LogDirectory"; // New property for log
+																							// directory
 	private static FakeSystaWeb fsw = null;
 	private static Thread t = null;
 	private final Map<String, Object> config = new HashMap<>();
 	private final JsonBuilderFactory jsonFactory = Json.createBuilderFactory(config);
+	private static SystaRESTAPI instance;
 
 	/**
 	 * Create SystaRESTAPI object which provides the Jersey REST API resource for
@@ -78,6 +81,7 @@ public class SystaRESTAPI {
 	 *               {@code PROP_PARADIGMA_IP} for configuring the used IP address
 	 */
 	public SystaRESTAPI(@Context ResourceConfig config) {
+		instance = this; // Set the static instance
 		// constructor is called for each request, so make sure only one FakeSystaWeb is
 		// created, or the socket will be blocked
 		if (fsw == null) {
@@ -85,6 +89,16 @@ public class SystaRESTAPI {
 			start(config);
 		}
 		// printAPI();
+	}
+
+	/**
+	 * Returns the singleton instance of SystaRESTAPI. This is package-private for
+	 * access from tests or other closely related classes.
+	 * 
+	 * @return The SystaRESTAPI instance.
+	 */
+	static SystaRESTAPI getInstance() {
+		return instance;
 	}
 
 	/**
@@ -115,7 +129,7 @@ public class SystaRESTAPI {
 	@POST
 	@Path("{start : (?i)start}")
 	public void start(@Context ResourceConfig config) {
-		System.out.println("SystaRESTAPI] start: called");
+		System.out.println("[SystaRESTAPI] start: called");
 		if (t == null || !t.isAlive()) {
 			// in Java you can start a thread only once, so we need a new one
 			t = new Thread(fsw);
@@ -125,6 +139,17 @@ public class SystaRESTAPI {
 			if (confInetAddress != null) {
 				fsw.setInetAddress(confInetAddress);
 			}
+
+			// Set custom log directory if provided in config
+			Object logDirPathProperty = config.getProperty(PROP_LOG_DIR);
+			if (logDirPathProperty instanceof String) {
+				String logDirPath = (String) logDirPathProperty;
+				if (logDirPath != null && !logDirPath.isEmpty()) {
+					System.out.println("[SystaRESTAPI] start: Setting custom log directory: " + logDirPath);
+					fsw.setLogFileRootPath(logDirPath);
+				}
+			}
+
 			try {
 				t.start();
 			} catch (Exception e) {
@@ -199,6 +224,7 @@ public class SystaRESTAPI {
 									.format(ZonedDateTime.of(LocalDateTime.now(), ZoneId.systemDefault())))
 					.add("connected", fsws.connected).add("running", fsws.running)
 					.add("lastDataReceivedAt", fsws.lastTimestamp).add("packetsReceived", fsws.dataPacketsReceived)
+					.add("packetsProcessed", fsws.dataPacketsProcessed) // Added new field here
 					.add("paradigmaListenerIP", fsws.localAddress).add("paradigmaListenerPort", fsws.localPort)
 					.add("paradigmaIP", (fsws.remoteAddress == null) ? "" : fsws.remoteAddress.getHostAddress())
 					.add("paradigmaPort", fsws.remotePort).add("loggingData", fsws.logging)

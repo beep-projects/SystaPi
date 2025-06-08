@@ -11,7 +11,7 @@ import java.util.Objects;
 
 /**
  * Contains all parsers for handling commands in the communication protocol used
- * by the S-Touch App. Each parser implements the {@link STouchCommandParser}
+ * by the S-Touch App. Each parser implements the {@link ObjectReaderWriter}
  * interface and is responsible for parsing and processing a specific command.
  * This class also provides a centralized map of parsers, the
  * {@link STouchCommand} enum, and utility methods like {@code getCmdLen}.
