@@ -186,7 +186,7 @@ The script will first ask you for required configuration parameters and then dow
 1. Install Raspberry Pi OS following this [guide](https://www.raspberrypi.com/documentation/computers/getting-started.html#installing-the-operating-system).
    [Raspberry Pi OS Lite](https://www.raspberrypi.org/software/operating-systems/#raspberry-pi-os-32-bit) is sufficient.
 
-2. Download [SystaPi](https://github.com/beep-projects/SystaPi/releases/download/3.20/SystaPi-3.0.zip)
+2. Download [SystaPi](https://github.com/beep-projects/SystaPi/releases/download/3.0/SystaPi-3.0.zip)
 
 3. Extract the downloaded zip file
 
