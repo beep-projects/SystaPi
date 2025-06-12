@@ -157,7 +157,7 @@ The script will first ask you for required configuration parameters and then dow
 
 1. Download the installation script and run it
    ```bash
-   wget https://github.com/beep-projects/SystaPi/releases/download/latest/getAndConfigureSystaPi.sh
+   wget [https://github.com/beep-projects/SystaPi/releases/download/latest/getAndConfigureSystaPi.sh](https://github.com/beep-projects/SystaPi/releases/latest/download/getAndConfigureSystaPi.sh)
    chmod 755 getAndConfigureSystaPi.sh
    ./getAndConfigureSystaPi.sh
    ```
