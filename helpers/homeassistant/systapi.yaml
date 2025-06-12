@@ -10,7 +10,7 @@
       value_template: "{{ value_json.operationMode }}"
       unit_of_measurement: ""
     - name: "systapi_operationModeName"
-      state: "{{ value_json.operationModeName }}"
+      value_template: "{{ value_json.operationModeName }}"
     - name: "systapi_circuit1FlowTemp"
       value_template: "{{ value_json.circuit1FlowTemp }}"
       device_class: temperature
@@ -52,7 +52,7 @@
       value_template: "{{ value_json.hotWaterTempMax }}"
       device_class: temperature
       unit_of_measurement: "°C"
-    - name: "systapi_hhotWaterOperationMode"
+    - name: "systapi_hotWaterOperationMode"
       value_template: "{{ value_json.hotWaterOperationMode }}"
       unit_of_measurement: ""
     - name: "systapi_hotWaterOperationModeName"
@@ -78,7 +78,6 @@
       unit_of_measurement: ""
     - name: "systapi_bufferTypeName"
       value_template: "{{ value_json.bufferTypeName }}"
-      unit_of_measurement: ""
     - name: "systapi_logBoilerFlowTemp"
       value_template: "{{ value_json.logBoilerFlowTemp }}"
       device_class: temperature
@@ -279,7 +278,6 @@
       unit_of_measurement: ""
     - name: "systapi_controlMethodName"
       value_template: "{{ value_json.controlMethodName }}"
-      unit_of_measurement: ""
     - name: "systapi_maxFlowTemp"
       value_template: "{{ value_json.maxFlowTemp }}"
       device_class: temperature
@@ -301,7 +299,6 @@
       unit_of_measurement: ""
     - name: "systapi_mixer1StateName"
       value_template: "{{ value_json.mixer1StateName }}"
-      unit_of_measurement: ""
     - name: "systapi_underfloorHeatingBasePoint"
       value_template: "{{ value_json.underfloorHeatingBasePoint }}"
       device_class: temperature
@@ -360,8 +357,8 @@
       value_template: "{{ value_json.timestampString }}"
       device_class: timestamp
   binary_sensor:
-    - name: "systapi_logBoilderChargePumpIsOn"
-      value_template: "{{ value_json.logBoilderChargePumpIsOn }}"
+    - name: "systapi_logBoilerChargePumpIsOn"
+      value_template: "{{ value_json.logBoilerChargePumpIsOn }}"
     - name: "systapi_logBoilerParallelOperation"
       value_template: "{{ value_json.logBoilerParallelOperation }}"
     - name: "systapi_boilerHeatsBuffer"

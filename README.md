@@ -8,40 +8,15 @@
 
 # SystaPi, SystaREST and STouchREST
 
-The goal of **SystaPi** is to make the [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) compatible with home automation system via REST APIs. It is developed for running on a Raspberry Pi, but you should easily get it running on any Linux you like.  
-The project contains an installation script to setup a Raspberry Pi as SystaPi, which runs the SystaREST server. SystaREST server provides two services, **SystaRESTAPI** for reading values from the SytsaComfort unit and **STouchRESTAPI** for writing to the SystaComfort, e.g. selecting the operation mode.  
+The goal of **SystaPi** is to make the [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) "smart" by providing Rest APIs for integration with home automation systems.  
+It is developed based on Raspberry Pi, but you should easily get it running on any Linux you like.  
+The project contains an installation script to setup a Raspberry Pi as **SystaPi**, which runs the **SystaREST server**. SystaREST server provides two services, **SystaRESTAPI** for reading values from the SytsaComfort unit and **STouchRESTAPI** for writing to the SystaComfort, e.g. selecting the operation mode.  
 **Important Note:** The communication protocols use by the SystaComfort unit are not publicly documented! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. Therefore, **please [contribute](#contribute) information from your system!**  
 
 This project is inspired by this post on the VDR portal [Heizungssteuerung: Daten auslesen](https://www.vdr-portal.de/forum/index.php?thread/119690-heizungssteuerung-daten-auslesen/) and I also used some information from the [SystaComfortPrometheusExporter](https://github.com/xgcssch/SystaComfortPrometheusExporter).  
 
 Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits easily into the housing of the Paradigma SystaComfort.  
 <img src="resources/SystaPi.jpg" alt="SystaPi" width="30%"></img> <img src="resources/SystaComfort_and_Pi_open.png" alt="SystaComfort_and_Pi_open" width="30%"></img> <img src="resources/SystaComfort_and_Pi_closed.png" alt="SystaComfort_and_Pi_closed" width="30%"></img> 
-
-## Project Status
-
-This project is updated irregularly or provided with new features.
-
-Key points:
-*   **Latest Release:** [2.2 "Bookworm"](https://github.com/beep-projects/SystaPi/releases/tag/2.2)
-*   **Future Development:** New releases are always prepared on the **main** branch. Currently version **"3.0 S-Touch"** is in preparation. If you want to get a sneak peek on it, check it out and [contribute](#contribute) your test results.
-*   **Known Limitations:** Compatibility with any SystaComfort software versions is not guaranteed. See [Known Issues](#known-issues) and [Contribute](#contribute) for more details.
-*   **Installation Scripts:** The provided installation scripts (`install_systapi.sh`, `SystaPi_files/*.sh`) are offered as-is and may require updates for the latest Raspberry Pi OS versions.
-
-## Getting Started
-
-This quick guide is for using SystaPi just as it is meant to be.
-
-1.  **Hardware:** Use any Raspberry Pi, best support is given for the [Hardware Components](#parts-list) that I use.
-2.  **Installation:**
-    *   **Recommended:** Follow the installation instructions for [Linux](#linux) if you are comfortable with it, as it provides an automated setup script.
-    *   **Alternative:** Use the [Windows / manual installation](#windows--manual-installation) guide for more control or if you're not using Linux for the setup.
-3.  **Accessing the API:**
-    *   You should then be able to access the SystaREST server's WADL at [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true) (or using the Pi's IP address if hostname resolution isn't working).
-    *   Explore the [SystaREST API](#the-systarest-api) and [STouchREST API](#the-stouchrest-api) sections to understand how to query data and control your system. The `curl` examples are a good starting point.
-    *   The [dashboard](#dashboard) ([http://systapi:1337/SystaREST/dashboard](http://systapi:1337/SystaREST/dashboard)) provides a web interface to view data.
-4.  **Home Automation Integration:** Use the REST APIs to integrate with your preferred home automation system (e.g., Home Assistant, OpenHAB). Please share your work by opening a [discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) on it.
-
-For developers or those wishing to understand the project structure deeply, please see [DEVELOPMENT.md](DEVELOPMENT.md), [protocols.md](resources/protocols.md) and the [Contribute](#contribute) sections.
 
 ## Contents
 
@@ -79,6 +54,30 @@ For developers or those wishing to understand the project structure deeply, plea
 - [Contribute](#contribute)
 - [Known Issues](#known-issues)
 - [Links](#links)
+
+## Project Status
+
+This project is updated irregularly or provided with new features.
+
+*   **Latest Release:** [3.0 "S-Touch"](https://github.com/beep-projects/SystaPi/releases/tag/3.0)
+*   **Future Development:** New releases are always prepared on the **main** branch. If you want to get a sneak peek on it, check it out and [contribute](#contribute) your test results. You can also update your running version to main, by executing `helpers/update.sh -b main` but you should backup you system before that.
+*   **Known Limitations:** Compatibility with any SystaComfort software or Raspberry Pi OS versions is not guaranteed. See [Known Issues](#known-issues) and [Contribute](#contribute) for more details.
+
+## Getting Started
+
+This quick guide is for using SystaPi just as it is meant to be.
+
+1.  **Hardware:** Use any Raspberry Pi, best support is given for the [Hardware Components](#parts-list) that I use.
+2.  **Installation:**
+    *   **Recommended:** Follow the installation instructions for [Linux](#linux) if you are comfortable with it, as it provides an automated setup script.
+    *   **Alternative:** Use the [Windows / manual installation](#windows--manual-installation) guide for more control or if you're not using Linux for the setup.
+3.  **Accessing the API:**
+    *   You should then be able to access the SystaREST server's WADL at [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true) (or using the Pi's IP address if hostname resolution isn't working).
+    *   Explore the [SystaREST API](#the-systarest-api) and [STouchREST API](#the-stouchrest-api) sections to understand how to query data and control your system. The `curl` examples are a good starting point.
+    *   The [dashboard](#dashboard) ([http://systapi:1337/SystaREST/dashboard](http://systapi:1337/SystaREST/dashboard)) provides a web interface to view data.
+4.  **Home Automation Integration:** Use the REST APIs to integrate with your preferred home automation system (e.g., Home Assistant, OpenHAB). Please share your work by opening a [discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) on it.
+
+For developers or those wishing to understand the project structure deeply, please see [DEVELOPMENT.md](DEVELOPMENT.md), [protocols.md](resources/protocols.md) and the [Contribute](#contribute) sections.
 
 ## Directory Structure of this Project
 <sup>\[[Back to Contents](#contents)\]</sup>
@@ -136,8 +135,8 @@ Once the Micro SD card is prepared as described in the next sections, the script
 * configure WiFi on interface `wlan0`
 * `apt full-upgrade` the system
 * install `dnsmasq`
-* configure `dnsmasq` and `dhcpd` for IP spoofing on interface `eth0`\
-  (this will make the Paradigma SystaComfort to communicate with `systapi` instead of [SystaWeb](https://paradigma.remoteportal.de/)
+* configure `dnsmasq` and `dhcpd` for IP spoofing on interface `eth0`  
+  (this will make the Paradigma SystaComfort to communicate with `systapi` instead of [SystaWeb](https://paradigma.remoteportal.de/))
 * install OpenJDK 11 from [https://www.azul.com/downloads/?package=jdk#download-openjdk](https://www.azul.com/downloads/?package=jdk#download-openjdk)\
   (this is the most current one you can get for the ARMv6 of the Raspberry Pi Zero)
 * install the `systemd` service unit `SytsaRESTServer.service` for automatically starting the SystaRESTServer
@@ -152,73 +151,24 @@ You have to make sure that your Paradigma SystaComfort unit is sending unencrypt
 <details>
 <summary>Expand instructions</summary>
 
-For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto a Micro SD card. The script was mainly written out of curiosity to see how that could work. So it has no added sanity checks and you should use it with care. Check each step, when asked to confirm. If unsure, follow the manual installation guide.
+For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto a Micro SD card. The script was mainly written out of curiosity to see how that could work. Iit has no added sanity checks and you should use it with care. Check each step, when asked to confirm. If unsure, follow the manual installation guide.
 
-1. Run the following commands in a shell for downloading and unzipping the project files
+The script will first ask you for required configuration parameters and then download Systapi, configure it and flash it on a sd card. There are no specific checks done on execution, so it is best if you run the script in an isolated environment. The script will create a folder called temp and download all files there. After execution, you might want to delete that folder.
 
+1. Download the installation script and run it
    ```bash
-   wget https://github.com/beep-projects/SystaPi/releases/download/2.2/SystaPi-2.2.zip
-   unzip SystaPi-2.2.zip
+   wget https://github.com/beep-projects/SystaPi/releases/download/latest/getAndConfigureSystaPi.sh
+   chmod 755 getAndConfigureSystaPi.sh
+   ./getAndConfigureSystaPi.sh
    ```
 
-2. Open `SystaPi-2.2/SystaPi_files/firstrun.sh` with a text editor and configure everything in the marked section to your liking. 
-   Most probably you want to generate your `WPA_PASSPHRASE` via `wpa_passphrase MY_WIFI passphrase` , or  use the [WPA PSK (Raw Key) Generator](https://www.wireshark.org/tools/wpa-psk.html), and add the credentials to the file.
-   If you use the network `192.168.1.x` for your local network, you should change the `IP_PREFIX` to another IP range, to avoid network collisions
-   
-   ```bash
-   #-------------------------------------------------------------------------------
-   #----------------------- START OF CONFIGURATION --------------------------------
-   #-------------------------------------------------------------------------------
-   
-   # which hostname do you want to give your raspberry pi?
-   HOSTNAME=systapi
-   #username: beep, password: projects
-   #you can change the password if you want and generate a new password with
-   #Linux: mkpasswd --method=SHA-256
-   #Windows: you can use an online generator like https://www.dcode.fr/crypt-hasing-function
-   USER=beep
-   # shellcheck disable=SC2016
-   PASSWD='$5$oLShbrSnGq$nrbeFyt99o2jOsBe1XRNqev5sWccQw8Uvyt8jK9mFR9' #keep single quote to avoid expansion of $
-   # configure the wifi connection
-   # the example WPA_PASSPHRASE is generated via
-   #     wpa_passphrase MY_WIFI passphrase
-   # but you also can enter your passphrase as plain text, if you accept the potential insecurity of that approach
-   SSID=MY_WIFI
-   WPA_PASSPHRASE=3755b1112a687d1d37973547f94d218e6673f99f73346967a6a11f4ce386e41e
-   # define the network to use for communication between systapi and SystaComfort
-   # change if you use the same network range on your wifi network
-   IP_PREFIX="192.168.1"
-   # configure your timezone and key board settings
-   TIMEZONE="Europe/Berlin"
-   COUNTRY="DE"
-   XKBMODEL="pc105"
-   XKBLAYOUT=$COUNTRY
-   XKBVARIANT=""
-   XKBOPTIONS=""
-   # if you want to use an ENC28J60 Ethernet HAT, enable it here
-   ENABLE_ENC28J60=true
-   
-   #-------------------------------------------------------------------------------
-   #------------------------ END OF CONFIGURATION ---------------------------------
-   #-------------------------------------------------------------------------------
-   ```
-   
-3. Insert the Micro SD card that you want to get prepared as SystaPi into your computing device
+2. Eject the Micro SD card and insert it into your Raspberry Pi
 
-4. Continue in the shell
+3. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
 
-   ```bash
-   cd SystaPi-2.2
-   ./install_systapi.sh
-   ```
+4. Power up the Raspberry Pi
 
-5. Eject the Micro SD card and insert it into your Raspberry Pi
-
-6. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
-
-7. Power up the Raspberry Pi
-
-8. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+5. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
     For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and watch the installation process. Default user is `beep` with password `projects`.
 
    ```bash
@@ -236,7 +186,7 @@ For Linux I provide a script that downloads Raspberry Pi OS and flashes it onto 
 1. Install Raspberry Pi OS following this [guide](https://www.raspberrypi.com/documentation/computers/getting-started.html#installing-the-operating-system).
    [Raspberry Pi OS Lite](https://www.raspberrypi.org/software/operating-systems/#raspberry-pi-os-32-bit) is sufficient.
 
-2. Download [SystaPi](https://github.com/beep-projects/SystaPi/releases/download/2.2/SystaPi-2.2.zip)
+2. Download [SystaPi](https://github.com/beep-projects/SystaPi/releases/download/3.20/SystaPi-3.0.zip)
 
 3. Extract the downloaded zip file
 
@@ -310,7 +260,7 @@ For troubleshooting, you can check the progress by checking the logs. After 5 mi
 ### Troubleshooting the installation
 <sup>\[[Back to Contents](#contents)\]</sup>
 
-1. The autoconfig of the Raspberry Pi OS worked fine when I did the commit for it. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong.
+1. The autoconfig of the Raspberry Pi OS always works fine when I do the commits to the repo. But if development of Raspberry Pi OS goes on, the scripts might break. If you connect the Raspberry Pi to a screen via HDMI, you will see if something gets wrong.
 2. If the pi does not boot, check if you did step 7 in case of a manual installation.
 3. If you do not know where the install script died on the Raspberry Pi, have a look into the `/boot` folder via `ls /boot/*.log`. 
 Each script creates a log file, so check `firstrun.log`, `secondrun.log` and `thirdrun.log`, to see where the script failed.
@@ -325,7 +275,7 @@ The hostname of the Raspberry Pi is set to `systapi`.
 There are two services running by default. The first one is **SystaREST** for reading values from a SystaComfort unit and the second one is **STouchREST** which emulates the S-Touch app for providing write access to the SystaComfort unit.
 The paths and method names on the REST server are implemented case insensitive.
 The root path for the both services are: `systarest`, or `SystaREST` and  `stouchrest`, or `STouchREST`, or any variation of that.
-By default you should be able to access the server via `http://systapi:1337/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the IP assigned to your server by the router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
+By default you should be able to access the server via `http://systapi:1337/`. This base URL will be used for the following examples and should work for most network configurations. If not, you have to replace `systapi` with the IP assigned to your server by the local router. The server provides a WADL of the provided API at: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 
 ### The SystaREST API
 <sup>\[[Back to Contents](#contents)\]</sup>
