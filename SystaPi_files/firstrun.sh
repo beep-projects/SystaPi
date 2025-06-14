@@ -187,6 +187,9 @@ if $ENABLE_ENC28J60; then
   echo "enable enc28j60 overlay"
   LINE="dtoverlay=enc28j60"
   FILE="/boot/config.txt"
+  if [ -f /boot/firmware/config.txt ]; then
+    FILE="/boot/firmware/config.txt"
+  fi
   grep -qxF -- "${LINE}" "${FILE}" || echo "${LINE}" >> "${FILE}"
 fi
 
