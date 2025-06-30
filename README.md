@@ -77,7 +77,7 @@ This quick guide is for using SystaPi just as it is meant to be.
     *   The [dashboard](#dashboard) ([http://systapi:1337/SystaREST/dashboard](http://systapi:1337/SystaREST/dashboard)) provides a web interface to view data.
 4.  **Home Automation Integration:** Use the REST APIs to integrate with your preferred home automation system (e.g., Home Assistant, OpenHAB). Please share your work by opening a [discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) on it.
 
-For developers or those wishing to understand the project structure deeply, please see [DEVELOPMENT.md](DEVELOPMENT.md), [protocols.md](resources/protocols.md) and the [Contribute](#contribute) sections.
+For developers or those wishing to understand the project structure deeply, please see [DEVELOPMENT.md](resources/DEVELOPMENT.md), [protocols.md](resources/protocols.md) and the [Contribute](#contribute) sections.
 
 ## Directory Structure of this Project
 <sup>\[[Back to Contents](#contents)\]</sup>
