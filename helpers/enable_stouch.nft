@@ -39,7 +39,7 @@ table netdev broadcastnat {
     chain fromLocalNework {
       #meta nftrace set 1
       type filter hook ingress device $IF_TO_LOCAL_NETWORK priority 0;
-      pkttype broadcast ether type ip ip daddr 255.255.255.255 udp dport $BC_PORT jump ethOut;
+      pkttype broadcast ether type ip ip daddr 255.255.255.255 udp dport $BC_PORT jump toSystaComfort;
     }
 
     chain toSystaComfort {
