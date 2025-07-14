@@ -95,13 +95,13 @@ wget "https://github.com/beep-projects/SystaPi/archive/refs/heads/${branch}.zip"
 unzip "${branch}.zip" 
 
 # replace the helpers folder
-rm -rf "${HOME}/helpers/"
-cp -r "SystaPi-${branch}/helpers" "${HOME}"
-chmod 755 "${HOME}/helpers/update.sh"
+sudo rm -rf "${HOME}/helpers/"
+sudo cp -r "SystaPi-${branch}/helpers/." "${HOME}/helpers/"
+sudo chmod 755 "${HOME}/helpers/update.sh"
 
 # build new version
 cd "SystaPi-${branch}/SystaRESTServer/" || error "Cannot cd into SystaPi-${branch}/SystaRESTServer/"
-sudo chmod 755 ./build.sh
+chmod 755 ./build.sh
 ./build.sh 2>&1
 cd "${HOME}" || error "Cannot cd into ${HOME}"
 
