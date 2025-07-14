@@ -18,6 +18,7 @@
 */
 package de.freaklamarsch.systarest;
 
+import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
@@ -165,7 +166,7 @@ public class DeviceTouchSearch {
 	 */
 	public static String getPasswordReplyString(DatagramPacket receivePacket) throws NumberFormatException {
 		// replies seen so far:
-		// 1234
+		// 1234, õû³ô
 		String reply = new String(Arrays.copyOfRange(receivePacket.getData(), 0, receivePacket.getLength()),
 				StandardCharsets.ISO_8859_1);
 		reply = reply.trim();
@@ -302,6 +303,11 @@ public class DeviceTouchSearch {
 			deviceInfo.mac = info[10];
 		}
 		return deviceInfo;
+	}
+
+	private static void printByteArrayAsHex(byte[] bytes) {
+		BigInteger bigInteger = new BigInteger(1, bytes);
+		System.out.println(String.format("%0" + (bytes.length << 1) + "X", bigInteger));
 	}
 
 }

@@ -28,6 +28,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -190,7 +191,7 @@ public class FakeSTouch {
 			return false;
 		}
 		this.port = info.port;
-		this.password = info.password.getBytes();
+		this.password = info.password.getBytes(StandardCharsets.ISO_8859_1);
 		return true;
 	}
 
