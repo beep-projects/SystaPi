@@ -80,9 +80,11 @@ while :; do
 done
 
 # make sure we are in the home directory
+echo "cd ${HOME}"
 cd "${HOME}" || error "Cannot cd into ${HOME}"
 
 # remove existing downloads
+echo "remove existing downloads"
 if [[ -f "${branch}.zip" ]]; then
   rm "${branch}.zip"
 fi
@@ -95,19 +97,25 @@ wget "https://github.com/beep-projects/SystaPi/archive/refs/heads/${branch}.zip"
 unzip "${branch}.zip" 
 
 # replace the helpers folder
+echo "remove helpers"
 sudo rm -rf "${HOME}/helpers/"
+echo "copy new helpers"
 sudo cp -r "SystaPi-${branch}/helpers/." "${HOME}/helpers/"
+echo "make update script executable"
 sudo chmod 755 "${HOME}/helpers/update.sh"
 
 # build new version
+echo "build new version"
 cd "SystaPi-${branch}/SystaRESTServer/" || error "Cannot cd into SystaPi-${branch}/SystaRESTServer/"
 chmod 755 ./build.sh
 ./build.sh 2>&1
 cd "${HOME}" || error "Cannot cd into ${HOME}"
 
 # stop the SystaRESTServer.service
+echo "stop SystaRESTServer.service"
 sudo systemctl stop SystaRESTServer.service 
 
+echo "install new binaries"
 # remove old binaries and install new ones
 rm -r "${HOME}/SystaRESTServer"
 cp -r "${HOME}/SystaPi-${branch}/SystaRESTServer" "${HOME}"
@@ -116,10 +124,12 @@ rm "${branch}.zip"
 rm -r "SystaPi-${branch}"
 
 # clear systemd logs 
+echo "clean service journal"
 sudo journalctl --rotate
 sudo journalctl --vacuum-time=1s
 
 # restart the SystaRESTServer.service
+echo "start SystaRESTServer.service"
 sudo systemctl start SystaRESTServer.service 
 
 exit 0
