@@ -164,17 +164,17 @@ The script will first ask you for required configuration parameters and then dow
 
 2. Eject the Micro SD card and insert it into your Raspberry Pi
 
-3. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
+3. Don't connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort. If the setup of SystaPi is taking too long, the SystaComfort will autoconfigure an IP address and will not be able to communicate tith SystaPi
 
 4. Power up the Raspberry Pi
 
 5. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
     For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and watch the installation process. Default user is `beep` with password `projects`.
-
    ```bash
    ssh -x beep@systapi.local
    tail -f /boot/secondrun.log
    ```
+6. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
 </details>
 
 ### Windows / manual installation
@@ -240,21 +240,21 @@ The script will first ask you for required configuration parameters and then dow
 
 8. Copy all files from the `SystaPi_files` subfolder to `boot`-partition of the Micro SD card
 
-9. Copy the `SystaRESTServer` folder and all of its content to the `boot`-partition.
+9. Copy the `SystaRESTServer` and `helpers` folder and all of their contents to the `boot`-partition.
 
 10. Eject the Micro SD card and insert it into your Raspberry Pi
 
-11. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
+11. Don't connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort. If the setup of SystaPi is taking too long, the SystaComfort will autoconfigure an IP address and will not be able to communicate tith SystaPi
 
 12. Power up the Raspberry Pi
 
 13. Wait a while (~20 minutes, depending on the number of system updates available) and then try to load the WADL of the server: [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true)
 For troubleshooting, you can check the progress by checking the logs. After 5 minutes the resize of the partitions and ```firstrun.sh``` should be finished, so that you can ssh into the **systapi** and whatch the installation process.. Default user is `beep` with password `projects`.
-
     ```bash
     ssh -x beep@systapi.local
     tail -f /boot/secondrun.log
     ```
+14. Connect the Raspberry Pi with an Ethernet cable to your Paradigma SystaComfort
 </details>
 
 ### Troubleshooting the installation
