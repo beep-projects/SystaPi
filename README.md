@@ -60,6 +60,9 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
 This project is updated irregularly or provided with new features.
 
 *   **Latest Release:** [3.0 "S-Touch"](https://github.com/beep-projects/SystaPi/releases/tag/3.0)
+*   **Changes on main:**
+    * fix for FakeSTouch UDP password encoding issue
+    * fix for helpers/update.sh on wrong handling the link to the folder on the boot partition 
 *   **Future Development:** New releases are always prepared on the **main** branch. If you want to get a sneak peek on it, check it out and [contribute](#contribute) your test results. You can also update your running version to main, by executing `helpers/update.sh -b main` but you should backup you system before that.
 *   **Known Limitations:** Compatibility with any SystaComfort software or Raspberry Pi OS versions is not guaranteed. See [Known Issues](#known-issues) and [Contribute](#contribute) for more details.
 
