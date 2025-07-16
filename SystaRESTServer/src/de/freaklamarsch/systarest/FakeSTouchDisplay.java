@@ -581,7 +581,7 @@ public class FakeSTouchDisplay {
 
 	public synchronized String getObjectTreeAsJSON() {
 		RTree tree = getObjectTree();
-		
+
 		if (tree == null || tree.getRoot() == null) {
 			return "{}";
 		}
@@ -591,7 +591,7 @@ public class FakeSTouchDisplay {
 		}
 		return stringWriter.toString();
 	}
-	
+
 	private JsonObject objectTreeNodetoJSON(RTreeNode node) {
 		JsonObjectBuilder builder = Json.createObjectBuilder();
 		if (node.object != null) {
@@ -603,12 +603,18 @@ public class FakeSTouchDisplay {
 		builder.add("maxY", node.maxY);
 
 		if (node.foregroundColor != null) {
-			//builder.add("foregroundColor", foregroundColor.toString());
-			builder.add("foregroundColor", String.format("%s [r=%d,g=%d,b=%d]", ColorNamer.getColorName(node.foregroundColor), node.foregroundColor.getRed(), node.foregroundColor.getGreen(), node.foregroundColor.getBlue()));
+			// builder.add("foregroundColor", foregroundColor.toString());
+			builder.add("foregroundColor",
+					String.format("%s [r=%d,g=%d,b=%d]", ColorNamer.getColorName(node.foregroundColor),
+							node.foregroundColor.getRed(), node.foregroundColor.getGreen(),
+							node.foregroundColor.getBlue()));
 		}
 		if (node.backgroundColor != null) {
-			//builder.add("backgroundColor", backgroundColor.toString());
-			builder.add("backgroundColor", String.format("%s [r=%d,g=%d,b=%d]", ColorNamer.getColorName(node.backgroundColor), node.backgroundColor.getRed(), node.backgroundColor.getGreen(), node.backgroundColor.getBlue()));
+			// builder.add("backgroundColor", backgroundColor.toString());
+			builder.add("backgroundColor",
+					String.format("%s [r=%d,g=%d,b=%d]", ColorNamer.getColorName(node.backgroundColor),
+							node.backgroundColor.getRed(), node.backgroundColor.getGreen(),
+							node.backgroundColor.getBlue()));
 		}
 
 		JsonArrayBuilder childrenBuilder = Json.createArrayBuilder();
@@ -625,7 +631,7 @@ public class FakeSTouchDisplay {
 		if (o == null) {
 			return builder.build();
 		}
-		//builder.add("type", o.getClass().getSimpleName());
+		// builder.add("type", o.getClass().getSimpleName());
 		if (o instanceof DisplayButton) {
 			builder.add("type", "Button");
 			DisplayButton btn = (DisplayButton) o;
@@ -659,8 +665,8 @@ public class FakeSTouchDisplay {
 			builder.add("object", o.toString());
 		}
 		return builder.build();
-	}	
-	
+	}
+
 	public synchronized String getContentAsExcalidrawJSON() {
 		return getObjectTree().getExcalidrawJSON();
 	}

@@ -253,6 +253,14 @@ public class STouchRESTAPI {
 		return Response.ok(fst.getObjectTree()).build();
 	}
 
+	@GET
+	@Path("{hasbutton : (?i)hasbutton}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response hasButton(@QueryParam("id") byte buttonId) {
+		DisplayButton foundButton = STouchRESTAPI.fst.getDisplay().findButtonInObjectTree(buttonId);
+		return Response.ok(Json.createObjectBuilder().add("result", foundButton != null).build()).build();
+	}
+
 	@POST
 	@Path("{touchbutton : (?i)touchbutton}")
 	public Response touchButton(@QueryParam("id") byte buttonId) {
@@ -269,6 +277,14 @@ public class STouchRESTAPI {
 			return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 					.entity("Error while pressing button: " + e.getMessage()).build();
 		}
+	}
+
+	@GET
+	@Path("{hastext : (?i)hastext}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response hasText(@QueryParam("text") String text) {
+		DisplayText foundText = STouchRESTAPI.fst.getDisplay().findTextInObjectTree(text);
+		return Response.ok(Json.createObjectBuilder().add("result", foundText != null).build()).build();
 	}
 
 	@POST

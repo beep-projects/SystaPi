@@ -48,7 +48,9 @@ Build with a Raspberry Pi Zero WH and ENC28J60 Ethernet HAT, the SystaPi fits ea
   - [screen](#screen)
   - [debugscreen](#debugscreen)
   - [objecttree](#objecttree)
+  - [hasbutton](#hasbutton)
   - [touchbutton](#touchbutton)
+  - [hastext](#hastext)
   - [touchtext](#touchtext)
   - [automation](#automation)
 - [Contribute](#contribute)
@@ -63,6 +65,8 @@ This project is updated irregularly or provided with new features.
 *   **Changes on main:**
     * fix for FakeSTouch UDP password encoding issue
     * fix for helpers/update.sh on wrong handling the link to the folder on the boot partition 
+    * stouchrest/objecttree returns now a JSON object
+    * added two new endpoints stouchrest/hastext and stouchrest/hasbutton for simplified queries of the screen content
 *   **Future Development:** New releases are always prepared on the **main** branch. If you want to get a sneak peek on it, check it out and [contribute](#contribute) your test results. You can also update your running version to main, by executing `helpers/update.sh -b main` but you should backup you system before that.
 *   **Known Limitations:** Compatibility with any SystaComfort software or Raspberry Pi OS versions is not guaranteed. See [Known Issues](#known-issues) and [Contribute](#contribute) for more details.
 
@@ -674,6 +678,18 @@ curl -X GET http://systapi:1337/stouchrest/objecttree
 Responses:  
 `200 OK`: Returns the object tree as JSON.
 
+### hasButton
+`GET` `/stouchrest/hasbutton`  
+Returns `true` if the display of the FakeSTouch has a DisplayButton object with the given id in its objecttree.
+```bash
+curl -X GET "http://systapi:1337/stouchrest/hasbutton?id=1"
+```
+Query Parameters:  
+`id` (byte): The ID of the button to search for.
+Responses:
+
+`200 OK`: Returns a JSON object with the result.
+
 #### touchbutton
 `POST` `/stouchrest/touchbutton`  
 Simulates a touch event on a button with the specified ID.
@@ -687,6 +703,18 @@ Responses:
 `200 OK`: Button pressed successfully.  
 `404 Not Found`: Button with the specified ID not found.  
 `500 Internal Server Error`: Error while pressing the button.
+
+#### hasText
+`GET` `/stouchrest/hastext`  
+Returns `true` if the display of the FakeSTouch has a DisplayText object with the given string in its objecttree.
+```bash
+curl -X GET "http://systapi:1337/stouchrest/hastext?text=Hello"
+```
+Query Parameters:  
+`text` (String): The text to search for.
+Responses:
+
+`200 OK`: Returns a JSON object with the result.
 
 #### touchtext
 `POST` `/stouchrest/touchtext`  
