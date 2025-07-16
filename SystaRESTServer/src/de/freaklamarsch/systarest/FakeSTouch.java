@@ -415,7 +415,7 @@ public class FakeSTouch {
 	}
 
 	public String getObjectTree() {
-		return getDisplay().getObjectTree().toString();
+		return getDisplay().getObjectTreeAsJSON();
 	}
 
 	public BufferedImage getScreenAsImage() {

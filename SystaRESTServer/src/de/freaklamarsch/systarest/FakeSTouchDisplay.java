@@ -20,15 +20,22 @@ package de.freaklamarsch.systarest;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
+import de.freaklamarsch.systarest.ColorNamer;
 import de.freaklamarsch.systarest.STouchProtocol.Button;
 import de.freaklamarsch.systarest.STouchProtocol.Circle;
 import de.freaklamarsch.systarest.STouchProtocol.Rectangle;
 import de.freaklamarsch.systarest.STouchProtocol.TextXY;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonWriter;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * A mock implementation of a S-Touch display used, for interaction with a
@@ -572,6 +579,88 @@ public class FakeSTouchDisplay {
 		return objectTree;
 	}
 
+	public synchronized String getObjectTreeAsJSON() {
+		RTree tree = getObjectTree();
+		
+		if (tree == null || tree.getRoot() == null) {
+			return "{}";
+		}
+		StringWriter stringWriter = new StringWriter();
+		try (JsonWriter jsonWriter = Json.createWriter(stringWriter)) {
+			jsonWriter.writeObject(objectTreeNodetoJSON(tree.getRoot()));
+		}
+		return stringWriter.toString();
+	}
+	
+	private JsonObject objectTreeNodetoJSON(RTreeNode node) {
+		JsonObjectBuilder builder = Json.createObjectBuilder();
+		if (node.object != null) {
+			builder.add("object", getObjectAsJSON(node.object));
+		}
+		builder.add("minX", node.minX);
+		builder.add("minY", node.minY);
+		builder.add("maxX", node.maxX);
+		builder.add("maxY", node.maxY);
+
+		if (node.foregroundColor != null) {
+			//builder.add("foregroundColor", foregroundColor.toString());
+			builder.add("foregroundColor", String.format("%s [r=%d,g=%d,b=%d]", ColorNamer.getColorName(node.foregroundColor), node.foregroundColor.getRed(), node.foregroundColor.getGreen(), node.foregroundColor.getBlue()));
+		}
+		if (node.backgroundColor != null) {
+			//builder.add("backgroundColor", backgroundColor.toString());
+			builder.add("backgroundColor", String.format("%s [r=%d,g=%d,b=%d]", ColorNamer.getColorName(node.backgroundColor), node.backgroundColor.getRed(), node.backgroundColor.getGreen(), node.backgroundColor.getBlue()));
+		}
+
+		JsonArrayBuilder childrenBuilder = Json.createArrayBuilder();
+		for (RTreeNode child : node.children) {
+			childrenBuilder.add(objectTreeNodetoJSON(child));
+		}
+		builder.add("children", childrenBuilder.build());
+
+		return builder.build();
+	}
+
+	private JsonObject getObjectAsJSON(Object o) {
+		JsonObjectBuilder builder = Json.createObjectBuilder();
+		if (o == null) {
+			return builder.build();
+		}
+		//builder.add("type", o.getClass().getSimpleName());
+		if (o instanceof DisplayButton) {
+			builder.add("type", "Button");
+			DisplayButton btn = (DisplayButton) o;
+			builder.add("id", btn.button.id);
+			builder.add("xMin", btn.button.xMin);
+			builder.add("yMin", btn.button.yMin);
+			builder.add("xMax", btn.button.xMax);
+			builder.add("yMax", btn.button.yMax);
+		} else if (o instanceof DisplayRectangle) {
+			builder.add("type", "Rectangle");
+			DisplayRectangle rect = (DisplayRectangle) o;
+			builder.add("xMin", rect.rectangle.xMin);
+			builder.add("yMin", rect.rectangle.yMin);
+			builder.add("xMax", rect.rectangle.xMax);
+			builder.add("yMax", rect.rectangle.yMax);
+		} else if (o instanceof DisplayText) {
+			builder.add("type", "Text");
+			DisplayText txt = (DisplayText) o;
+			builder.add("text", txt.textXY.text);
+			builder.add("x", txt.textXY.x);
+			builder.add("y", txt.textXY.y);
+			builder.add("alignment", txt.getALignmentString());
+		} else if (o instanceof DisplayCircle) {
+			builder.add("type", "Circle");
+			DisplayCircle c = (DisplayCircle) o;
+			builder.add("x", c.circle.x);
+			builder.add("y", c.circle.y);
+			builder.add("radius", c.circle.radius);
+		} else {
+			builder.add("type", o.getClass().getSimpleName());
+			builder.add("object", o.toString());
+		}
+		return builder.build();
+	}	
+	
 	public synchronized String getContentAsExcalidrawJSON() {
 		return getObjectTree().getExcalidrawJSON();
 	}

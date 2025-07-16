@@ -1,3 +1,21 @@
+/*
+* Copyright (c) 2025, The beep-projects contributors
+* this file originated from https://github.com/beep-projects
+* Do not remove the lines above.
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see https://www.gnu.org/licenses/
+*
+*/
 package de.freaklamarsch.systarest;
 
 import java.awt.Color;
@@ -34,8 +52,22 @@ public class RTree {
 	 * space.
 	 */
 	public RTree() {
-		this.root = new RTreeNode(null, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE,
-				null, null, null);
+		this.setRoot(new RTreeNode(null, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE,
+				null, null, null));
+	}
+
+	/**
+	 * @return the root
+	 */
+	public RTreeNode getRoot() {
+		return root;
+	}
+
+	/**
+	 * @param root the root to set
+	 */
+	public void setRoot(RTreeNode root) {
+		this.root = root;
 	}
 
 	/**
@@ -52,7 +84,7 @@ public class RTree {
 							// before?
 		} else {
 			elements.add(newNode);
-			return add(root, newNode);
+			return add(getRoot(), newNode);
 		}
 	}
 
@@ -71,7 +103,7 @@ public class RTree {
 				if (!storedNode.children.isEmpty()) {
 					// readd the children, so they don't become orphans
 					for (RTreeNode child : storedNode.children) {
-						add(root, child);
+						add(getRoot(), child);
 					}
 					storedNode.children.clear();
 				}
@@ -86,7 +118,7 @@ public class RTree {
 	}
 
 	public synchronized String toString() {
-		return (root == null) ? "Empty RTree" : root.toString();
+		return (getRoot() == null) ? "Empty RTree" : getRoot().toString();
 	}
 
 	/**
@@ -97,7 +129,7 @@ public class RTree {
 	 * @return
 	 */
 	public Object findContainingObject(int x, int y) {
-		return findContainingObject(root, x, y);
+		return findContainingObject(getRoot(), x, y);
 	}
 
 	/**
@@ -109,7 +141,7 @@ public class RTree {
 	 *         at that position
 	 */
 	public synchronized RTreeNode findNodeAtPos(int x, int y) {
-		return findNodeAtPos(root, x, y);
+		return findNodeAtPos(getRoot(), x, y);
 	}
 
 	private synchronized RTreeNode findNodeAtPos(RTreeNode node, int x, int y) {
@@ -140,7 +172,7 @@ public class RTree {
 	 * @return
 	 */
 	public synchronized Object findContainingObjectWithType(int x, int y, Class<?> type) {
-		return findContainingObjectWithType(root, x, y, type);
+		return findContainingObjectWithType(getRoot(), x, y, type);
 	}
 
 	private synchronized boolean add(RTreeNode node, RTreeNode newNode) {
