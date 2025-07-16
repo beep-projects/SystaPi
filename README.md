@@ -678,7 +678,7 @@ curl -X GET http://systapi:1337/stouchrest/objecttree
 Responses:  
 `200 OK`: Returns the object tree as JSON.
 
-### hasButton
+#### hasbutton
 `GET` `/stouchrest/hasbutton`  
 Returns `true` if the display of the FakeSTouch has a DisplayButton object with the given id in its objecttree.
 ```bash
@@ -704,7 +704,7 @@ Responses:
 `404 Not Found`: Button with the specified ID not found.  
 `500 Internal Server Error`: Error while pressing the button.
 
-#### hasText
+#### hastext
 `GET` `/stouchrest/hastext`  
 Returns `true` if the display of the FakeSTouch has a DisplayText object with the given string in its objecttree.
 ```bash
