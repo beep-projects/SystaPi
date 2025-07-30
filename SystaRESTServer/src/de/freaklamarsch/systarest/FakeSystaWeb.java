@@ -97,7 +97,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2025-07-16T20:52:15+00:00";
+			this.commitDate = "2025-07-30T21:12:40+00:00";
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	// Constants
-	private static final String commitDate = "2025-07-16T20:52:15+00:00";
+	private static final String commitDate = "2025-07-30T21:12:40+00:00";
 	private static final int PORT = 22460;
 	private static final int MAX_DATA_LENGTH = 1048;
 	private static final int MAX_NUMBER_ENTRIES = 256;
@@ -412,7 +412,7 @@ public class FakeSystaWeb implements Runnable {
 		status.relay = intData[i][SystaIndex.RELAY];
 		status.heatingPumpIsOn = (status.relay & SystaStatus.HEATING_PUMP_MASK) != 0;
 		status.chargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_MASK) != 0;
-		status.logBoilderChargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_LOG_BOILER_MASK) != 0;
+		status.logBoilerChargePumpIsOn = (status.relay & SystaStatus.CHARGE_PUMP_LOG_BOILER_MASK) != 0;
 		status.circulationPumpIsOn = (status.relay & SystaStatus.CIRCULATION_PUMP_MASK) != 0;
 		status.boilerIsOn = ((status.relay & SystaStatus.BOILER_MASK) != 0)
 				|| (List.of(1, 2, 3, 8, 9, 11, 12).contains(status.boilerOperationMode));

@@ -188,6 +188,7 @@ public class FakeSTouchDisplay {
 				alignment = ALIGN_LEFT;
 				break;
 			case 97:
+			case 163:
 				alignment = ALIGN_CENTER;
 				break;
 			default:
@@ -213,7 +214,7 @@ public class FakeSTouchDisplay {
 
 		@Override
 		public String toString() {
-			return "Text: " + textXY.text + " (" + textXY.x + ", " + textXY.y + ")" + "[" + getALignmentString() + "]";
+			return "Text: " + textXY.text + " (" + textXY.x + ", " + textXY.y + ")" + "[Style("+style+"): " + getALignmentString() + "]";
 		}
 
 		@Override
@@ -405,7 +406,7 @@ public class FakeSTouchDisplay {
 		DisplayText foundText = findTextInObjectTree(searchText);
 		if (foundText != null) {
 			// Generate a touch event at the upper-left corner of the text
-			setTouch(foundText.textXY.x, foundText.textXY.y);
+			setTouch(foundText.textXY.x+1, foundText.textXY.y+1);
 			return true;
 		}
 		return false; // Text not found
@@ -653,6 +654,7 @@ public class FakeSTouchDisplay {
 			builder.add("text", txt.textXY.text);
 			builder.add("x", txt.textXY.x);
 			builder.add("y", txt.textXY.y);
+			builder.add("style", txt.style);
 			builder.add("alignment", txt.getALignmentString());
 		} else if (o instanceof DisplayCircle) {
 			builder.add("type", "Circle");
@@ -673,6 +675,10 @@ public class FakeSTouchDisplay {
 
 	public synchronized BufferedImage getContentAsImage() {
 		return getObjectTree().getImage();
+	}
+
+	public ArrayList<DisplayText> getTexts() {
+		return texts;
 	}
 
 }

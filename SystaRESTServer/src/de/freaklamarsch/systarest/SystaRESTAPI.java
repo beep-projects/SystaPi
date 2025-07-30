@@ -336,7 +336,7 @@ public class SystaRESTAPI {
 				.add("logBoilerSpreadingMin", ps.logBoilerSpreadingMin)
 				.add("logBoilerPumpSpeedMin", ps.logBoilerPumpSpeedMin)
 				.add("logBoilerPumpSpeedActual", ps.logBoilerPumpSpeedActual)
-				.add("logBoilderChargePumpIsOn", ps.logBoilderChargePumpIsOn)
+				.add("logBoilerChargePumpIsOn", ps.logBoilerChargePumpIsOn)
 				.add("logBoilerSettings", ps.logBoilerSettings)
 				.add("logBoilerParallelOperation", ps.logBoilerParallelOperation)
 				.add("logBoilerOperationMode", ps.logBoilerOperationMode)

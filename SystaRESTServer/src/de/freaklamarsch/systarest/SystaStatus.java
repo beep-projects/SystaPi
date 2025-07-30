@@ -847,7 +847,7 @@ public class SystaStatus {
 	/**
 	 * log bioler charge pump = Relay &amp; 0x1000
 	 */
-	public boolean logBoilderChargePumpIsOn;
+	public boolean logBoilerChargePumpIsOn;
 	/**
 	 * LED boiler = Relay &amp; 0x2000
 	 * 

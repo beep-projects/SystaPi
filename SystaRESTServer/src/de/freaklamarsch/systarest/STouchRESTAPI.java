@@ -334,58 +334,87 @@ public class STouchRESTAPI {
 		String query = uriInfo.getRequestUri().getQuery();
 		String[] commandArray = query.split("&");
 		boolean skipNext = false;
-
+		//System.out.println("start automation");
 		for (int i = 0; i < commandArray.length; i++) {
 			String command = commandArray[i];
+			//System.out.println("command["+i+"]: "+command);
 			if (skipNext) {
 				skipNext = false;
+				//System.out.println("skip next");
 				continue;
 			}
 			if (command.toLowerCase().startsWith("whiletext")) {
+				//System.out.println("whiletext");
 				Response response = automationWhileTextCommand(commandArray, i);
 				if (response != null)
+				{
+					//System.out.println("return "+response);
 					return response;
+				}
 				skipNext = true;
 				continue;
 			}
 			if (command.toLowerCase().startsWith("checktext")) {
+				//System.out.println("checktext: "+command);
 				skipNext = automationCheckTextCommand(command);
+				//System.out.println("text found == "+skipNext);
 				continue;
 			}
 			if (command.toLowerCase().startsWith("whilebutton")) {
+				//System.out.println("whilebutton");
 				Response response = automationWhileButtonCommand(commandArray, i);
-				if (response != null)
+				if (response != null) {
+					//System.out.println("return "+response);
 					return response;
+				}
 				skipNext = true;
 				continue;
 			}
 			if (command.toLowerCase().startsWith("checkbutton")) {
+				//System.out.println("checkbutton");
 				skipNext = automationCheckButtonCommand(command);
+				//System.out.println("button "+command+" found == "+skipNext);
 				continue;
 			}
+			//System.out.println("execute command "+command);
 			Response response = automationExecuteCommand(command);
+			//System.out.println("result of command: "+response);
 			if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-						.entity("Command failed: " + command + ", Error: " + response.getEntity()).build();
+				response = Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+				.entity("Command failed: " + command + ", Error: " + response.getEntity()).build();
+				//System.out.println("result of command: "+response);
+				return response;
 			}
-			sleepForTwoSeconds();
+			shortSleep();
 		}
+		//System.out.println("Automation executed successfully");
 		return Response.ok("Automation executed successfully").build();
 	}
 
 	private Response automationWhileTextCommand(String[] commandArray, int i) {
+		//System.out.println("whileTextCommand");
 		String command = commandArray[i];
+		//System.out.println("command == "+command);
 		String searchText = extractComparisonValue(command, "whiletext");
+		//System.out.println("searchText == "+searchText);
 		boolean isEqualComparison = command.toLowerCase().startsWith("whiletext==");
 		DisplayText foundText = STouchRESTAPI.fst.getDisplay().findTextInObjectTree(searchText);
+		//System.out.println("foundText == "+foundText);
 		while ((isEqualComparison && foundText != null) || (!isEqualComparison && foundText == null)) {
+			//System.out.println("whileConditionNotMet");
+			//System.out.println("execute command "+commandArray[i + 1]);
 			Response response = automationExecuteCommand(commandArray[i + 1]);
+			//System.out.println("response == "+response);
 			if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+				//System.out.println("error");
+				//System.out.println(fst.getObjectTree());
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 						.entity("Command failed: " + command + ", Error: " + response.getEntity()).build();
 			}
-			sleepForTwoSeconds();
+			shortSleep();
+			//System.out.println("search text again: "+searchText);
 			foundText = STouchRESTAPI.fst.getDisplay().findTextInObjectTree(searchText);
+			//System.out.println("now foundText == "+foundText);
 		}
 		return null;
 	}
@@ -408,7 +437,7 @@ public class STouchRESTAPI {
 				return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 						.entity("Command failed: " + command + ", Error: " + response.getEntity()).build();
 			}
-			sleepForTwoSeconds();
+			shortSleep();
 			foundButton = STouchRESTAPI.fst.getDisplay().findButtonInObjectTree(searchId);
 		}
 		return null;
@@ -429,9 +458,9 @@ public class STouchRESTAPI {
 		return Byte.parseByte(command.substring((prefix + "??").length()));
 	}
 
-	private void sleepForTwoSeconds() {
+	private void shortSleep() {
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(750);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new RuntimeException("Execution interrupted.");
@@ -439,27 +468,87 @@ public class STouchRESTAPI {
 	}
 
 	private Response automationExecuteCommand(String command) {
-		if (command.equalsIgnoreCase("none")) {
-			return Response.ok().build();
-		} else if (command.equalsIgnoreCase("connect")) {
-			return connect();
-		} else if (command.toLowerCase().startsWith("touchbutton")) {
-			String[] parts = command.split("=");
-			return touchButton(Byte.parseByte(parts[1]));
-		} else if (command.toLowerCase().startsWith("touchtext")) {
-			String[] parts = command.split("=");
-			return touchText(parts[1]);
-		} else if (command.toLowerCase().startsWith("touch")) {
-			String[] parts = command.split("=");
-			String[] coordinates = parts[1].split(",");
-			int x = Integer.parseInt(coordinates[0]);
-			int y = Integer.parseInt(coordinates[1]);
-			return touch(x, y);
-		} else if (command.equalsIgnoreCase("disconnect")) {
-			return disconnect();
-		} else {
-			return Response.status(Response.Status.BAD_REQUEST).entity("Unknown command: " + command).build();
-		}
+	    if (command == null || command.trim().isEmpty()) {
+	        return Response.status(Response.Status.BAD_REQUEST)
+	                .entity("Error: Command is null or empty. Received: '" + command + "'. Please provide a valid command.")
+	                .build();
+	    }
+
+	    try {
+	        if (command.equalsIgnoreCase("none")) {
+	            return Response.ok().build();
+	        } else if (command.equalsIgnoreCase("connect")) {
+	            Response response = connect();
+	            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+	                // just try if a hanging connection is the cause
+	                disconnect();
+	                return connect();
+	            }
+	            return response;
+	        } else if (command.toLowerCase().startsWith("touchbutton")) {
+	            String[] parts = command.split("=");
+	            if (parts.length != 2) {
+	                return Response.status(Response.Status.BAD_REQUEST)
+	                        .entity("Error: 'touchbutton' command format is incorrect. Received: '" + command +
+	                                "'. Expected format: 'touchbutton=<number>'.")
+	                        .build();
+	            }
+	            return touchButton(Byte.parseByte(parts[1]));
+	        } else if (command.toLowerCase().startsWith("touchtext")) {
+	            String[] parts = command.split("=");
+	            if (parts.length != 2) {
+	                return Response.status(Response.Status.BAD_REQUEST)
+	                        .entity("Error: 'touchtext' command format is incorrect. Received: '" + command +
+	                                "'. Expected format: 'touchtext=<text>'.")
+	                        .build();
+	            }
+				ArrayList<DisplayText> texts = fst.getDisplay().getTexts();
+				Response response = touchText(parts[1]);
+				if(texts.equals(fst.getDisplay().getTexts())) {
+					shortSleep();
+					// the touch should always change the screen content
+					response = touchText(parts[1]);
+				}
+	            return response;
+	        } else if (command.toLowerCase().startsWith("touch")) {
+	            String[] parts = command.split("=");
+	            if (parts.length != 2) {
+	                return Response.status(Response.Status.BAD_REQUEST)
+	                        .entity("Error: 'touch' command format is incorrect. Received: '" + command +
+	                                "'. Expected format: 'touch=x,y'.")
+	                        .build();
+	            }
+
+	            String[] coordinates = parts[1].split(",");
+	            if (coordinates.length != 2) {
+	                return Response.status(Response.Status.BAD_REQUEST)
+	                        .entity("Error: Coordinates are missing or incomplete in command: '" + command +
+	                                "'. Expected format: 'touch=x,y'.")
+	                        .build();
+	            }
+
+	            int x = Integer.parseInt(coordinates[0]);
+	            int y = Integer.parseInt(coordinates[1]);
+	            return touch(x, y);
+	        } else if (command.equalsIgnoreCase("disconnect")) {
+	            return disconnect();
+	        } else {
+	            return Response.status(Response.Status.BAD_REQUEST)
+	                    .entity("Error: Unknown command received: '" + command +
+	                            "'. Please check spelling or usage.")
+	                    .build();
+	        }
+	    } catch (NumberFormatException e) {
+	        return Response.status(Response.Status.BAD_REQUEST)
+	                .entity("Error: Invalid number format in command: '" + command +
+	                        "'. Details: " + e.getMessage())
+	                .build();
+	    } catch (Exception e) {
+	        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+	                .entity("Error: Unexpected error while processing command: '" + command +
+	                        "'. Details: " + e.getMessage())
+	                .build();
+	    }
 	}
 
 }
