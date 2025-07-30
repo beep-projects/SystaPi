@@ -212,8 +212,8 @@
       value_template: "{{ value_json.roomTempSetComfort }}"
       device_class: temperature
       unit_of_measurement: "°C"
-    - name: "systapi_roomTempSetLowering"
-      value_template: "{{ value_json.roomTempSetLowering }}"
+    - name: "systapi_roomTempSetReduced"
+      value_template: "{{ value_json.roomTempSetReduced }}"
       device_class: temperature
       unit_of_measurement: "°C"
     - name: "systapi_roomImpact"
@@ -255,8 +255,8 @@
       value_template: "{{ value_json.heatingLimitTemp }}"
       device_class: temperature
       unit_of_measurement: "°C"
-    - name: "systapi_heatingLimitTeampLowering"
-      value_template: "{{ value_json.heatingLimitTeampLowering }}"
+    - name: "systapi_heatingLimitTeampReduced"
+      value_template: "{{ value_json.heatingLimitTeampReduced }}"
       device_class: temperature
       unit_of_measurement: "°C"
     - name: "systapi_heatingPumpSpeedActual"

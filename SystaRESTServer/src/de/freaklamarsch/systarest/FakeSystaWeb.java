@@ -97,7 +97,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2025-07-30T21:12:40+00:00";
+			this.commitDate = "2025-07-30T21:28:42+00:00";
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	// Constants
-	private static final String commitDate = "2025-07-30T21:12:40+00:00";
+	private static final String commitDate = "2025-07-30T21:28:42+00:00";
 	private static final int PORT = 22460;
 	private static final int MAX_DATA_LENGTH = 1048;
 	private static final int MAX_NUMBER_ENTRIES = 256;
@@ -361,14 +361,14 @@ public class FakeSystaWeb implements Runnable {
 		status.operationMode = intData[i][SystaIndex.OPERATION_MODE];
 		status.roomTempSetNormal = intData[i][SystaIndex.ROOM_TEMP_SET_NORMAL] / 10.0;
 		status.roomTempSetComfort = intData[i][SystaIndex.ROOM_TEMP_SET_COMFORT] / 10.0;
-		status.roomTempSetLowering = intData[i][SystaIndex.ROOM_TEMP_SET_LOWERING] / 10.0;
+		status.roomTempSetReduced = intData[i][SystaIndex.ROOM_TEMP_SET_REDUCED] / 10.0;
 		status.heatingOperationMode = intData[i][SystaIndex.HEATING_OPERATION_MODE];
 		status.controlledBy = intData[i][SystaIndex.CONTROLLED_BY];
 		status.heatingCurveBasePoint = intData[i][SystaIndex.HEATING_CURVE_BASE_POINT] / 10.0;
 		status.heatingCurveGradient = intData[i][SystaIndex.HEATING_CURVE_GRADIENT] / 10.0;
 		status.maxFlowTemp = intData[i][SystaIndex.MAX_FLOW_TEMP] / 10.0;
 		status.heatingLimitTemp = intData[i][SystaIndex.HEATING_LIMIT_TEMP] / 10.0;
-		status.heatingLimitTeampLowering = intData[i][SystaIndex.HEATING_LIMIT_TEMP_LOWERING] / 10.0;
+		status.heatingLimitTeampReduced = intData[i][SystaIndex.HEATING_LIMIT_TEMP_REDUCED] / 10.0;
 		status.antiFreezeOutsideTemp = intData[i][SystaIndex.ANTI_FREEZE_OUTSIDE_TEMP] / 10.0;
 		status.heatUpTime = intData[i][SystaIndex.HEAT_UP_TIME]; // in minutes
 		status.roomImpact = intData[i][SystaIndex.ROOM_IMPACT] / 10.0;

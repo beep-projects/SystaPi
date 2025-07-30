@@ -201,11 +201,11 @@ public final class SystaIndex {
 	/**
 	 * Raumtemperatur abgesenkt (soll)
 	 */
-	final static int ROOM_TEMP_SET_LOWERING = 41;
+	final static int ROOM_TEMP_SET_REDUCED = 41;
 	/**
 	 * Heizung aus=0, normal=1, absenken=3
 	 */
-	final static int HEATING_OPERATION_MODE = 42; // off=0, normal=1, lowering=3
+	final static int HEATING_OPERATION_MODE = 42; // off=0, normal=1, reduced=3
 	// final static int = 43
 	// final static int = 44
 	// final static int = 45
@@ -241,7 +241,7 @@ public final class SystaIndex {
 	/**
 	 * Heizgrenze Absenken
 	 */
-	final static int HEATING_LIMIT_TEMP_LOWERING = 54;
+	final static int HEATING_LIMIT_TEMP_REDUCED = 54;
 	/**
 	 * Frostschutz Aussentemperatur
 	 */

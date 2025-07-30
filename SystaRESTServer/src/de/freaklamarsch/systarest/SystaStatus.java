@@ -320,7 +320,7 @@ public class SystaStatus {
 	 * 2 = Auto Prog. 3<br/>
 	 * 3 = Continuous Normal<br/>
 	 * 4 = Continuous Comfort<br/>
-	 * 5 = Continuous Lowering<br/>
+	 * 5 = Continuous Reduced<br/>
 	 * 6 = Summer<br/>
 	 * 7 = Off<br/>
 	 * 8 = Party<br/>
@@ -335,7 +335,7 @@ public class SystaStatus {
 	 * <li>Continuous Comfort - Heating circuit is controlled to "Comfort room
 	 * temperature setpoint", DHW heating and circulation run according to the
 	 * settings in the respective time program.</li>
-	 * <li>Continuous Lowering - Heating circuit is controlled to "Room temperature
+	 * <li>Continuous Reduced - Heating circuit is controlled to "Room temperature
 	 * setpoint reduced", drinking water heating and circulation run according to
 	 * the settings in the respective time program.</li>
 	 * <li>Summer - Heating is switched off, drinking water heating and circulation
@@ -351,12 +351,12 @@ public class SystaStatus {
 	public int operationMode;
 	/**
 	 * operationModes = { "Auto Prog. 1", "Auto Prog. 2", "Auto Prog. 3",
-	 * "Continuous Normal", "Continuous Comfort", "Continuous Lowering", "Summer",
+	 * "Continuous Normal", "Continuous Comfort", "Continuous Reduced", "Summer",
 	 * "Off", "Party", "undef", "undef", "undef", "manual", "Test", "chimney",
 	 * "undef" }
 	 */
 	public final String[] operationModes = { "Auto Prog. 1", "Auto Prog. 2", "Auto Prog. 3", "Continuous Normal",
-			"Continuous Comfort", "Continuous Lowering", "Summer", "Off", "Party", "undef", "undef", "undef", "manual",
+			"Continuous Comfort", "Continuous Reduced", "Summer", "Off", "Party", "undef", "undef", "undef", "manual",
 			"Test", "chimney", "undef" };
 	/**
 	 * Status Kessel<br/>
@@ -462,19 +462,19 @@ public class SystaStatus {
 	/**
 	 * Raumtemperatur abgesenkt (soll)<br/>
 	 * <br/>
-	 * Room temperature lowering (set)
+	 * Room temperature reduced (set)
 	 */
-	public double roomTempSetLowering;
+	public double roomTempSetReduced;
 	/**
 	 * Heizung aus=0, normal=1, komfort=2, absenken=3<br/>
 	 * <br/>
-	 * Heating off=0, normal=1, comfort=2, lower=3
+	 * Heating off=0, normal=1, comfort=2, reduced=3
 	 */
 	public int heatingOperationMode;
 	/**
-	 * heatingOperationModes = { "off", "normal", "comfort", "lowering" }
+	 * heatingOperationModes = { "off", "normal", "comfort", "reduced" }
 	 */
-	public final String[] heatingOperationModes = { "off", "normal", "comfort", "lowering" };
+	public final String[] heatingOperationModes = { "off", "normal", "comfort", "reduced" };
 	/**
 	 * Regelung HK nach:<br/>
 	 * 0 = Aussentemperatur<br/>
@@ -536,9 +536,9 @@ public class SystaStatus {
 	/**
 	 * Heizgrenze Absenken<br/>
 	 * <br/>
-	 * Heating limit Lowering
+	 * Heating limit reduced
 	 */
-	public double heatingLimitTeampLowering;
+	public double heatingLimitTeampReduced;
 	/**
 	 * Frostschutz Aussentemperatur<br/>
 	 * <br/>
@@ -911,7 +911,7 @@ public class SystaStatus {
 	/**
 	 * Heizung aus=0; normal=1, komfort=2, abgesenkt=3 ???<br/>
 	 * <br/>
-	 * heating off=0; normal=1, comfort=2, lowering=3 ???
+	 * heating off=0; normal=1, comfort=2, reduced=3 ???
 	 */
 	public int heatingOperationModeX;
 	/**
@@ -1061,13 +1061,13 @@ public class SystaStatus {
 	 * 0 = "off" 1 = "off (heating limit)" 2 = "off (room temperature)" 3 = "locked
 	 * (buffer temp top)" 4 = "off (yield hot water)" 5 = "on" 6 = "anti freeze" 7 =
 	 * "cooling" 8 = "lead time heat up" 9 = "heating" 10 = "comfort" 11 =
-	 * "lowering" 12 = "off (temp swimming pool)" 13 = "locked" 14 = "normal" 15 =
+	 * "reduced" 12 = "off (temp swimming pool)" 13 = "locked" 14 = "normal" 15 =
 	 * "raised" 16 = "hot water" 17 = "screed heating" 18 = "cooling mode"
 	 */
 	public int circuit1OperationMode;
 	public final String[] circuit1OperationModeNames = { "off", "off (heating limit)", "off (room temperature)",
 			"locked (buffer temp top)", "off (yield hot water)", "on", "anti freeze", "cooling", "lead time heat up",
-			"heating", "comfort", "lowering", "off (temp swimming pool)", "locked", "normal", "raised", "hot water",
+			"heating", "comfort", "reduced", "off (temp swimming pool)", "locked", "normal", "raised", "hot water",
 			"screed heating", "cooling mode" };
 
 	/**

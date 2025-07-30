@@ -186,14 +186,14 @@ class FakeSystaWebTest {
 		assertEquals(7, status.operationMode);
 		assertEquals(21, status.roomTempSetNormal);
 		assertEquals(24, status.roomTempSetComfort);
-		assertEquals(18, status.roomTempSetLowering);
+		assertEquals(18, status.roomTempSetReduced);
 		assertEquals(0, status.heatingOperationMode);
 		assertEquals(0, status.controlledBy);
 		assertEquals(34, status.heatingCurveBasePoint);
 		assertEquals(0.4, status.heatingCurveGradient);
 		assertEquals(60, status.maxFlowTemp);
 		assertEquals(15, status.heatingLimitTemp);
-		assertEquals(15, status.heatingLimitTeampLowering);
+		assertEquals(15, status.heatingLimitTeampReduced);
 		assertEquals(2, status.antiFreezeOutsideTemp);
 		assertEquals(30, status.heatUpTime);
 		assertEquals(0, status.roomImpact);
