@@ -40,8 +40,12 @@ jobs:
       # Runs a single command using the runners shell
       - name: run JUnit tests
         run: |
+          CP_TEST="./SystaRESTServer/bin"
+          for jarfile in ./SystaRESTServer/lib/*.jar; do
+            CP_TEST="$CP_TEST:$jarfile"
+          done
           ls -al ./SystaRESTServer/bin/
-          java -jar .github/workflows/junit-platform-console-standalone-1.13.4.jar -cp ./SystaRESTServer/bin/ --scan-classpath -reports-dir='junit-reports/'
+          java -jar .github/workflows/junit-platform-console-standalone-1.13.4.jar -cp "$CP_TEST" --scan-classpath -reports-dir='junit-reports/'
 
       # Publish the test results
       - name: Publish Test Report
