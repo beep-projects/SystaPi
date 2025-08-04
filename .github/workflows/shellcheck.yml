@@ -3,6 +3,7 @@ name: Shellcheck
 
 # Controls when the workflow will run
 on:
+  workflow_dispatch:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
     branches: [ main ]
@@ -15,7 +16,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Run ShellCheck
-      uses: ludeeus/action-shellcheck@master
+      uses: ludeeus/action-shellcheck@2.0.0
       env:
         SHELLCHECK_OPTS: -e SC1091
         
