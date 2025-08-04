@@ -99,9 +99,9 @@ class SystaRESTAPITest extends JerseyTest {
     // do not name this setup()
 	@BeforeAll // fix incompatibility with JUnit5
 	public static void initializeTestData() { // Made static as @BeforeAll for non-PER_CLASS lifecycle requires it
-	    String testDir = SystaRESTAPITest.class.getClass().getResource(".").getPath();
-		// TODO improve path handling of tests
-	    //String testDir = System.getProperty("user.dir") + "/bin/" + SystaRESTAPITest.class.getPackageName().replace('.', '/') + "/";
+	    //String testDir = SystaRESTAPITest.class.getClass().getResource(".").getPath();
+	    // TODO improve path handling of tests
+	    String testDir = System.getProperty("user.dir") + "/bin/" + SystaRESTAPITest.class.getPackageName().replace('.', '/') + "/";
 	    String[] TEST_DATA_FILES = {
 	    		testDir + "data00_09_00.txt", // IDX_DATA00_09_00
 	    		testDir + "data01_09_00.txt", // IDX_DATA01_09_00
