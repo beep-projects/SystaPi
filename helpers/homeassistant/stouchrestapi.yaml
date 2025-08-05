@@ -1,0 +1,49 @@
+ systapi_stouch_connect:
+   url: "http://systapi:1337/STouchREST/connect"
+   method: POST
+ systapi_stouch_disconnect:
+   url: "http://systapi:1337/STouchREST/disconnect"
+   method: POST
+ systapi_stouch_touch:
+   url: "http://systapi:1337/STouchREST/touch?x={{ x }}&y={{ y }}"
+   method: POST
+ systapi_stouch_hasbutton:
+   url: "http://systapi:1337/STouchREST/hasbutton?id={{ id }}"
+   method: POST
+ systapi_stouch_touchbutton:
+   url: "http://systapi:1337/STouchREST/touchbutton?id={{ id }}"
+   method: POST
+ systapi_stouch_hastext:
+   url: "http://systapi:1337/STouchREST/hastext?text={{ text }}"
+   method: POST
+ systapi_stouch_touchtext:
+   url: "http://systapi:1337/STouchREST/touchtext?text={{ text }}"
+   method: POST
+ systapi_stouch_automation:
+   url: "http://systapi:1337/STouchREST/automation?{{ commands }}"
+   method: GET
+ systapi_heating_program_request:
+   url: >
+     http://systapi:1337/stouchrest/automation?connect&touch=155,141&touch=42,77&touch=157,182&whiletext!={{ program_name | urlencode }}&touchbutton={{ touchbutton }}&touchtext={{ program_name | urlencode }}&disconnect
+   method: GET
+   timeout: 60
+
+# Example for calling the STouchREST API from an automation
+#
+# automation:
+#   - alias: "Emulate STouch"
+#     trigger:
+#       - platform: state
+#         entity_id: input_boolean.emulate_stouch
+#         to: "on"
+#     action:
+#       - service: rest_command.systapi_stouch_connect
+#       - delay:
+#           seconds: 2
+#       - service: rest_command.systapi_stouch_touch
+#         data:
+#           x: 100
+#           y: 200
+#       - delay:
+#           seconds: 2
+#       - service: rest_command.systapi_stouch_disconnect

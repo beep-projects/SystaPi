@@ -1,0 +1,281 @@
+views:
+  - type: sections
+    max_columns: 10
+    title: SystaPi
+    path: systapi
+    icon: mdi:heating-coil
+    dense_section_placement: true
+    sections:
+      - type: grid
+        cards:
+          - type: horizontal-stack
+            cards:
+              - show_name: true
+                show_icon: false
+                type: button
+                name: Heating Program 1
+                tap_action:
+                  action: call-service
+                  service: script.heating_program_1
+              - show_name: true
+                show_icon: false
+                type: button
+                name: Heating Program 2
+                tap_action:
+                  action: call-service
+                  service: script.heating_program_2
+              - show_name: true
+                show_icon: false
+                type: button
+                name: Contin. normal
+                tap_action:
+                  action: call-service
+                  service: script.contin_normal
+              - show_name: true
+                show_icon: false
+                type: button
+                name: Contin. comfort
+                tap_action:
+                  action: call-service
+                  service: script.contin_comfort
+            grid_options:
+              columns: full
+              rows: auto
+          - type: horizontal-stack
+            cards:
+              - show_name: true
+                show_icon: false
+                type: button
+                name: Contin. reduce
+                tap_action:
+                  action: call-service
+                  service: script.contin_reduce
+              - show_name: true
+                show_icon: false
+                type: button
+                name: Summer mode
+                tap_action:
+                  action: call-service
+                  service: script.summer_mode
+              - show_name: true
+                show_icon: false
+                type: button
+                name: 'Off'
+                tap_action:
+                  action: call-service
+                  service: script.off_mode
+              - show_name: true
+                show_icon: false
+                type: button
+                name: Party
+                tap_action:
+                  action: call-service
+                  service: script.party_mode
+            grid_options:
+              columns: full
+              rows: 1
+        column_span: 10
+      - type: grid
+        cards:
+          - type: heading
+            icon: mdi:floor-plan
+            heading: Schema
+            heading_style: title
+          - type: picture-elements
+            card_mod:
+              style: |
+                :root {
+                  --logboiler-state-color: red;
+                  {% if is_state('sensor.systapi_logboileroperationmodename','Off') %}
+                  --logboiler-state-color: grey;
+                  {% else %}
+                  --logboiler-state-color: red;
+                  {% endif %}
+                }
+            elements:
+              - type: state-label
+                entity: sensor.systapi_buffertemptop
+                style:
+                  left: 52%
+                  top: 44%
+              - type: state-label
+                entity: sensor.systapi_buffertempbottom
+                style:
+                  left: 52%
+                  top: 75%
+              - type: state-label
+                entity: sensor.systapi_hotwatertemp
+                style:
+                  left: 63%
+                  top: 24%
+              - type: state-label
+                entity: sensor.systapi_heatingpumpspeedactual
+                style:
+                  left: 73%
+                  top: 53%
+              - type: state-label
+                style:
+                  left: 72%
+                  top: 43%
+                entity: binary_sensor.systapi_heatingpumpison
+              - type: state-label
+                style:
+                  left: 90%
+                  top: 54%
+                entity: sensor.systapi_circuit1flowtemp
+              - type: state-label
+                style:
+                  left: 90%
+                  top: 80%
+                entity: sensor.systapi_circuit1returntemp
+              - type: state-label
+                entity: sensor.systapi_logboilerpumpspeedactual
+                style:
+                  left: 35%
+                  top: 65%
+              - type: state-label
+                style:
+                  left: 34%
+                  top: 74%
+                entity: binary_sensor.systapi_logboilerchargepumpison
+              - type: state-label
+                entity: sensor.systapi_logboilerflowtemp
+                style:
+                  left: 16.5%
+                  top: 83%
+              - type: state-label
+                entity: sensor.systapi_logboilerreturntemp
+                style:
+                  left: 16.5%
+                  top: 99%
+              - type: state-label
+                style:
+                  left: 52%
+                  top: 95%
+                entity: sensor.systapi_operationmodename
+              - type: state-label
+                entity: sensor.systapi_boileroperationmodename
+                style:
+                  left: 15%
+                  top: 70%
+              - type: state-label
+                entity: sensor.systapi_heatingoperationmodename
+                style:
+                  left: 80%
+                  top: 85%
+                prefix: 'heatingOperationMode: '
+              - type: state-label
+                style:
+                  left: 90%
+                  top: 90%
+                entity: sensor.systapi_circuit1operationmodename
+              - type: state-label
+                style:
+                  left: 55%
+                  top: 10%
+                entity: sensor.systapi_hotwateroperationmodename
+              - type: state-label
+                entity: sensor.systapi_logboileroperationmodename
+                style:
+                  left: 5%
+                  top: 103%
+              - type: state-label
+                entity: binary_sensor.systapi_burnerison
+                style:
+                  left: 5.5%
+                  top: 59%
+              - type: state-label
+                entity: sensor.systapi_mixer1statename
+                style:
+                  left: 70%
+                  top: 61%
+              - type: state-label
+                entity: sensor.systapi_boilerflowtemp
+                style:
+                  left: 16.5%
+                  top: 48%
+              - type: state-label
+                entity: sensor.systapi_boilerreturntemp
+                style:
+                  left: 16.5%
+                  top: 60%
+              - type: state-icon
+                entity: binary_sensor.systapi_burnerison
+                icon: mdi:fire
+                style:
+                  left: 6%
+                  top: 54%
+                  '--paper-item-icon-active-color': red
+                  '--paper-item-icon-color': grey
+              - type: icon
+                icon: mdi:fire
+                style:
+                  left: 6%
+                  top: 89%
+                  color: var(--logboiler-state-color)
+              - type: state-label
+                entity: binary_sensor.systapi_chargepumpison
+                style:
+                  left: 28%
+                  top: 61.5%
+              - type: state-label
+                style:
+                  left: 34%
+                  top: 58%
+                entity: sensor.systapi_boilerpumpspeedactual
+              - type: state-label
+                style:
+                  left: 75%
+                  top: 100%
+                entity: sensor.systapi_timestampstring
+                format: datetime
+            grid_options:
+              columns: full
+              rows: 8
+            image: /local/systapi/schema.png
+          - type: heading
+            heading_style: title
+            heading: Buffer Temperatures
+            icon: mdi:thermometer-water
+          - type: history-graph
+            entities:
+              - entity: sensor.systapi_buffertempmax
+              - entity: sensor.systapi_buffertemptop
+              - entity: sensor.systapi_buffertempbottom
+              - entity: sensor.systapi_buffertempmin
+              - entity: sensor.systapi_buffertempset
+            hours_to_show: 168
+            grid_options:
+              columns: full
+        column_span: 2
+      - type: grid
+        cards:
+          - type: heading
+            heading: Relay
+            heading_style: title
+          - type: history-graph
+            entities:
+              - entity: binary_sensor.systapi_burnerison
+              - entity: binary_sensor.systapi_boilerison
+              - entity: binary_sensor.systapi_boilerledison
+              - entity: binary_sensor.systapi_chargepumpison
+              - entity: binary_sensor.systapi_relay_bit00
+              - entity: binary_sensor.systapi_relay_bit01
+              - entity: binary_sensor.systapi_relay_bit02
+              - entity: binary_sensor.systapi_relay_bit03
+              - entity: binary_sensor.systapi_relay_bit04
+              - entity: binary_sensor.systapi_relay_bit05
+              - entity: binary_sensor.systapi_relay_bit06
+              - entity: binary_sensor.systapi_relay_bit07
+              - entity: binary_sensor.systapi_relay_bit08
+              - entity: binary_sensor.systapi_relay_bit09
+              - entity: binary_sensor.systapi_relay_bit10
+              - entity: binary_sensor.systapi_relay_bit11
+              - entity: binary_sensor.systapi_relay_bit12
+              - entity: binary_sensor.systapi_relay_bit13
+              - entity: binary_sensor.systapi_relay_bit14
+              - entity: binary_sensor.systapi_relay_bit15
+            grid_options:
+              columns: full
+        column_span: 2
+    cards: []

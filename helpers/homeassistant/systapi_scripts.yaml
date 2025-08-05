@@ -1,0 +1,62 @@
+  heating_program_1:
+    alias: "Heating Program 1"
+    sequence:
+      - service: rest_command.systapi_heating_program_request
+        data:
+          program_name: "Heating program 1"
+          touchbutton: 19
+
+  heating_program_2:
+    alias: "Heating Program 2"
+    sequence:
+      - service: rest_command.systapi_heating_program_request
+        data:
+          program_name: "Heating program 2"
+          touchbutton: 19
+
+  contin_normal:
+    alias: "Contin. normal"
+    sequence:
+      - service: rest_command.systapi_heating_program_request
+        data:
+          program_name: "Contin. normal"
+          touchbutton: 19
+
+  contin_comfort:
+    alias: "Contin. comfort"
+    sequence:
+      - service: rest_command.systapi_heating_program_request
+        data:
+          program_name: "Contin. comfort"
+          touchbutton: 20
+
+  contin_reduce:
+    alias: "Contin. reduce"
+    sequence:
+      - service: rest_command.systapi_heating_program_request
+        data:
+          program_name: "Contin. reduce"
+          touchbutton: 20
+
+  summer_mode:
+    alias: "Summer mode"
+    sequence:
+      - service: rest_command.systapi_heating_program_request
+        data:
+          program_name: "Summer mode"
+          touchbutton: 20
+
+  off_mode:
+    alias: "Off"
+    sequence:
+      - service: rest_command.systapi_heating_program_request
+        data:
+          program_name: "Off"
+          touchbutton: 20
+
+  party_mode:
+    alias: "Party"
+    sequence:
+      - service: rest_command.systapi_heating_program_request
+        data:
+          program_name: "Party"

@@ -1,0 +1,11 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# include sensors for reading values from SystaPi vi SystaREST API
+rest: !include systarestapi.yaml
+# includ commands for controlling SystaPi via STouchREST API
+rest_command: !include stouchrestapi.yaml
+# include scripts that trigger STouchREST API commands
+script: !include systapi_scripts.yaml
+
