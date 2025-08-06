@@ -5,7 +5,7 @@ If you have created something nice for your Home Assistant installation, please 
 
 ## Prerequisites
 
-*   A running [Home Assistant](https://www.home-assistant.io/) instance. I use [HAcorePi](https://github.com/beep-projects/HAcorePi) for this, wich is a Home Assistant Core installation. You will have to adapt the information on this page to match your type of installation.
+*   A running [Home Assistant](https://www.home-assistant.io/) instance. I use [HAcorePi](https://github.com/beep-projects/HAcorePi) for this, which is a Home Assistant Core installation. You will have to adapt the information on this page to match your type of installation.
 *   A running [SystaPi](../../README.md) instance that is accessible from your Home Assistant instance.
 
 ## Using the example files
@@ -30,9 +30,6 @@ This section gives you short instruction on how to use the files, to get more in
     You need to include the provided YAML files in your Home Assistant `configuration.yaml` file. You can do this by adding the following lines to your `configuration.yaml`:
 
     ```yaml
-    # Loads default set of integrations. Do not remove.
-    default_config:
-
     # include sensors for reading values from SystaPi vi SystaREST API
     rest: !include systarestapi.yaml
     # includ commands for controlling SystaPi via STouchREST API
