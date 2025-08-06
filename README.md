@@ -8,7 +8,7 @@
 
 # SystaPi, SystaREST and STouchREST
 
-The goal of **SystaPi** is to make the [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) "smart" by providing Rest APIs for integration with home automation systems.  
+The goal of **SystaPi** is to make the [Paradigma SystaComfort](https://www.paradigma.de/produkte/regelungen/systacomfortll/) "smart" by providing Rest APIs for integration with home automation systems, like [Home Assistant](helpers/homeassistant).  
 It is developed based on Raspberry Pi, but you should easily get it running on any Linux you like.  
 The project contains an installation script to setup a Raspberry Pi as **SystaPi**, which runs the **SystaREST server**. SystaREST server provides two services, **SystaRESTAPI** for reading values from the SytsaComfort unit and **STouchRESTAPI** for writing to the SystaComfort, e.g. selecting the operation mode.  
 **Important Note:** The communication protocols use by the SystaComfort unit are not publicly documented! Everything here is based on [reverse engineering](resources/protocols.md) and will only work for systems that are used by contributors. Therefore, **please [contribute](#contribute) information from your system!**  
@@ -83,7 +83,7 @@ This quick guide is for using SystaPi just as it is meant to be.
     *   You should then be able to access the SystaREST server's WADL at [http://systapi:1337/application.wadl?detail=true](http://systapi:1337/application.wadl?detail=true) (or using the Pi's IP address if hostname resolution isn't working).
     *   Explore the [SystaREST API](#the-systarest-api) and [STouchREST API](#the-stouchrest-api) sections to understand how to query data and control your system. The `curl` examples are a good starting point.
     *   The [dashboard](#dashboard) ([http://systapi:1337/SystaREST/dashboard](http://systapi:1337/SystaREST/dashboard)) provides a web interface to view data.
-4.  **Home Automation Integration:** Use the REST APIs to integrate with your preferred home automation system (e.g., Home Assistant, OpenHAB). Please share your work by opening a [discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) on it.
+4.  **Home Automation Integration:** Use the REST APIs to integrate with your preferred home automation system (e.g., [Home Assistant](helpers/homeassistant), OpenHAB). Please share your work by opening a [discussion](https://github.com/beep-projects/SystaPi/discussions/new/choose) on it.
 
 For developers or those wishing to understand the project structure deeply, please see [DEVELOPMENT.md](resources/DEVELOPMENT.md), [protocols.md](resources/protocols.md) and the [Contribute](#contribute) sections.
 
