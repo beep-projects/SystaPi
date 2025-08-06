@@ -240,10 +240,15 @@ views:
           - type: history-graph
             entities:
               - entity: sensor.systapi_buffertempmax
+                name: Max
               - entity: sensor.systapi_buffertemptop
+                name: Top
               - entity: sensor.systapi_buffertempbottom
+                name: Bottom
               - entity: sensor.systapi_buffertempmin
+                name: Min
               - entity: sensor.systapi_buffertempset
+                name: Set
             hours_to_show: 168
             grid_options:
               columns: full
