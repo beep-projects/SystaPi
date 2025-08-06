@@ -28,7 +28,7 @@ git add "${PWD}/SystaRESTServer/src/de/freaklamarsch/systarest/FakeSystaWeb.java
 # Check if any staged files are in the helpers/homeassistant directory
 if git diff --cached --name-only | grep -q "helpers/homeassistant/"; then
   echo "Changes detected in helpers/homeassistant. Archiving..."
-  tar -czvf "helpers/homeassistant/homeassistant.tar.gz" --exclude='homeassistant.tar.gz' -C "helpers/homeassistant" .
+  tar -czvf "helpers/homeassistant/homeassistant.tar.gz" --exclude='homeassistant.tar.gz' -C "helpers" "homeassistant"
   git add "helpers/homeassistant/homeassistant.tar.gz"
 fi
 
