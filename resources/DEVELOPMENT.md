@@ -5,8 +5,13 @@
 <sup>\[[Back to README](../README.md)\]</sup>
 
 Welcome future contributor, this document shall give you an overview of the Java services developed for SystaPi and give you a starting point for extending their functionality.  
-The project is set up without any sophisticated build pipeline, you just need to run the `build.sh` for compiling the code.
+The project is set up without any sophisticated build pipeline, you just need to run the `build.sh` for compiling the code.  
+If you want to contribute code to this project, you should make sure that the pre-commit git hook is installed.
+To install the hook, run the following command from the root of the repository:
 
+```bash
+./helpers/maintenance/install-pre-commit-hook.sh
+```
 # Contents
 - [FakeSystaWeb](#fakesystaweb)
   - [1. FakeSystaWeb.java](#1-fakesystawebjava)

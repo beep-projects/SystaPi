@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Copyright (c) 2021, The beep-projects contributors
+# this file originated from https://github.com/beep-projects
+# Do not remove the lines above.
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see https://www.gnu.org/licenses/
+
+# This script updates the commit date in FakeSystaWeb.java and archives changes in helpers/homeassistant.
+# It should be run as a pre-commit hook in a git repository.
+
+PWD=$( pwd )
+
+# Add the commit date to FakeSystaWeb.java
+DATE=$( date -u --iso-8601=seconds )
+sed -i "s/\(.*commitDate = \).*/\1\"${DATE}\";/" "${PWD}/SystaRESTServer/src/de/freaklamarsch/systarest/FakeSystaWeb.java"
+git add "${PWD}/SystaRESTServer/src/de/freaklamarsch/systarest/FakeSystaWeb.java"
+
+# Check if any staged files are in the helpers/homeassistant directory
+if git diff --cached --name-only | grep -q "${PWD}/helpers/homeassistant/"; then
+  echo "Changes detected in ${PWD}/helpers/homeassistant. Archiving..."
+  tar -czvf "${PWD}/helpers/homeassistant/homeassistant.tar.gz" --exclude='homeassistant.tar.gz' -C "${PWD}/helpers/homeassistant" .
+  git add "${PWD}/helpers/homeassistant/homeassistant.tar.gz"
+fi
+
+exit 0
