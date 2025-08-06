@@ -5,7 +5,7 @@ If you have created something nice for your Home Assistant installation, please 
 
 ## Prerequisites
 
-*   A running [Home Assistant](https://www.home-assistant.io/) instance. I use [HAcorePi](https://github.com/beep-projects/HAcorePi) for this, which is a Home Assistant Core installation. You will have to adapt the information on this page to match your type of installation.
+*   A running [Home Assistant](https://www.home-assistant.io/) instance. I use [HAcorePi](https://github.com/beep-projects/HAcorePi) for this, which is a Home Assistant Core installation. You will have to adapt the information given in this readme to match your type of installation.
 *   A running [SystaPi](../../README.md) instance that is accessible from your Home Assistant instance.
 
 ## Using the example files
