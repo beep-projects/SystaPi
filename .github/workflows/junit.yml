@@ -45,8 +45,6 @@ jobs:
             CP_TEST="$CP_TEST:$jarfile"
           done
           ls -al ./SystaRESTServer/bin/
-          echo "Searching for data00_09_00.txt..."
-          find / -name 'data00_09_00.txt' 2>/dev/null || echo "File not found"
           java -jar .github/workflows/junit-platform-console-standalone-1.13.4.jar -cp "$CP_TEST" --scan-classpath -reports-dir='junit-reports/'
 
       # Publish the test results
