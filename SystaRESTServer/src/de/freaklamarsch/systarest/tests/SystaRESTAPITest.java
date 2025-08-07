@@ -98,7 +98,7 @@ class SystaRESTAPITest extends JerseyTest {
 
     // do not name this setup()
 	@BeforeAll // fix incompatibility with JUnit5
-	public static void initializeTestData() { // Made static as @BeforeAll for non-PER_CLASS lifecycle requires it
+	public void initializeTestData() {
 	    String testDir = SystaRESTAPITest.class.getResource(".").getPath();
         System.out.println(testDir);
         //String testDir = this.getResource(".").getPath();
@@ -114,7 +114,7 @@ class SystaRESTAPITest extends JerseyTest {
 	    		testDir + "data06_09_01.txt", // IDX_DATA06_09_01
 	    		testDir + "data07_09_02.txt", // IDX_DATA07_09_02
 	    		testDir + "data08_09_03.txt"  // IDX_DATA08_09_03
-	        };	    // However, this class uses PER_CLASS, so instance method @BeforeAll is also fine.
+	        };
 	    // Let's stick to static as per instruction for data init.
 	    for (String filePath : TEST_DATA_FILES) {
 	        ByteBuffer buffer = ByteBuffer.allocate(1048); // Default size
