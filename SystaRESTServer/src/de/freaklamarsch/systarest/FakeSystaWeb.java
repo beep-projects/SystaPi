@@ -766,7 +766,7 @@ public class FakeSystaWeb implements Runnable {
 	public int deleteAllLogs() {
 		File logDirectory = new File(LOG_PATH);
 		if (!logDirectory.exists() || !logDirectory.isDirectory()) {
-			System.out.println("[FakeSystaWeb] deleteAllLogs: LOG_PATH does not exist or is not a directory.");
+			System.out.println("[FakeSystaWeb] deleteAllLogs: LOG_PATH (" + LOG_PATH + ") does not exist or is not a directory.");
 			return 0;
 		}
 
