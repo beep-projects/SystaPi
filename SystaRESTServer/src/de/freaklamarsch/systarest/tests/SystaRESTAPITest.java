@@ -128,14 +128,15 @@ class SystaRESTAPITest extends JerseyTest {
 	// Instance @BeforeAll for JerseyTest setup
 	@BeforeAll // fix incompatibility with JUnit5
 	public void before() throws Exception { // This is an instance method due to PER_CLASS
-		System.out.println("ystaRESTAPITest: BEFORE (Instance setup)");
+		System.out.println("SystaRESTAPITest: BEFORE (Instance setup)");
         super.setUp(); // Call JerseyTest's setup
+		System.out.println("SystaRESTAPITest: BEFORE (Instance setup) is done");
 	}
 
 	// do not name this tearDown()
 	@AfterAll // fix incompatibility with JUnit5
 	public void after() throws Exception {
-		System.out.println("ystaRESTAPITest: AFTER");
+		System.out.println("SystaRESTAPITest: AFTER");
 		super.tearDown(); // Call JerseyTest's tearDown first
         if (tempDir != null) {
             try {
@@ -146,6 +147,7 @@ class SystaRESTAPITest extends JerseyTest {
                 // but typically cleanup failures are just logged.
             }
         }
+		System.out.println("SystaRESTAPITest: AFTER is done");
 	}
 
     private static void deleteDirectoryRecursively(Path path) throws IOException {
