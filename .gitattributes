@@ -5,3 +5,5 @@ SystaRESTServer/src/de/freaklamarsch/systarest/tests/*.h linguist-generated
 SystaRESTServer/src/de/freaklamarsch/systarest/tests/*.txt linguist-generated
 SystaRESTServer/src/*.html linguist-generated
 helpers/*.html linguist-documentation
+*.html linguist-documentation
+*.htm linguist-documentation
