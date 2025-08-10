@@ -45,7 +45,7 @@ This section gives you short instruction on how to use the files, to get more in
     find ./homeassistant -maxdepth 1 -type f -name "*.yaml" \
     | grep -v "configuration.yaml" \
     | xargs -I{} sudo cp {} /home/homeassistant/.homeassistant/
-    sudo chown -R homeassistant:homeassistant /home/homeassistant/.homeassistant/www/systapi
+    sudo chown homeassistant:homeassistant /home/homeassistant/.homeassistant/*.yaml
     ```
 
 3.  **Add the dashboard:**
