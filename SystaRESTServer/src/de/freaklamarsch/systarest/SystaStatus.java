@@ -472,6 +472,10 @@ public class SystaStatus {
 	 */
 	public int heatingOperationMode;
 	/**
+	 * heatingOperationModes = { "off", "normal", "comfort", "reduced" }
+	 */
+	public final String[] heatingOperationModes = { "off", "normal", "comfort", "reduced" };
+	/**
 	 * Heizung aus=0; normal=1, komfort=2, abgesenkt=3 ???<br/>
 	 * <br/>
 	 * heating off=0; normal=1, comfort=2, reduced=3 ???
@@ -480,7 +484,7 @@ public class SystaStatus {
 	/**
 	 * heatingOperationModes = { "off", "normal", "comfort", "reduced" }
 	 */
-	public final String[] heatingOperationModes = { "off", "normal", "comfort", "reduced" };
+	public final String[] circuit2HeatingOperationModes = { "off", "normal", "comfort", "reduced" };
 	/**
 	 * Regelung HK nach:<br/>
 	 * 0 = Aussentemperatur<br/>
