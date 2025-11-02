@@ -97,7 +97,7 @@ public class FakeSystaWeb implements Runnable {
 			this.loggerFileRootPath = logFileRootPath;
 			this.loggerFileCount = writerFileCount;
 			this.loggerBufferedEntries = bufferedEntries;
-			this.commitDate = "2025-08-06T21:01:33+00:00";
+			this.commitDate = "2025-11-02T22:24:04+00:00";
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FakeSystaWeb implements Runnable {
 	}
 
 	// Constants
-	private static final String commitDate = "2025-08-06T21:01:33+00:00";
+	private static final String commitDate = "2025-11-02T22:24:04+00:00";
 	private static final int PORT = 22460;
 	private static final int MAX_DATA_LENGTH = 1048;
 	private static final int MAX_NUMBER_ENTRIES = 256;
@@ -340,6 +340,7 @@ public class FakeSystaWeb implements Runnable {
 		status.circulationTemp = intData[i][SystaIndex.CIRCULATION_TEMP] / 10.0;
 		status.circuit2FlowTemp = intData[i][SystaIndex.CIRCUIT_2_FLOW_TEMP] / 10.0;
 		status.circuit2ReturnTemp = intData[i][SystaIndex.CIRCUIT_2_RETURN_TEMP] / 10.0;
+		status.circuit2OperationMode = intData[i][SystaIndex.CIRCUIT_2_OPERATION_MODE];
 		status.roomTempActual1 = intData[i][SystaIndex.ROOM_TEMP_ACTUAL_1] / 10.0;
 		status.roomTempActual2 = intData[i][SystaIndex.ROOM_TEMP_ACTUAL_2] / 10.0;
 		status.collectorTempActual = intData[i][SystaIndex.COLLECTOR_TEMP_ACTUAL] / 10.0;
@@ -363,6 +364,7 @@ public class FakeSystaWeb implements Runnable {
 		status.roomTempSetComfort = intData[i][SystaIndex.ROOM_TEMP_SET_COMFORT] / 10.0;
 		status.roomTempSetReduced = intData[i][SystaIndex.ROOM_TEMP_SET_REDUCED] / 10.0;
 		status.heatingOperationMode = intData[i][SystaIndex.HEATING_OPERATION_MODE];
+		status.circuit2HeatingOperationMode = intData[i][SystaIndex.CIRCUIT_2_HEATING_OPERATION_MODE];
 		status.controlledBy = intData[i][SystaIndex.CONTROLLED_BY];
 		status.heatingCurveBasePoint = intData[i][SystaIndex.HEATING_CURVE_BASE_POINT] / 10.0;
 		status.heatingCurveGradient = intData[i][SystaIndex.HEATING_CURVE_GRADIENT] / 10.0;
@@ -428,6 +430,7 @@ public class FakeSystaWeb implements Runnable {
 		status.unknowRelayState5IsOn = (status.relay & SystaStatus.UNKNOWN_5_MASK) != 0;
 		status.error = intData[i][SystaIndex.ERROR];
 		status.operationModeX = intData[i][SystaIndex.OPERATION_MODE_X];
+		status.circuit2OperationModeX = intData[i][SystaIndex.CIRCUIT_2_OPERATION_MODE_X];
 		status.heatingOperationModeX = intData[i][SystaIndex.HEATING_OPERATION_MODE_X];
 		status.logBoilerBufferTempMin = intData[i][SystaIndex.LOG_BOILER_BUFFER_TEMP_MIN] / 10.0;
 		status.logBoilerTempMin = intData[i][SystaIndex.LOG_BOILER_TEMP_MIN] / 10.0;
