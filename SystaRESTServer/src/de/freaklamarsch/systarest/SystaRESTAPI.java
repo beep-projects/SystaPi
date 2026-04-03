@@ -355,7 +355,10 @@ public class SystaRESTAPI {
 				.add("circulationLockoutTimePushButton", ps.circulationLockoutTimePushButton)
 				.add("circulationHysteresis", ps.circulationHysteresis).add("circuit2FlowTemp", ps.circuit2FlowTemp)
 				.add("circuit2FlowTemp", ps.circuit2FlowTemp).add("circuit2ReturnTemp", ps.circuit2ReturnTemp)
-				.add("circuit2FlowTempSet", ps.circuit2FlowTempSet).add("roomTempActual1", ps.roomTempActual1)
+				.add("circuit2FlowTempSet", ps.circuit2FlowTempSet)
+				.add("circuit2OperationMode", ps.circuit2OperationMode)
+				.add("circuit2OperationModeName", ps.circuit2OperationModeNames[ps.circuit2OperationMode])
+				.add("roomTempActual1", ps.roomTempActual1)
 				.add("roomTempSet1", ps.roomTempSet1).add("roomTempActual2", ps.roomTempActual2)
 				.add("roomTempSet2", ps.roomTempSet2).add("roomTempSetNormal", ps.roomTempSetNormal)
 				.add("roomTempSetComfort", ps.roomTempSetComfort).add("roomTempSetReduced", ps.roomTempSetReduced)
@@ -365,6 +368,8 @@ public class SystaRESTAPI {
 				.add("swimmingpoolReturnTemp", ps.swimmingpoolReturnTemp)
 				.add("heatingOperationMode", ps.heatingOperationMode)
 				.add("heatingOperationModeName", ps.heatingOperationModes[ps.heatingOperationMode])
+				.add("circuit2HeatingOperationMode", ps.circuit2HeatingOperationMode)
+				.add("circuit2HeatingOperationModeName", ps.circuit2HeatingOperationModes[ps.circuit2HeatingOperationMode])
 				.add("heatingCurveBasePoint", ps.heatingCurveBasePoint)
 				.add("heatingCurveGradient", ps.heatingCurveGradient).add("heatingLimitTemp", ps.heatingLimitTemp)
 				.add("heatingLimitTeampReduced", ps.heatingLimitTeampReduced)
@@ -391,6 +396,8 @@ public class SystaRESTAPI {
 				.add("unknowRelayState2IsOn", ps.unknowRelayState2IsOn)
 				.add("unknowRelayState5IsOn", ps.unknowRelayState5IsOn).add("error", ps.error)
 				.add("operationModeX", ps.operationModeX).add("heatingOperationModeX", ps.heatingOperationModeX)
+				.add("circuit2OperationModeX", ps.circuit2OperationModeX)
+				.add("heatingOperationModeX", ps.heatingOperationModeX)
 				.add("timestamp", ps.timestamp).add("timestampString", ps.timestampString).build();
 		return jo;
 

@@ -591,9 +591,23 @@ public final class SystaIndex {
 	final static int CIRCUIT_1_OPERATION_MODE = 232;
 	// final static int = 233
 	// final static int = 234
-	// final static int = 235
-	// final static int = 236
-	// final static int = 237
+	/**
+	 * Status HK 1 0="Aus" 1="Aus Heizgrenze" 2="Aus TI" 3="Gesperrt TPO" 4="Aus
+	 * WW-Vorrang" 5="Ein" 6="Frostschutz" 7=,"K\u00fchlen" 8="Vorhaltezeit"
+	 * 9="Heizbetrieb" 10="Komfortbetrieb" 11="Absenkbetrieb" 12="Aus TSB"
+	 * 13="Gesperrt" 14="Normal" 15="Erh\u00f6ht" 16="WW-Modus" 17="Estrich
+	 * trocknen" 18="K\u00fchlbetrieb"
+	 */
+	// added on request https://github.com/beep-projects/SystaPi/issues/35
+	final static int CIRCUIT_2_OPERATION_MODE = 235;
+	/**
+	 * Betriebsart ???
+	 */
+	final static int CIRCUIT_2_OPERATION_MODE_X = 236;
+	/**
+	 * Heizung aus=0; normal=1, komfort=2, abgesenkt=3 ???
+	 */
+	final static int CIRCUIT_2_HEATING_OPERATION_MODE = 237;
 	// final static int = 238
 	// final static int = 239
 	// final static int = 240

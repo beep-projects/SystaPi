@@ -476,6 +476,16 @@ public class SystaStatus {
 	 */
 	public final String[] heatingOperationModes = { "off", "normal", "comfort", "reduced" };
 	/**
+	 * Heizung aus=0; normal=1, komfort=2, abgesenkt=3 ???<br/>
+	 * <br/>
+	 * heating off=0; normal=1, comfort=2, reduced=3 ???
+	 */
+	public int circuit2HeatingOperationMode;
+	/**
+	 * heatingOperationModes = { "off", "normal", "comfort", "reduced" }
+	 */
+	public final String[] circuit2HeatingOperationModes = { "off", "normal", "comfort", "reduced" };
+	/**
 	 * Regelung HK nach:<br/>
 	 * 0 = Aussentemperatur<br/>
 	 * 1 = Raumtemperatur<br/>
@@ -909,6 +919,12 @@ public class SystaStatus {
 	 */
 	public int operationModeX;
 	/**
+	 * Betriebsart ???<br/>
+	 * <br/>
+	 * Operating mode ???
+	 */
+	public int circuit2OperationModeX;
+	/**
 	 * Heizung aus=0; normal=1, komfort=2, abgesenkt=3 ???<br/>
 	 * <br/>
 	 * heating off=0; normal=1, comfort=2, reduced=3 ???
@@ -1066,6 +1082,25 @@ public class SystaStatus {
 	 */
 	public int circuit1OperationMode;
 	public final String[] circuit1OperationModeNames = { "off", "off (heating limit)", "off (room temperature)",
+			"locked (buffer temp top)", "off (yield hot water)", "on", "anti freeze", "cooling", "lead time heat up",
+			"heating", "comfort", "reduced", "off (temp swimming pool)", "locked", "normal", "raised", "hot water",
+			"screed heating", "cooling mode" };
+
+	/**
+	 * 0 = "Aus" 1 = "Aus Heizgrenze" 2 = "Aus TI" 3 = "Gesperrt TPO" 4 = "Aus
+	 * WW-Vorrang" 5 = "Ein" 6 = "Frostschutz" 7 = "Kühlen" 8 = "Vorhaltezeit" 9 =
+	 * "Heizbetrieb" 10 = "Komfortbetrieb" 11 = "Absenkbetrieb" 12 = "Aus TSB" 13 =
+	 * "Gesperrt" 14 = "Normal" 15 = "Erhöht" 16 = "WW-Modus" 17 = "Estrich
+	 * trocknen" 18 = "Kühlbetrieb"
+	 * 
+	 * 0 = "off" 1 = "off (heating limit)" 2 = "off (room temperature)" 3 = "locked
+	 * (buffer temp top)" 4 = "off (yield hot water)" 5 = "on" 6 = "anti freeze" 7 =
+	 * "cooling" 8 = "lead time heat up" 9 = "heating" 10 = "comfort" 11 =
+	 * "reduced" 12 = "off (temp swimming pool)" 13 = "locked" 14 = "normal" 15 =
+	 * "raised" 16 = "hot water" 17 = "screed heating" 18 = "cooling mode"
+	 */
+	public int circuit2OperationMode;
+	public final String[] circuit2OperationModeNames = { "off", "off (heating limit)", "off (room temperature)",
 			"locked (buffer temp top)", "off (yield hot water)", "on", "anti freeze", "cooling", "lead time heat up",
 			"heating", "comfort", "reduced", "off (temp swimming pool)", "locked", "normal", "raised", "hot water",
 			"screed heating", "cooling mode" };
